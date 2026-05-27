@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RealceCardápio - Gerenciar Cardápio</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <link rel="stylesheet" href="../css/cardapio.css">
+</head>
+<body>
+<div class="dashboard-container">
+    <aside class="sidebar">
+        <div class="logo-area">
+            <h2>Realce<span>Cardápio</span></h2>
+        </div>
+        <nav class="menu-nav">
+            <ul>
+                <li><a href="index.html"><i class="fas fa-tachometer-alt"></i> <span>Início</span></a></li>
+                <li class="active"><a href="cardapio.html"><i class="fas fa-utensils"></i> <span>Cardápio</span></a></li>
+                <li><a href="pedidos.html"><i class="fas fa-motorcycle"></i> <span>Pedidos</span></a></li>
+                <li><a href="caixa.html"><i class="fas fa-cash-register"></i> <span>Caixa</span></a></li>
+                <li><a href="configuracoes.html"><i class="fas fa-sliders-h"></i> <span>Configurações</span></a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <h1>Gerenciar Cardápio</h1>
+        <div class="cardapio-layout">
+            <!-- Painel de categorias -->
+            <div class="categorias-panel">
+                <div class="panel-header">
+                    <h3>Categorias</h3>
+                    <button class="btn-primary" id="btn-nova-categoria"><i class="fas fa-plus"></i> Nova</button>
+                </div>
+                <ul id="lista-categorias" class="categorias-list">
+                    <li style="text-align:center;">Carregando...</li>
+                </ul>
+            </div>
+
+            <!-- Painel de produtos -->
+            <div class="produtos-panel">
+                <div class="panel-header">
+                    <h3 id="titulo-produtos">Produtos</h3>
+                    <button class="btn-primary" id="btn-novo-produto"><i class="fas fa-plus"></i> Novo Produto</button>
+                </div>
+                <div id="lista-produtos" class="produtos-grid">
+                    <p>Selecione uma categoria</p>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Modal para categoria -->
+<div id="modal-categoria" class="modal">
+    <div class="modal-content">
+        <h3 id="modal-categoria-titulo">Nova Categoria</h3>
+        <input type="hidden" id="categoria-id">
+        <input type="text" id="categoria-nome" placeholder="Nome da categoria" required>
+        <input type="number" id="categoria-ordem" placeholder="Ordem (0,1,2...)" value="0">
+        <div class="modal-buttons">
+            <button class="btn-outline" id="cancel-categoria">Cancelar</button>
+            <button class="btn-primary" id="save-categoria">Salvar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para produto -->
+<div id="modal-produto" class="modal">
+    <div class="modal-content">
+        <h3 id="modal-produto-titulo">Novo Produto</h3>
+        <input type="hidden" id="produto-id">
+        <input type="text" id="produto-nome" placeholder="Nome do produto" required>
+        <textarea id="produto-descricao" placeholder="Descrição"></textarea>
+        <input type="number" id="produto-preco" placeholder="Preço (R$)" step="0.01" required>
+        <select id="produto-categoria">
+            <option value="">Selecione uma categoria</option>
+        </select>
+        <label><input type="checkbox" id="produto-disponivel" checked> Disponível</label>
+        <div class="modal-buttons">
+            <button class="btn-outline" id="cancel-produto">Cancelar</button>
+            <button class="btn-primary" id="save-produto">Salvar</button>
+        </div>
+    </div>
+</div>
+
+<script src="../js/cardapio.js"></script>
+</body>
+</html>
