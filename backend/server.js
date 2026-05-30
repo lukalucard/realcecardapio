@@ -1,58 +1,42 @@
 const express = require('express');
 const cors = require('cors');
-const db = require('./config/db');
+const path = require('path');
+const pool = require('./config/db'); // Alterado para pool para fazer sentido com o restante do código
 
 // Inicialização
 const app = express();
 
 // Middlewares
-app.use(cors()); // Permite que seu frontend (HTML) acesse a API
-app.use(express.json()); // Permite receber dados em JSON
+app.use(cors()); 
+app.use(express.json()); 
 
 // Rota de teste
 app.get('/api/test', (req, res) => {
     res.json({ message: 'Servidor RealceCardápio funcionando!' });
 });
 
-// -------------------- ROTAS DO CARDÁPIO --------------------
+// -------------------- ROTAS DO CARDÁPIO & PEDIDOS --------------------
 
-// Listar todos os produtos (para o frontend público)
-app.get('/api/produtos', async (req, res) => {
-    try {
-        const [rows] = await db.query(`
-            SELECT p.*, c.nome as categoria_nome 
-            FROM produtos p
-            JOIN categorias c ON p.categoria_id = c.id
-            WHERE p.disponivel = true
-            ORDER BY c.ordem, p.id
-        `);
-        res.json(rows);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Erro ao buscar produtos' });
-    }
-});
-
-// Criar um novo pedido (o cliente finaliza a compra)
+// Criar um novo pedido (Cliente finaliza a compra)
 app.post('/api/pedidos', async (req, res) => {
     const { cliente_nome, cliente_telefone, cliente_endereco, itens, subtotal, taxa_entrega, total, forma_pagamento } = req.body;
     
-    // Validação simples
     if (!cliente_nome || !itens || !total) {
-        return res.status(400).json({ error: 'Dados do pedido incompletos' });
+        return res.status(400).json({ erro: 'Dados do pedido incompletos' });
     }
 
     try {
-        const [result] = await db.execute(
+        // Adaptado para a sintaxe correta do PostgreSQL ($1, $2... e RETURNING id)
+        const result = await pool.query(
             `INSERT INTO pedidos 
             (cliente_nome, cliente_telefone, cliente_endereco, itens, subtotal, taxa_entrega, total, forma_pagamento) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
             [cliente_nome, cliente_telefone, cliente_endereco, JSON.stringify(itens), subtotal, taxa_entrega, total, forma_pagamento]
         );
-        res.status(201).json({ id: result.insertId, message: 'Pedido recebido com sucesso!' });
+        res.status(201).json({ id: result.rows[0].id, message: 'Pedido recebido com sucesso!' });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Erro ao salvar o pedido' });
+        res.status(500).json({ erro: 'Erro ao salvar o pedido' });
     }
 });
 
@@ -117,11 +101,11 @@ app.delete('/api/categorias/:id', async (req, res) => {
 });
 
 
-// -------- CRUD Produtos --------
+// -------- CRUD Produtos (Rotas Unificadas e Corrigidas) --------
 
-// Listar produtos (opcional: filtrar por categoria)
+// Listar produtos (Suporta filtro por categoria e parâmetro opcional para o painel público)
 app.get('/api/produtos', async (req, res) => {
-    const { categoria_id } = req.query;
+    const { categoria_id, apenas_disponiveis } = req.query;
     try {
         let query = `
             SELECT p.*, c.nome as categoria_nome 
@@ -130,11 +114,20 @@ app.get('/api/produtos', async (req, res) => {
             WHERE 1=1
         `;
         const params = [];
+        let paramCount = 1;
+
         if (categoria_id) {
-            query += ` AND p.categoria_id = $1`;
+            query += ` AND p.categoria_id = $${paramCount}`;
             params.push(categoria_id);
+            paramCount++;
         }
+
+        if (apenas_disponiveis === 'true') {
+            query += ` AND p.disponivel = true`;
+        }
+
         query += ` ORDER BY c.ordem, p.id`;
+        
         const result = await pool.query(query, params);
         res.json(result.rows);
     } catch (err) {
@@ -199,10 +192,8 @@ app.delete('/api/produtos/:id', async (req, res) => {
     }
 });
 
-
-const path = require('path');
-app.use(express.static(path.join(__dirname, '../frontend')));
-
+// Servir arquivos estáticos do Frontend
+app.use(express.static(path.join(__dirname, '../frontend/admin')));
 
 const PORT = process.env.PORT || 3002;
 app.listen(PORT, () => {

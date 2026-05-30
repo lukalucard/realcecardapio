@@ -1,0 +1,371 @@
+/* ==========================================================================
+   ESTILOS ESPECÍFICOS DA PÁGINA DE PEDIDOS (GESTOR KANBAN)
+   ========================================================================== */
+
+/* 1. Submenu Superior (Abas / Tabs) */
+.page-header {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 25px;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 15px;
+}
+
+.title-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.status-badge-online {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.status-badge-online i {
+    font-size: 0.6rem;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.4; }
+    50% { opacity: 1; }
+    100% { opacity: 0.4; }
+}
+
+.submenu-superior {
+    display: flex;
+    gap: 10px;
+}
+
+.tab-link {
+    background: none;
+    border: none;
+    padding: 10px 20px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #6b7280;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tab-link:hover {
+    color: #4b5563;
+}
+
+.tab-link.active {
+    color: #FF6B00;
+    border-bottom-color: #FF6B00;
+    font-weight: 600;
+}
+
+/* 2. Estrutura do Kanban (4 Colunas) */
+.kanban-wrapper {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    align-items: start;
+    height: calc(100vh - 180px);
+}
+
+.kanban-column {
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    max-height: 100%;
+}
+
+.column-header {
+    padding: 15px;
+    border-bottom: 1px solid #e5e7eb;
+    font-weight: 600;
+}
+
+.column-header h3 {
+    font-size: 0.95rem;
+    color: #1f2937;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.badge {
+    background-color: #e5e7eb;
+    color: #4b5563;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+}
+
+/* Identidade visual do topo das colunas */
+.col-novos .column-header { border-top: 4px solid #f59e0b; }
+.col-novos .badge { background-color: #fef3c7; color: #d97706; }
+
+.col-pagamento .column-header { border-top: 4px solid #7c3aed; }
+.col-pagamento .badge { background-color: #f3e8ff; color: #6d28d9; }
+
+.col-preparo .column-header { border-top: 4px solid #3b82f6; }
+.col-preparo .badge { background-color: #dbeafe; color: #2563eb; }
+
+.col-entrega .column-header { border-top: 4px solid #10b981; }
+.col-entrega .badge { background-color: #d1fae5; color: #059669; }
+
+.kanban-cards-area {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+    flex-grow: 1;
+    min-height: 200px;
+    max-height: calc(100vh - 250px);
+}
+
+.empty-column-message {
+    text-align: center;
+    color: #9ca3af;
+    font-size: 0.85rem;
+    padding: 20px 0;
+    border: 2px dashed #e5e7eb;
+    border-radius: 8px;
+}
+
+/* 3. Design dos Cards de Pedido */
+.pedido-card {
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.pedido-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pedido-id {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #4b5563;
+}
+
+/* Badges de Status de Pagamento sugeridos por você */
+.pago-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.pago-badge.pix { background-color: #d1fae5; color: #065f46; }
+.pago-badge.cartao { background-color: #e0f2fe; color: #075985; }
+.pago-badge.dinheiro { background-color: #fef3c7; color: #92400e; }
+
+.card-body h4 {
+    font-size: 0.95rem;
+    color: #111827;
+    margin-bottom: 4px;
+}
+
+.pedido-itens {
+    font-size: 0.85rem;
+    color: #6b7280;
+    line-height: 1.3;
+    margin-bottom: 8px;
+}
+
+.pedido-financeiro {
+    background-color: #f9fafb;
+    padding: 8px;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.8rem;
+    border-left: 3px solid #d1d5db;
+}
+
+.valor-dinheiro { color: #111827; }
+.font-pago { color: #10b981; font-weight: 500; }
+.font-atencao { color: #b45309; font-weight: 500; }
+
+.troco-destaque {
+    background-color: #fef3c7;
+    padding: 1px 4px;
+    border-radius: 4px;
+    color: #d97706;
+}
+
+/* Botão de Avançar o Card no Fluxo */
+.card-footer {
+    margin-top: 5px;
+}
+
+.btn-avancar {
+    width: 100%;
+    background-color: #ffffff;
+    border: 1px solid #d1d5db;
+    color: #374151;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.btn-avancar:hover {
+    background-color: #f3f4f6;
+    border-color: #9ca3af;
+    color: #111827;
+}
+
+/* Estilo para ocultar a tabela de histórico */
+.historico-box {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+/* Responsividade */
+@media (max-width: 1200px) {
+    .kanban-wrapper { 
+        grid-template-columns: repeat(2, 1fr); 
+        height: auto; 
+    }
+}
+
+@media (max-width: 680px) {
+    .kanban-wrapper { 
+        grid-template-columns: 1fr; 
+    }
+}
+
+
+/* ==========================================================================
+   ESTILOS ADICIONAIS: CENTRAL DE HISTÓRICO GERAL
+   ========================================================================== */
+
+.historico-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+/* Filtros Temporais Estilo Pílula */
+.filtro-temporal {
+    display: flex;
+    background-color: #f3f4f6;
+    padding: 4px;
+    border-radius: 8px;
+    gap: 2px;
+}
+
+.btn-filtro {
+    background: none;
+    border: none;
+    padding: 6px 14px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #4b5563;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-filtro:hover {
+    color: #1f2937;
+}
+
+.btn-filtro.active {
+    background-color: #ffffff;
+    color: #FF6B00;
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Customizações da Tabela */
+.txt-cortado {
+    max-width: 250px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #6b7280;
+}
+
+.status-finalizado {
+    background-color: #d1fae5;
+    color: #065f46;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 12px;
+}
+
+.status-cancelado {
+    background-color: #fee2e2;
+    color: #991b1b;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 12px;
+}
+
+/* Botão de Ação Lupa/Visualizar */
+.btn-detalhes {
+    background-color: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    color: #4b5563;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-detalhes:hover {
+    background-color: #FF6B00;
+    color: #ffffff;
+    border-color: #FF6B00;
+}
