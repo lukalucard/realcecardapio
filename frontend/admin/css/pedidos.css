@@ -178,11 +178,23 @@
 .pago-badge {
     font-size: 0.7rem;
     font-weight: 700;
-    padding: 3px 8px;
+    padding: 4px 8px;
     border-radius: 6px;
     display: flex;
     align-items: center;
     gap: 4px;
+}
+
+/* Verde para Pix, Crédito e Débito */
+.pago-badge.status-verde { 
+    background-color: #d1fae5; 
+    color: #065f46; 
+}
+
+/* Amarelo para Dinheiro */
+.pago-badge.status-amarelo { 
+    background-color: #fef3c7; 
+    color: #92400e; 
 }
 
 .pago-badge.pix { background-color: #d1fae5; color: #065f46; }
@@ -369,3 +381,45 @@
     color: #ffffff;
     border-color: #FF6B00;
 }
+
+/* Subetapas internas do Card (Refatoração Luiz) */
+.substatus-container {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.badge-substatus {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
+/* Cores das subetapas da Cozinha */
+.sub-aguardando { background-color: #e5e7eb; color: #4b5563; } /* Cinza */
+.sub-preparando { background-color: #fef3c7; color: #d97706; animation: blink 2s infinite; } /* Amarelo */
+.sub-pronto { background-color: #d1fae5; color: #065f46; } /* Verde */
+
+/* Cores das subetapas da Entrega */
+.sub-rota { background-color: #dbeafe; color: #1e40af; } /* Azul */
+
+.previsao-entrega {
+    font-size: 0.75rem;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+    font-style: italic;
+}
+
+@keyframes blink {
+    0% { opacity: 0.7; }
+    50% { opacity: 1; }
+    100% { opacity: 0.7; }
+}
+
+.sub-amarelo { background-color: #fef3c7; color: #92400e; }

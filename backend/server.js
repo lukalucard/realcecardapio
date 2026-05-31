@@ -199,3 +199,19 @@ const PORT = process.env.PORT || 3002;
 app.listen(PORT, () => {
     console.log(`🚀 Servidor RealceCardápio rodando na porta ${PORT}`);
 });
+
+// ==========================================================================
+// ROTA PARA BUSCAR PEDIDOS ATIVOS DO KANBAN
+// ==========================================================================
+app.get('/api/pedidos/ativos', async (req, res) => {
+    try {
+        const resultado = await pool.query(
+            "SELECT id, cliente_nome, itens, valor_total, forma_pagamento, troco, status, sub_status, endereco_entrega FROM pedidos WHERE status NOT IN ('entregue', 'cancelado') ORDER BY criado_em ASC"
+        );
+        res.json(resultado.rows);
+    } catch (erro) {
+        console.error("Erro ao buscar pedidos ativos:", erro.message);
+        res.status(500).json({ erro: "Erro interno ao buscar pedidos." });
+    }
+});
+
