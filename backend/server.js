@@ -1,14 +1,20 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const pool = require('./config/db'); // Alterado para pool para fazer sentido com o restante do código
+const pool = require('./config/db'); 
 
 // Inicialização
 const app = express();
 
-// Middlewares
+// Middlewares Globais
 app.use(cors()); 
-app.use(express.json()); 
+app.use(express.json());
+
+// O '..' faz o Node sair da pasta 'backend' e ir para a raiz do projeto
+app.use(express.static(path.join(__dirname, '..', 'frontend')));
+
+// Altere o console.log também para você ver o novo caminho no terminal:
+console.log("📂 O Node agora está procurando a pasta frontend aqui:", path.join(__dirname, '..', 'frontend'));
 
 // Rota de teste
 app.get('/api/test', (req, res) => {
@@ -17,7 +23,7 @@ app.get('/api/test', (req, res) => {
 
 // -------------------- ROTAS DO CARDÁPIO & PEDIDOS --------------------
 
-// Criar um novo pedido (Cliente finaliza a compra)
+// Criar um novo pedido (Cliente finaliza a compra no WhatsApp/Web)
 app.post('/api/pedidos', async (req, res) => {
     const { cliente_nome, cliente_telefone, cliente_endereco, itens, subtotal, taxa_entrega, total, forma_pagamento } = req.body;
     
@@ -26,7 +32,6 @@ app.post('/api/pedidos', async (req, res) => {
     }
 
     try {
-        // Adaptado para a sintaxe correta do PostgreSQL ($1, $2... e RETURNING id)
         const result = await pool.query(
             `INSERT INTO pedidos 
             (cliente_nome, cliente_telefone, cliente_endereco, itens, subtotal, taxa_entrega, total, forma_pagamento) 
@@ -40,10 +45,8 @@ app.post('/api/pedidos', async (req, res) => {
     }
 });
 
-
 // -------- CRUD Categorias --------
 
-// Listar todas as categorias
 app.get('/api/categorias', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM categorias ORDER BY ordem, id');
@@ -54,7 +57,6 @@ app.get('/api/categorias', async (req, res) => {
     }
 });
 
-// Criar nova categoria
 app.post('/api/categorias', async (req, res) => {
     const { nome, ordem } = req.body;
     if (!nome) return res.status(400).json({ erro: 'Nome é obrigatório' });
@@ -70,7 +72,6 @@ app.post('/api/categorias', async (req, res) => {
     }
 });
 
-// Atualizar categoria
 app.put('/api/categorias/:id', async (req, res) => {
     const { id } = req.params;
     const { nome, ordem } = req.body;
@@ -87,7 +88,6 @@ app.put('/api/categorias/:id', async (req, res) => {
     }
 });
 
-// Excluir categoria
 app.delete('/api/categorias/:id', async (req, res) => {
     const { id } = req.params;
     try {
@@ -100,10 +100,8 @@ app.delete('/api/categorias/:id', async (req, res) => {
     }
 });
 
+// -------- CRUD Produtos --------
 
-// -------- CRUD Produtos (Rotas Unificadas e Corrigidas) --------
-
-// Listar produtos (Suporta filtro por categoria e parâmetro opcional para o painel público)
 app.get('/api/produtos', async (req, res) => {
     const { categoria_id, apenas_disponiveis } = req.query;
     try {
@@ -136,7 +134,6 @@ app.get('/api/produtos', async (req, res) => {
     }
 });
 
-// Criar produto
 app.post('/api/produtos', async (req, res) => {
     const { nome, descricao, preco, foto_url, disponivel, opcionais, categoria_id } = req.body;
     if (!nome || preco === undefined) return res.status(400).json({ erro: 'Nome e preço são obrigatórios' });
@@ -154,7 +151,6 @@ app.post('/api/produtos', async (req, res) => {
     }
 });
 
-// Atualizar produto
 app.put('/api/produtos/:id', async (req, res) => {
     const { id } = req.params;
     const { nome, descricao, preco, foto_url, disponivel, opcionais, categoria_id } = req.body;
@@ -179,7 +175,6 @@ app.put('/api/produtos/:id', async (req, res) => {
     }
 });
 
-// Excluir produto
 app.delete('/api/produtos/:id', async (req, res) => {
     const { id } = req.params;
     try {
@@ -192,16 +187,9 @@ app.delete('/api/produtos/:id', async (req, res) => {
     }
 });
 
-// Servir arquivos estáticos do Frontend
-app.use(express.static(path.join(__dirname, '../frontend/admin')));
-
-const PORT = process.env.PORT || 3002;
-app.listen(PORT, () => {
-    console.log(`🚀 Servidor RealceCardápio rodando na porta ${PORT}`);
-});
 
 // ==========================================================================
-// ROTA PARA BUSCAR PEDIDOS ATIVOS DO KANBAN
+// [NOVO] ROTA PARA BUSCAR PEDIDOS ATIVOS DA ESTEIRA GESTORA
 // ==========================================================================
 app.get('/api/pedidos/ativos', async (req, res) => {
     try {
@@ -215,3 +203,99 @@ app.get('/api/pedidos/ativos', async (req, res) => {
     }
 });
 
+
+// ==========================================================================
+// [NOVO] ROTA PARA AVANÇAR O STATUS DO PEDIDO NO TRILHO (CORRIGIDA)
+// ==========================================================================
+app.put('/api/pedidos/:id/avancar', async (req, res) => {
+    const { id } = req.params;
+    const { status_atual, sub_status_atual } = req.body;
+    
+    let novoStatus = status_atual;
+    let novoSubStatus = 'aguardando';
+
+    try {
+        // Alinhamento inteligente entre os termos 'novos' e 'pedidos'
+        if (status_atual === 'pedidos' || status_atual === 'novos') {
+            novoStatus = 'pagamento';
+            novoSubStatus = 'aguardando';
+        } else if (status_atual === 'pagamento') {
+            novoStatus = 'preparo';
+            novoSubStatus = 'aguardando'; 
+        } else if (status_atual === 'preparo') {
+            if (sub_status_atual === 'aguardando') {
+                novoSubStatus = 'preparando'; 
+            } else if (sub_status_atual === 'preparando') {
+                novoSubStatus = 'pronto'; 
+            } else if (sub_status_atual === 'pronto') {
+                novoStatus = 'entrega'; 
+                novoSubStatus = 'aguardando';
+            }
+        } else if (status_atual === 'entrega') {
+            if (sub_status_atual === 'aguardando') {
+                novoSubStatus = 'saiu_para_entrega'; 
+            } else if (sub_status_atual === 'saiu_para_entrega') {
+                novoStatus = 'entregue'; 
+            }
+        }
+
+        // Atualização atômica no banco de dados
+        await pool.query(
+            "UPDATE pedidos SET status = $1, sub_status = $2 WHERE id = $3",
+            [novoStatus, novoSubStatus, id]
+        );
+
+        res.json({ mensagem: "Status atualizado com sucesso!", novoStatus, novoSubStatus });
+    } catch (erro) {
+        console.error("Erro ao atualizar status do pedido:", erro.message);
+        res.status(500).json({ erro: "Erro ao atualizar status no banco." });
+    }
+});
+
+
+// 1. ROTA PARA BUSCAR AS MENSAGENS SALVAS
+app.get('/api/whatsapp/config', async (req, res) => {
+    try {
+        // Busca o registro único de configuração
+        const resultado = await pool.query('SELECT * FROM configuracoes_whatsapp WHERE id = 1');
+        
+        if (resultado.rows.length === 0) {
+            return res.status(404).json({ erro: "Configuração não encontrada." });
+        }
+        
+        res.json(resultado.rows[0]);
+    } catch (erro) {
+        console.error("❌ Erro ao buscar configurações do WhatsApp:", erro);
+        res.status(500).json({ erro: "Erro interno no servidor." });
+    }
+});
+
+// 2. ROTA PARA SALVAR AS ALTERAÇÕES DO GESTOR
+app.put('/api/whatsapp/config', async (req, res) => {
+    const { msg_novo, msg_preparo, msg_entrega } = req.body;
+    
+    try {
+        // Atualiza a linha fixa id = 1 com os novos textos da tela
+        await pool.query(
+            `UPDATE configuracoes_whatsapp 
+             SET msg_novo = $1, msg_preparo = $2, msg_entrega = $3 
+             WHERE id = 1`,
+            [msg_novo, msg_preparo, msg_entrega]
+        );
+        
+        res.json({ mensagem: "Configurações do WhatsApp salvas com sucesso!" });
+    } catch (erro) {
+        console.error("❌ Erro ao salvar configurações do WhatsApp:", erro);
+        res.status(500).json({ erro: "Erro interno no servidor." });
+    }
+});
+
+
+
+// Servir arquivos estáticos do Frontend (Sempre por último para não interceptar as APIs!)
+app.use(express.static(path.join(__dirname, '../frontend/admin')));
+
+const PORT = process.env.PORT || 3002;
+app.listen(PORT, () => {
+    console.log(`🚀 Servidor RealceCardápio rodando na porta ${PORT}`);
+});

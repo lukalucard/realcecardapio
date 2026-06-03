@@ -1,11 +1,14 @@
+let pedidosAtivosGlobais = [];
+
 document.addEventListener('DOMContentLoaded', () => {
-    inicializarSubmenu();
-    carregarPedidosDoBanco();
+    configurarSubmenuSuperior();
+    buscarPedidosDoServidor();
 });
 
-function inicializarSubmenu() {
+function configurarSubmenuSuperior() {
     const botoesMenu = document.querySelectorAll('.tab-link');
-    const painelKanban = document.getElementById('painel-kanban');
+    const painelGeral = document.getElementById('painel-geral');
+    const painelFlutuantes = document.getElementById('painel-flutuantes');
     const painelHistorico = document.getElementById('painel-historico');
 
     botoesMenu.forEach(botao => {
@@ -13,185 +16,267 @@ function inicializarSubmenu() {
             botoesMenu.forEach(b => b.classList.remove('active'));
             botao.classList.add('active');
 
-            const origemSelecionada = botao.getAttribute('data-origem');
+            const abaSelecionada = botao.getAttribute('data-aba');
 
-            if (origemSelecionada === 'historico') {
-                painelKanban.style.display = 'none';
+            if (painelGeral) painelGeral.style.display = 'none';
+            if (painelFlutuantes) painelFlutuantes.style.display = 'none';
+            if (painelHistorico) painelHistorico.style.display = 'none';
+
+            if (abaSelecionada === 'geral' && painelGeral) {
+                painelGeral.style.display = 'block';
+                renderizarModoGeralEsteira(pedidosAtivosGlobais);
+            } else if (abaSelecionada === 'flutuantes' && painelFlutuantes) {
+                painelFlutuantes.style.display = 'grid';
+                renderizarModoPedidosFlutuantes(pedidosAtivosGlobais);
+            } else if (abaSelecionada === 'historico' && painelHistorico) {
                 painelHistorico.style.display = 'block';
-            } else {
-                painelKanban.style.display = 'grid';
-                painelHistorico.style.display = 'none';
             }
         });
     });
 }
 
-async function carregarPedidosDoBanco() {
+async function buscarPedidosDoServidor() {
     try {
         const resposta = await fetch('/api/pedidos/ativos');
-        if (!resposta.ok) throw new Error("Erro na requisição");
-        const pedidos = await resposta.json();
-        renderizarPedidosNoKanban(pedidos);
+        if (!resposta.ok) throw new Error("Erro na comunicação");
+        pedidosAtivosGlobais = await resposta.json();
+
+        // Atualiza os contadores globais de ambas as abas antes de desenhar
+        calcularEAtualizarContadores(pedidosAtivosGlobais);
+
+        const abaAtiva = document.querySelector('.tab-link.active');
+        const tipoAba = abaAtiva ? abaAtiva.getAttribute('data-aba') : 'geral';
+
+        if (tipoAba === 'geral') renderizarModoGeralEsteira(pedidosAtivosGlobais);
+        else if (tipoAba === 'flutuantes') renderizarModoPedidosFlutuantes(pedidosAtivosGlobais);
     } catch (erro) {
-        console.error("❌ Falha ao carregar pedidos:", erro);
+        console.error("❌ Falha ao buscar pedidos ativos:", erro);
     }
 }
 
-function renderizarPedidosNoKanban(pedidos) {
+function calcularEAtualizarContadores(pedidos) {
+    const contadores = { pedidos: 0, pagamento: 0, preparo: 0, entrega: 0 };
+    
+    pedidos.forEach(pedido => {
+        let statusNormalizado = pedido.status === 'novos' ? 'pedidos' : pedido.status;
+        if (contadores.hasOwnProperty(statusNormalizado)) {
+            contadores[statusNormalizado]++;
+        }
+    });
+
+    // Atualiza os badges da aba Pedidos Flutuantes (Kanban)
+    if(document.getElementById('badge-pedidos')) document.getElementById('badge-pedidos').innerText = contadores.pedidos;
+    if(document.getElementById('badge-pagamento')) document.getElementById('badge-pagamento').innerText = contadores.pagamento;
+    if(document.getElementById('badge-preparo')) document.getElementById('badge-preparo').innerText = contadores.preparo;
+    if(document.getElementById('badge-entrega')) document.getElementById('badge-entrega').innerText = contadores.entrega;
+
+    // Atualiza os badges novos da aba Pedidos Geral (Esteira Horizontal)
+    if(document.getElementById('esteira-badge-pedidos')) document.getElementById('esteira-badge-pedidos').innerText = contadores.pedidos;
+    if(document.getElementById('esteira-badge-pagamento')) document.getElementById('esteira-badge-pagamento').innerText = contadores.pagamento;
+    if(document.getElementById('esteira-badge-preparo')) document.getElementById('esteira-badge-preparo').innerText = contadores.preparo;
+    if(document.getElementById('esteira-badge-entrega')) document.getElementById('esteira-badge-entrega').innerText = contadores.entrega;
+}
+
+function renderizarModoGeralEsteira(pedidos) {
+    const container = document.getElementById('lista-pedidos-linhas');
+    if (!container) return;
+    container.innerHTML = '';
+
+    if (!pedidos || pedidos.length === 0) {
+        container.innerHTML = '<div class="empty-message">Nenhum pedido ativo na esteira.</div>';
+        return;
+    }
+
+    pedidos.forEach(pedido => {
+        let statusReal = pedido.status === 'novos' ? 'pedidos' : pedido.status;
+        const subStatus = pedido.sub_status || 'aguardando';
+        const valorFormatado = parseFloat(pedido.valor_total).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        
+        let trocoHTML = '';
+        if (pedido.forma_pagamento === 'DINHEIRO' && parseFloat(pedido.troco) > 0) {
+            const trocoFormatado = parseFloat(pedido.troco).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            trocoHTML = `<span class="troco-destaque" style="display:block;margin-top:2px;">Troco: ${trocoFormatado}</span>`;
+        }
+
+        // --- CÉLULA 1: PEDIDOS ---
+        let htmlCel1 = '';
+        if (statusReal === 'pedidos') {
+            htmlCel1 = `
+                <div class="celula-esteira etapa-iluminada">
+                    <div>
+                        <span class="pedido-id">#${pedido.id}</span>
+                        <h4>${pedido.cliente_nome}</h4>
+                        <p style="font-size:0.82rem; margin-bottom:4px;"><strong>Itens:</strong> ${pedido.itens}</p>
+                        <small style="color:#ef4444;"><i class="fas fa-map-marker-alt"></i> ${pedido.endereco_entrega || 'Balcão'}</small>
+                    </div>
+                    <button class="btn-avancar" onclick="executarAvancoDeEtapa(${pedido.id}, '${statusReal}', '${subStatus}')"><i class="fas fa-check"></i> Aceitar Pedido</button>
+                </div>`;
+        } else {
+            htmlCel1 = `
+                <div class="celula-esteira etapa-concluida">
+                    <div>
+                        <span class="pedido-id">#${pedido.id}</span>
+                        <h4>${pedido.cliente_nome}</h4>
+                        <p style="font-size:0.82rem; margin-bottom:4px;"><strong>Itens:</strong> ${pedido.itens}</p>
+                        <small style="color:#6b7280;"><i class="fas fa-map-marker-alt"></i> ${pedido.endereco_entrega || 'Balcão'}</small>
+                    </div>
+                    <span class="txt-concluido-check"><i class="fas fa-check-circle"></i> Pedido Aceito</span>
+                </div>`;
+        }
+
+        // --- CÉLULA 2: PAGAMENTO ---
+        let htmlCel2 = '';
+        if (statusReal === 'pedidos') {
+            htmlCel2 = `<div class="celula-esteira etapa-apagada"><h4>Aguardando</h4><p>Etapa financeira bloqueada.</p></div>`;
+        } else if (statusReal === 'pagamento') {
+            htmlCel2 = `
+                <div class="celula-esteira etapa-iluminada">
+                    <div>
+                        <h4>Pagamento</h4>
+                        <span class="pago-badge status-verde" style="display:inline-block;margin-bottom:6px;">${pedido.forma_pagamento}</span>
+                        <p style="font-weight:700; font-size:1rem; margin:0;">Total: ${valorFormatado}${trocoHTML}</p>
+                    </div>
+                    <button class="btn-avancar" onclick="executarAvancoDeEtapa(${pedido.id}, '${statusReal}', '${subStatus}')"><i class="fas fa-fire"></i> Enviar p/ Cozinha</button>
+                </div>`;
+        } else {
+            htmlCel2 = `
+                <div class="celula-esteira etapa-concluida">
+                    <div>
+                        <h4>Pagamento</h4>
+                        <span class="pago-badge status-verde" style="display:inline-block;margin-bottom:6px;">${pedido.forma_pagamento}</span>
+                        <p style="font-size:0.9rem; margin:0;">Total Pago: ${valorFormatado}</p>
+                    </div>
+                    <span class="txt-concluido-check"><i class="fas fa-check-circle"></i> Financeiro Pago</span>
+                </div>`;
+        }
+
+        // --- CÉLULA 3: EM PREPARO ---
+        let htmlCel3 = '';
+        if (statusReal === 'pedidos' || statusReal === 'pagamento') {
+            htmlCel3 = `<div class="celula-esteira etapa-apagada"><h4>Cozinha</h4><p>Aguardando liberação.</p></div>`;
+        } else if (statusReal === 'preparo') {
+            let textoBotao = '';
+            let labelStatus = '';
+            
+            if (subStatus === 'aguardando') {
+                labelStatus = '<span class="badge-substatus sub-aguardando">Aguardando Cozinha</span>';
+                textoBotao = '<i class="fas fa-play"></i> Iniciar Preparo';
+            } else if (subStatus === 'preparando') {
+                labelStatus = '<span class="badge-substatus sub-preparando">Preparando...</span>';
+                textoBotao = '<i class="fas fa-stopwatch"></i> Marcar como Pronto';
+            } else if (subStatus === 'pronto') {
+                labelStatus = '<span class="badge-substatus sub-pronto">Pronto p/ Envio</span>';
+                textoBotao = '<i class="fas fa-motorcycle"></i> Despachar Entrega';
+            }
+
+            htmlCel3 = `
+                <div class="celula-esteira etapa-iluminada">
+                    <div>
+                        <h4>Produção</h4>
+                        <p style="margin-bottom:6px;">${labelStatus}</p>
+                    </div>
+                    <button class="btn-avancar" onclick="executarAvancoDeEtapa(${pedido.id}, '${statusReal}', '${subStatus}')">${textoBotao}</button>
+                </div>`;
+        } else {
+            htmlCel3 = `
+                <div class="celula-esteira item-concluido etapa-concluida">
+                    <div>
+                        <h4>Produção</h4>
+                        <p><span class="badge-substatus sub-pronto">Finalizado</span></p>
+                    </div>
+                    <span class="txt-concluido-check"><i class="fas fa-check-circle"></i> Pronto e Despachado</span>
+                </div>`;
+        }
+
+        // --- CÉLULA 4: SAIU PARA ENTREGA ---
+        let htmlCel4 = '';
+        if (statusReal !== 'entrega') {
+            htmlCel4 = `<div class="celula-esteira etapa-apagada"><h4>Logística</h4><p>Aguardando produção.</p></div>`;
+        } else {
+            let labelEntrega = subStatus === 'aguardando' ? 'Aguardando Motoboy' : 'Saiu para Entrega';
+            let txtBtn = subStatus === 'aguardando' ? '<i class="fas fa-shipping-fast"></i> Despachar Rota' : '<i class="fas fa-hand-holding-usd"></i> Finalizar Pedido';
+            
+            htmlCel4 = `
+                <div class="celula-esteira etapa-iluminada">
+                    <div>
+                        <h4>Logística</h4>
+                        <p><span class="badge-substatus sub-rota">${labelEntrega}</span></p>
+                    </div>
+                    <button class="btn-avancar" onclick="executarAvancoDeEtapa(${pedido.id}, '${statusReal}', '${subStatus}')">${txtBtn}</button>
+                </div>`;
+        }
+
+        const linhaCompletaHTML = `
+            <div class="linha-esteira-pedido" id="trilho-pedido-${pedido.id}">
+                ${htmlCel1}
+                ${htmlCel2}
+                ${htmlCel3}
+                ${htmlCel4}
+            </div>
+        `;
+        container.innerHTML += linhaCompletaHTML;
+    });
+}
+
+function renderizarModoPedidosFlutuantes(pedidos) {
     const colunas = {
-        novos: document.getElementById('cards-novos'),
+        pedidos: document.getElementById('cards-pedidos'),
         pagamento: document.getElementById('cards-pagamento'),
         preparo: document.getElementById('cards-preparo'),
         entrega: document.getElementById('cards-entrega')
     };
 
-    // Mantém os títulos das colunas organizados
-    const tituloColunaNovos = document.querySelector('.col-novos .column-header h3');
-    if (tituloColunaNovos) {
-        tituloColunaNovos.innerHTML = `Pedidos <span class="badge" id="qtd-novos">0</span>`;
-    }
+    Object.values(colunas).forEach(col => { if(col) col.innerHTML = ''; });
 
-    // Limpa os containers antes de renderizar
-    Object.values(colunas).forEach(coluna => { if(coluna) coluna.innerHTML = ''; });
-    const contadores = { novos: 0, pagamento: 0, preparo: 0, entrega: 0 };
-
-    if (pedidos.length === 0) {
-        Object.values(colunas).forEach(coluna => {
-            if(coluna) coluna.innerHTML = '<div class="empty-column-message">Nenhum pedido ativo</div>';
-        });
-        atualizarBadgesDoTopo(contadores);
+    if (!pedidos || pedidos.length === 0) {
+        Object.values(colunas).forEach(col => { if(col) col.innerHTML = '<div class="empty-message">Vazio</div>'; });
         return;
     }
 
-    // Processa a esteira de cada pedido de forma independente
     pedidos.forEach(pedido => {
-        const statusAtual = pedido.status;
-        const subStatusAtual = pedido.sub_status || 'aguardando';
-        
-        if (colunas[statusAtual]) {
-            contadores[statusAtual]++;
-            
-            let badgePagamentoHTML = '';
-            let blocoFinanceiroHTML = ''; 
-            let etiquetaSubstatusHTML = '';
-            let textoBotao = 'Avançar';
-            let acaoBotao = `avancarStatusPedido(${pedido.id}, '${statusAtual}', '${subStatusAtual}')`;
+        let statusNormalizado = pedido.status === 'novos' ? 'pedidos' : pedido.status;
+        const subStatus = pedido.sub_status || 'aguardando';
 
-            // Tratamento e formatação de valores monetários padrão
-            const valorTotalFormatado = parseFloat(pedido.valor_total).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            let trocoHTML = '';
+        if (colunas[statusNormalizado]) {
+            const valorFormatado = parseFloat(pedido.valor_total).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
             
-            if (pedido.forma_pagamento === 'DINHEIRO') {
-                const valorTroco = parseFloat(pedido.troco) || 0;
-                const trocoFormatado = valorTroco.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                trocoHTML = `<span class="troco-label font-atencao">Troco: <strong class="troco-destaque">${trocoFormatado}</strong></span>`;
+            let btnTexto = 'Avançar';
+            if (statusNormalizado === 'pedidos') btnTexto = '<i class="fas fa-check"></i> Aceitar Pedido';
+            else if (statusNormalizado === 'pagamento') btnTexto = '<i class="fas fa-fire"></i> Ir p/ Cozinha';
+            else if (statusNormalizado === 'preparo') {
+                btnTexto = subStatus === 'aguardando' ? '<i class="fas fa-play"></i> Iniciar' : '<i class="fas fa-stopwatch"></i> Pronto';
+            } else if (statusNormalizado === 'entrega') {
+                btnTexto = subStatus === 'aguardando' ? '<i class="fas fa-motorcycle"></i> Despachar' : '<i class="fas fa-hand-holding-usd"></i> Finalizar';
             }
 
-            // Definição das tags de pagamento baseadas em regras de cores
-            if (pedido.forma_pagamento === 'PIX') {
-                badgePagamentoHTML = `<span class="pago-badge status-verde"><i class="fas fa-check-circle"></i> PAGO: PIX</span>`;
-            } else if (pedido.forma_pagamento === 'CARTAO_CREDITO') {
-                badgePagamentoHTML = `<span class="pago-badge status-verde"><i class="fas fa-credit-card"></i> PAGO: CARTÃO CRÉDITO</span>`;
-            } else if (pedido.forma_pagamento === 'CARTAO_DEBITO') {
-                badgePagamentoHTML = `<span class="pago-badge status-verde"><i class="fas fa-credit-card"></i> PAGO: CARTÃO DÉBITO</span>`;
-            } else if (pedido.forma_pagamento === 'DINHEIRO') {
-                badgePagamentoHTML = `<span class="pago-badge status-amarelo"><i class="fas fa-money-bill-wave"></i> PAGO: DINHEIRO</span>`;
-            }
-
-            // ==========================================================================
-            // LOGICA DA ESTEIRA DE STATUS POR CLIENTE
-            // ==========================================================================
-            
-            if (statusAtual === 'novos') {
-                // Primeira fase: Foco no cliente, itens e logística de entrega
-                badgePagamentoHTML = ''; 
-                blocoFinanceiroHTML = ''; 
-                etiquetaSubstatusHTML = `<span class="badge-substatus sub-aguardando">Novo Pedido</span>`;
-                textoBotao = '<i class="fas fa-check"></i> Aceitar Pedido';
-            } 
-            
-            else {
-                // Fases seguintes: Ativação dos blocos financeiros e troco programado
-                blocoFinanceiroHTML = `
-                    <div class="pedido-financeiro">
-                        <span class="total-label">Total: <strong class="valor-dinheiro">${valorTotalFormatado}</strong></span>
-                        ${trocoHTML}
-                    </div>
-                `;
-
-                if (statusAtual === 'pagamento') {
-                    if (pedido.forma_pagamento === 'DINHEIRO') {
-                        etiquetaSubstatusHTML = `<span class="badge-substatus sub-amarelo">pagamento em dinheiro</span>`;
-                    } else {
-                        etiquetaSubstatusHTML = `<span class="badge-substatus sub-aguardando">aguardando pagamento</span>`;
-                    }
-                    textoBotao = '<i class="fas fa-fire"></i> Enviar p/ Cozinha';
-                } 
-                
-                else if (statusAtual === 'preparo') {
-                    if (subStatusAtual === 'aguardando') {
-                        etiquetaSubstatusHTML = `<span class="badge-substatus sub-aguardando">Aguardando Cozinha</span>`;
-                        textoBotao = '<i class="fas fa-play"></i> Iniciar Preparo';
-                    } else if (subStatusAtual === 'preparando') {
-                        etiquetaSubstatusHTML = `<span class="badge-substatus sub-preparando">Preparando...</span>`;
-                        textoBotao = '<i class="fas fa-stopwatch"></i> Marcar como Pronto';
-                    } else if (subStatusAtual === 'pronto') {
-                        etiquetaSubstatusHTML = `<span class="badge-substatus sub-pronto">Pronto p/ Envio</span>`;
-                        textoBotao = '<i class="fas fa-motorcycle"></i> Despachar Entrega';
-                    }
-                } 
-                
-                else if (statusAtual === 'entrega') {
-                    if (subStatusAtual === 'aguardando') {
-                        etiquetaSubstatusHTML = `<span class="badge-substatus sub-aguardando">Aguardando Motoboy</span>`;
-                        textoBotao = '<i class="fas fa-shipping-fast"></i> Saiu para Entrega';
-                    } else if (subStatusAtual === 'saiu_para_entrega') {
-                        etiquetaSubstatusHTML = `<span class="badge-substatus sub-rota">Saiu para Entrega</span>`;
-                        textoBotao = '<i class="fas fa-hand-holding-usd"></i> Pedido Entregue';
-                    }
-                }
-            }
-
-            // Injeção do endereço coletado previamente no fluxo
-            let enderecoHTML = '';
-            if (pedido.endereco_entrega) {
-                enderecoHTML = `
-                    <div class="card-endereco" style="margin-top: 8px; font-size: 0.8rem; color: #4b5563; border-top: 1px dashed #e5e7eb; padding-top: 6px;">
-                        <i class="fas fa-map-marker-alt" style="color: #ef4444; margin-right: 4px;"></i> ${pedido.endereco_entrega}
-                    </div>
-                `;
-            }
-
-            // Estruturação final do Card dentro da coluna ativa do trilho
             const cardHTML = `
-                <div class="pedido-card" id="pedido-${pedido.id}">
+                <div class="pedido-card">
                     <div class="card-header">
                         <span class="pedido-id">#${pedido.id}</span>
-                        ${badgePagamentoHTML}
+                        <span class="pago-badge status-verde">${pedido.forma_pagamento}</span>
                     </div>
                     <div class="card-body">
-                        <h4>${pedido.cliente_nome}</h4>
-                        <div class="substatus-container">${etiquetaSubstatusHTML}</div>
-                        <p class="pedido-itens" style="margin-top: 8px; margin-bottom: 4px;">${pedido.itens}</p>
-                        ${blocoFinanceiroHTML}
-                        ${enderecoHTML}
+                        <h4 style="margin: 4px 0;">${pedido.cliente_nome}</h4>
+                        <p style="font-size: 0.85rem; color: #4b5563; margin: 6px 0;">${pedido.itens}</p>
+                        <p style="margin: 4px 0; font-size: 0.9rem; font-weight: bold;">Total: ${valorFormatado}</p>
                     </div>
-                    <div class="card-footer">
-                        <button class="btn-avancar" onclick="${acaoBotao}">${textoBotao}</button>
-                    </div>
-                </div>
-            `;
-            
-            colunas[statusAtual].innerHTML += cardHTML;
+                    <button class="btn-avancar" onclick="executarAvancoDeEtapa(${pedido.id}, '${statusNormalizado}', '${subStatus}')">${btnTexto}</button>
+                </div>`;
+            colunas[statusNormalizado].innerHTML += cardHTML;
         }
     });
-
-    atualizarBadgesDoTopo(contadores);
 }
 
-function atualizarBadgesDoTopo(contadores) {
-    if(document.getElementById('qtd-novos')) document.getElementById('qtd-novos').innerText = contadores.novos;
-    if(document.getElementById('qtd-pagamento')) document.getElementById('qtd-pagamento').innerText = contadores.pagamento;
-    if(document.getElementById('qtd-preparo')) document.getElementById('qtd-preparo').innerText = contadores.preparo;
-    if(document.getElementById('qtd-entrega')) document.getElementById('qtd-entrega').innerText = contadores.entrega;
+async function executarAvancoDeEtapa(id, statusAtual, subStatusAtual) {
+    try {
+        const resposta = await fetch(`/api/pedidos/${id}/avancar`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status_atual: statusAtual, sub_status_atual: subStatusAtual })
+        });
+        if (!resposta.ok) throw new Error("Erro ao atualizar no servidor");
+        buscarPedidosDoServidor();
+    } catch (erro) {
+        console.error("❌ Erro ao avançar o pedido:", erro);
+    }
 }

@@ -1,8 +1,7 @@
 /* ==========================================================================
-   ESTILOS ESPECÍFICOS DA PÁGINA DE PEDIDOS (GESTOR KANBAN)
+   ESTILOS GERAIS DO PAINEL DE PEDIDOS (REALCE CARDÁPIO)
    ========================================================================== */
 
-/* 1. Submenu Superior (Abas / Tabs) */
 .page-header {
     display: flex;
     flex-direction: column;
@@ -36,9 +35,15 @@
 }
 
 @keyframes pulse {
-    0% { opacity: 0.4; }
-    50% { opacity: 1; }
-    100% { opacity: 0.4; }
+    0% { 
+        opacity: 0.4; 
+    }
+    50% { 
+        opacity: 1; 
+    }
+    100% { 
+        opacity: 0.4; 
+    }
 }
 
 .submenu-superior {
@@ -71,7 +76,126 @@
     font-weight: 600;
 }
 
-/* 2. Estrutura do Kanban (4 Colunas) */
+/* ==========================================================================
+   2. ABA 1: PEDIDOS GERAL (ESTEIRA HORIZONTAL PERMANENTE)
+   ========================================================================== */
+
+.esteira-titulos-header {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.titulo-esteira {
+    padding: 12px 15px;
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 0.88rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.titulo-esteira.t-pedidos { 
+    background-color: #f59e0b; 
+}
+
+.titulo-esteira.t-pagamento { 
+    background-color: #7c3aed; 
+}
+
+.titulo-esteira.t-preparo { 
+    background-color: #3b82f6; 
+}
+
+.titulo-esteira.t-entrega { 
+    background-color: #10b981; 
+}
+
+.badge-count {
+    background-color: #ffffff;
+    color: #1f2937;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.esteira-linhas-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.linha-esteira-pedido {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 15px;
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    align-items: stretch;
+}
+
+.celula-esteira {
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    font-size: 0.88rem;
+    transition: all 0.2s ease;
+}
+
+.celula-esteira.etapa-apagada {
+    opacity: 0.4;
+    background-color: #f3f4f6;
+    border-style: dashed;
+}
+
+.celula-esteira.etapa-iluminada {
+    background-color: #fffbeb;
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.1);
+}
+
+.celula-esteira.etapa-concluida {
+    background-color: #f0fdf4;
+    border-color: #bbf7d0;
+}
+
+.celula-esteira h4 {
+    margin: 0 0 6px 0;
+    font-size: 0.95rem;
+    color: #111827;
+}
+
+.celula-esteira p {
+    margin: 0 0 8px 0;
+    color: #4b5563;
+    line-height: 1.4;
+}
+
+.txt-concluido-check {
+    color: #16a34a;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: auto 0;
+}
+
+/* ==========================================================================
+   3. ABA 2: PEDIDOS FLUTUANTES (KANBAN DE COLUNAS)
+   ========================================================================== */
+
 .kanban-wrapper {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -111,18 +235,41 @@
     font-size: 0.8rem;
 }
 
-/* Identidade visual do topo das colunas */
-.col-novos .column-header { border-top: 4px solid #f59e0b; }
-.col-novos .badge { background-color: #fef3c7; color: #d97706; }
+.col-pedidos .column-header { 
+    border-top: 4px solid #f59e0b; 
+}
 
-.col-pagamento .column-header { border-top: 4px solid #7c3aed; }
-.col-pagamento .badge { background-color: #f3e8ff; color: #6d28d9; }
+.col-pedidos .badge { 
+    background-color: #fef3c7; 
+    color: #d97706; 
+}
 
-.col-preparo .column-header { border-top: 4px solid #3b82f6; }
-.col-preparo .badge { background-color: #dbeafe; color: #2563eb; }
+.col-pagamento .column-header { 
+    border-top: 4px solid #7c3aed; 
+}
 
-.col-entrega .column-header { border-top: 4px solid #10b981; }
-.col-entrega .badge { background-color: #d1fae5; color: #059669; }
+.col-pagamento .badge { 
+    background-color: #f3e8ff; 
+    color: #6d28d9; 
+}
+
+.col-preparo .column-header { 
+    border-top: 4px solid #3b82f6; 
+}
+
+.col-preparo .badge { 
+    background-color: #dbeafe; 
+    color: #2563eb; 
+}
+
+.col-entrega .column-header { 
+    border-top: 4px solid #10b981; 
+}
+
+.col-entrega .badge { 
+    background-color: #d1fae5; 
+    color: #059669; 
+}
 
 .kanban-cards-area {
     padding: 12px;
@@ -144,7 +291,6 @@
     border-radius: 8px;
 }
 
-/* 3. Design dos Cards de Pedido */
 .pedido-card {
     background-color: #ffffff;
     border: 1px solid #e5e7eb;
@@ -154,12 +300,6 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.pedido-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
 }
 
 .card-header {
@@ -174,7 +314,6 @@
     color: #4b5563;
 }
 
-/* Badges de Status de Pagamento sugeridos por você */
 .pago-badge {
     font-size: 0.7rem;
     font-weight: 700;
@@ -185,21 +324,30 @@
     gap: 4px;
 }
 
-/* Verde para Pix, Crédito e Débito */
 .pago-badge.status-verde { 
     background-color: #d1fae5; 
     color: #065f46; 
 }
 
-/* Amarelo para Dinheiro */
 .pago-badge.status-amarelo { 
     background-color: #fef3c7; 
     color: #92400e; 
 }
 
-.pago-badge.pix { background-color: #d1fae5; color: #065f46; }
-.pago-badge.cartao { background-color: #e0f2fe; color: #075985; }
-.pago-badge.dinheiro { background-color: #fef3c7; color: #92400e; }
+.pago-badge.pix { 
+    background-color: #d1fae5; 
+    color: #065f46; 
+}
+
+.pago-badge.cartao { 
+    background-color: #e0f2fe; 
+    color: #075985; 
+}
+
+.pago-badge.dinheiro { 
+    background-color: #fef3c7; 
+    color: #92400e; 
+}
 
 .card-body h4 {
     font-size: 0.95rem;
@@ -225,9 +373,19 @@
     border-left: 3px solid #d1d5db;
 }
 
-.valor-dinheiro { color: #111827; }
-.font-pago { color: #10b981; font-weight: 500; }
-.font-atencao { color: #b45309; font-weight: 500; }
+.valor-dinheiro { 
+    color: #111827; 
+}
+
+.font-pago { 
+    color: #10b981; 
+    font-weight: 500; 
+}
+
+.font-atencao { 
+    color: #b45309; 
+    font-weight: 500; 
+}
 
 .troco-destaque {
     background-color: #fef3c7;
@@ -236,7 +394,10 @@
     color: #d97706;
 }
 
-/* Botão de Avançar o Card no Fluxo */
+/* ==========================================================================
+   4. BOTÕES E COMPONENTES DE INTERAÇÃO (COMPARTILHADOS)
+   ========================================================================== */
+
 .card-footer {
     margin-top: 5px;
 }
@@ -246,10 +407,10 @@
     background-color: #ffffff;
     border: 1px solid #d1d5db;
     color: #374151;
-    padding: 6px 12px;
+    padding: 8px 12px;
     border-radius: 6px;
     font-size: 0.85rem;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
     display: flex;
@@ -264,32 +425,76 @@
     color: #111827;
 }
 
-/* Estilo para ocultar a tabela de histórico */
+.btn-linha-avancar {
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-linha-avancar:hover { 
+    background-color: #1d4ed8; 
+}
+
+.badge-substatus {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
+.sub-aguardando { 
+    background-color: #e5e7eb; 
+    color: #4b5563; 
+}
+
+.sub-preparando { 
+    background-color: #fef3c7; 
+    color: #d97706; 
+    animation: blink 2s infinite; 
+}
+
+.sub-pronto { 
+    background-color: #d1fae5; 
+    color: #065f46; 
+}
+
+.sub-rota { 
+    background-color: #dbeafe; 
+    color: #1e40af; 
+}
+
+.sub-amarelo { 
+    background-color: #fef3c7; 
+    color: #92400e; 
+}
+
+@keyframes blink {
+    0% { 
+        opacity: 0.7; 
+    }
+    50% { 
+        opacity: 1; 
+    }
+    100% { 
+        opacity: 0.7; 
+    }
+}
+
+/* ==========================================================================
+   5. CENTRAL DE HISTÓRICO DE PEDIDOS
+   ========================================================================== */
+
 .historico-box {
     background: #ffffff;
     border: 1px solid #e5e7eb;
     border-radius: 12px;
     padding: 20px;
 }
-
-/* Responsividade */
-@media (max-width: 1200px) {
-    .kanban-wrapper { 
-        grid-template-columns: repeat(2, 1fr); 
-        height: auto; 
-    }
-}
-
-@media (max-width: 680px) {
-    .kanban-wrapper { 
-        grid-template-columns: 1fr; 
-    }
-}
-
-
-/* ==========================================================================
-   ESTILOS ADICIONAIS: CENTRAL DE HISTÓRICO GERAL
-   ========================================================================== */
 
 .historico-header {
     display: flex;
@@ -302,7 +507,6 @@
     border-bottom: 1px solid #f3f4f6;
 }
 
-/* Filtros Temporais Estilo Pílula */
 .filtro-temporal {
     display: flex;
     background-color: #f3f4f6;
@@ -337,7 +541,6 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-/* Customizações da Tabela */
 .txt-cortado {
     max-width: 250px;
     white-space: nowrap;
@@ -364,7 +567,6 @@
     border-radius: 12px;
 }
 
-/* Botão de Ação Lupa/Visualizar */
 .btn-detalhes {
     background-color: #f3f4f6;
     border: 1px solid #e5e7eb;
@@ -382,29 +584,12 @@
     border-color: #FF6B00;
 }
 
-/* Subetapas internas do Card (Refatoração Luiz) */
 .substatus-container {
     display: flex;
     align-items: center;
     gap: 6px;
     margin-top: 4px;
 }
-
-.badge-substatus {
-    font-size: 0.7rem;
-    font-weight: 600;
-    padding: 2px 6px;
-    border-radius: 4px;
-    text-transform: uppercase;
-}
-
-/* Cores das subetapas da Cozinha */
-.sub-aguardando { background-color: #e5e7eb; color: #4b5563; } /* Cinza */
-.sub-preparando { background-color: #fef3c7; color: #d97706; animation: blink 2s infinite; } /* Amarelo */
-.sub-pronto { background-color: #d1fae5; color: #065f46; } /* Verde */
-
-/* Cores das subetapas da Entrega */
-.sub-rota { background-color: #dbeafe; color: #1e40af; } /* Azul */
 
 .previsao-entrega {
     font-size: 0.75rem;
@@ -416,10 +601,23 @@
     font-style: italic;
 }
 
-@keyframes blink {
-    0% { opacity: 0.7; }
-    50% { opacity: 1; }
-    100% { opacity: 0.7; }
+.empty-message {
+    text-align: center;
+    color: #9ca3af;
+    padding: 20px;
+    font-size: 0.9rem;
 }
 
-.sub-amarelo { background-color: #fef3c7; color: #92400e; }
+/* Responsividade Mestre */
+@media (max-width: 1200px) {
+    .kanban-wrapper { 
+        grid-template-columns: repeat(2, 1fr); 
+        height: auto; 
+    }
+}
+
+@media (max-width: 680px) {
+    .kanban-wrapper { 
+        grid-template-columns: 1fr; 
+    }
+}

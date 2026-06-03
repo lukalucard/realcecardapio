@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RealceCardápio - WhatsApp</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/whatsapp.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        
+        <aside class="sidebar">
+            <div class="logo-area">
+                <h2>Realce<span>Cardápio</span></h2>
+            </div>
+            <nav class="menu-nav">
+                <ul>
+                    <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> <span>Início</span></a></li>
+                    <li><a href="pedidos.html"><i class="fas fa-motorcycle"></i> <span>Pedidos</span></a></li>
+                    <li class="active"><a href="whatsapp.html"><i class="fab fa-whatsapp"></i> <span>WhatsApp</span></a></li>
+                    <li><a href="cardapio.html"><i class="fas fa-utensils"></i> <span>Cardápio</span></a></li>
+                    <li><a href="clientes.html"><i class="fas fa-users"></i> <span>Clientes</span></a></li>
+                    <li><a href="estoque.html"><i class="fas fa-boxes"></i> <span>Estoque</span></a></li>
+                    <li><a href="financeiro.html"><i class="fas fa-dollar-sign"></i> <span>Financeiro</span></a></li>
+                    <li><a href="configuracoes.html"><i class="fas fa-sliders-h"></i> <span>Configurações</span></a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            
+            <header class="page-header">
+                <div class="title-section">
+                    <h1>Integração WhatsApp</h1>
+                    <span class="status-badge-desconectado" id="whatsapp-status-global">
+                        <i class="fas fa-circle"></i> Aguardando Conexão
+                    </span>
+                </div>
+            </header>
+
+            <div class="whatsapp-grid-layout">
+                
+                <section class="whatsapp-card card-conexao">
+                    <div class="card-header-simple">
+                        <h3><i class="fas fa-qrcode"></i> Conexão com o Sistema</h3>
+                    </div>
+                    <div class="card-body-conexao">
+                        <p class="txt-ajuda">Abra o WhatsApp no seu celular, vá em <strong>Aparelhos conectados</strong> e escaneie o código abaixo:</p>
+                        
+                        <div class="container-qrcode" id="qrcode-area">
+                            <div class="qrcode-placeholder">
+                                <i class="fas fa-sync-alt fa-spin"></i>
+                                <span>Gerando código seguro...</span>
+                            </div>
+                        </div>
+
+                        <div class="acoes-conexao">
+                            <button class="btn-whatsapp-secundario" id="btn-desconectar" disabled>
+                                <i class="fas fa-unlink"></i> Desconectar Aparelho
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="whatsapp-card card-templates">
+                    <div class="card-header-simple">
+                        <h3><i class="fas fa-comment-medical"></i> Mensagens Notificadoras</h3>
+                    </div>
+                    <form class="form-templates-whatsapp" id="form-whatsapp-config">
+                        
+                        <div class="bloco-input-mensagem">
+                            <label for="msg-novo">
+                                <strong>Pedido Recebido / Novos</strong>
+                                <span class="tag-variavel">Variáveis disponíveis: {nome}, {pedido}, {total}</span>
+                            </label>
+                            <textarea id="msg-novo" rows="3" placeholder="Ex: Olá {nome}, recebemos o seu pedido {pedido} no valor de {total}!"></textarea>
+                        </div>
+
+                        <div class="bloco-input-mensagem">
+                            <label for="msg-preparo">
+                                <strong>Em Preparo / Cozinha</strong>
+                                <span class="tag-variavel">Variáveis disponíveis: {nome}, {pedido}</span>
+                            </label>
+                            <textarea id="msg-preparo" rows="3" placeholder="Ex: Boa notícia {nome}! O seu pedido {pedido} já começou a ser preparado pela nossa equipe."></textarea>
+                        </div>
+
+                        <div class="bloco-input-mensagem">
+                            <label for="msg-entrega">
+                                <strong>Saiu para Entrega / Rota</strong>
+                                <span class="tag-variavel">Variáveis disponíveis: {nome}, {pedido}</span>
+                            </label>
+                            <textarea id="msg-entrega" rows="3" placeholder="Ex: Seu pedido {pedido} ficou pronto e já saiu para entrega, {nome}! O motoboy já está a caminho."></textarea>
+                        </div>
+
+                        <div class="form-footer-acoes">
+                            <button type="button" class="btn-whatsapp-principal" id="btn-salvar-mensagens">
+                                <i class="fas fa-save"></i> Salvar Mensagens
+                            </button>
+                        </div>
+
+                    </form>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="js/dashboard.js"></script>
+    <script src="js/whatsapp.js"></script>
+</body>
+</html>

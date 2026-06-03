@@ -28,14 +28,14 @@ body {
 }
 
 .logo-area {
+    font-family: "Dancing Script", cursive;
     padding: 24px 20px;
     border-bottom: 1px solid rgba(255,255,255,0.2);
     margin-bottom: 20px;
 }
 
 .logo-area h2 {
-    font-size: 1.6rem;
-    font-weight: 700;
+    font-size: 2rem;
 }
 
 .logo-area span {

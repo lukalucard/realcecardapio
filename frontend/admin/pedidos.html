@@ -4,17 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RealceCardápio - Pedidos</title>
-    <!-- Font Awesome (ícones) -->
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Google Fonts (Inter) -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
-    <!-- CSS (Aproveita o dashboard e adiciona o específico de pedidos) -->
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/pedidos.css">
+    
 </head>
 <body>
     <div class="dashboard-container">
-        <!-- MENU LATERAL FIXO (Padronizado com 8 palavras curtas) -->
+        
         <aside class="sidebar">
             <div class="logo-area">
                 <h2>Realce<span>Cardápio</span></h2>
@@ -22,7 +26,7 @@
             <nav class="menu-nav">
                 <ul>
                     <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> <span>Início</span></a></li>
-                    <li><a href="pedidos.html"><i class="fas fa-motorcycle"></i> <span>Pedidos</span></a></li>
+                    <li class="active"><a href="pedidos.html"><i class="fas fa-motorcycle"></i> <span>Pedidos</span></a></li>
                     <li><a href="whatsapp.html"><i class="fab fa-whatsapp"></i> <span>WhatsApp</span></a></li>
                     <li><a href="cardapio.html"><i class="fas fa-utensils"></i> <span>Cardápio</span></a></li>
                     <li><a href="clientes.html"><i class="fas fa-users"></i> <span>Clientes</span></a></li>
@@ -33,188 +37,121 @@
             </nav>
         </aside>
 
-        <!-- CONTEÚDO PRINCIPAL -->
         <main class="main-content">
-            <!-- SEU MENU SUPERIOR / SUBMENU DENTRO DA PÁGINA -->
+            
             <header class="page-header">
                 <div class="title-section">
                     <h1>Gestor de Pedidos</h1>
                     <span class="status-badge-online"><i class="fas fa-circle"></i> Sistema Online</span>
                 </div>
                 <nav class="submenu-superior">
-                    <button class="tab-link active" data-origem="delivery"><i class="fas fa-shipping-fast"></i> Delivery</button>
-                    <button class="tab-link" data-origem="historico"><i class="fas fa-history"></i> Histórico</button>
+                    <button class="tab-link active" data-aba="geral">
+                        <i class="fas fa-stream"></i> Pedidos Geral
+                    </button>
+                    <button class="tab-link" data-aba="flutuantes">
+                        <i class="fas fa-columns"></i> Pedidos Flutuantes
+                    </button>
+                    <button class="tab-link" data-aba="historico">
+                        <i class="fas fa-history"></i> Histórico de Pedidos
+                    </button>
                 </nav>
             </header>
 
-            <!-- PAINEL KANBAN (Foco Total em Delivery Seguro) -->
-            <section id="painel-kanban" class="kanban-wrapper">
-                
-                <!-- COLUNA 1: NOVOS -->
-                <div class="kanban-column col-novos">
-                    <div class="column-header">
-                        <h3>Novos <span class="badge" id="qtd-novos">0</span></h3>
-                    </div>
-                    <div class="kanban-cards-area" id="cards-novos">
-                        <div class="empty-column-message">Nenhum pedido novo</div>
-                    </div>
-                </div>
+            <div class="paineis-conteudo-area">
 
-                <!-- COLUNA 2: PAGAMENTO -->
-                <div class="kanban-column col-pagamento">
-                    <div class="column-header">
-                        <h3>Pagamento <span class="badge" id="qtd-pagamento">3</span></h3>
+                <section id="painel-geral" class="aba-painel" style="display: block;">
+                    <div class="esteira-titulos-header">
+                        <div class="titulo-esteira t-pedidos">Pedidos <span class="badge-count" id="esteira-badge-pedidos">0</span></div>
+                        <div class="titulo-esteira t-pagamento">Pagamento <span class="badge-count" id="esteira-badge-pagamento">0</span></div>
+                        <div class="titulo-esteira t-preparo">Em Preparo <span class="badge-count" id="esteira-badge-preparo">0</span></div>
+                        <div class="titulo-esteira t-entrega">Saiu para Entrega <span class="badge-count" id="esteira-badge-entrega">0</span></div>
                     </div>
-                    <div class="kanban-cards-area" id="cards-pagamento">
+                    <div class="esteira-linhas-container" id="lista-pedidos-linhas"></div>
+                </section>
+
+                <section id="painel-flutuantes" class="aba-painel" style="display: none;">
+                    <div class="kanban-wrapper">
                         
-                        <!-- CARD EXEMPLO 1: PIX (Já pago online) -->
-                        <div class="pedido-card">
-                            <div class="card-header">
-                                <span class="pedido-id">#1024</span>
-                                <span class="pago-badge pix"><i class="fas fa-check-circle"></i> PIX PAGO</span>
+                        <div class="kanban-column col-pedidos">
+                            <div class="column-header">
+                                <h3>Pedidos <span class="badge" id="badge-pedidos">0</span></h3>
                             </div>
-                            <div class="card-body">
-                                <h4>Luiz Silva</h4>
-                                <p class="pedido-itens">1x Pizza Calabresa G, 1x Coca-Cola 2L</p>
-                                <div class="pedido-financeiro">
-                                    <span class="total-label">Total: <strong class="valor-dinheiro">R$ 65,00</strong></span>
-                                    <span class="troco-label font-pago">Troco: R$ 0,00</span>
-                                </div>
-                            </div>
-                            <div class="card-footer">
-                                <button class="btn-avancar"><i class="fas fa-fire"></i> Enviar p/ Cozinha</button>
-                            </div>
+                            <div class="kanban-cards-area" id="cards-pedidos"></div>
                         </div>
 
-                        <!-- CARD EXEMPLO 2: CARTÃO FÍSICO (Levar maquininha) -->
-                        <div class="pedido-card">
-                            <div class="card-header">
-                                <span class="pedido-id">#1025</span>
-                                <span class="pago-badge cartao"><i class="fas fa-credit-card"></i> LEVAR MAQUININHA</span>
+                        <div class="kanban-column col-pagamento">
+                            <div class="column-header">
+                                <h3>Pagamento <span class="badge" id="badge-pagamento">0</span></h3>
                             </div>
-                            <div class="card-body">
-                                <h4>Carlos Souza</h4>
-                                <p class="pedido-itens">2x X-Salada, 1x Batata Frita</p>
-                                <div class="pedido-financeiro">
-                                    <span class="total-label">Total: <strong class="valor-dinheiro">R$ 48,00</strong></span>
-                                    <span class="troco-label">Troco: R$ 0,00</span>
-                                </div>
-                            </div>
-                            <div class="card-footer">
-                                <button class="btn-avancar"><i class="fas fa-fire"></i> Enviar p/ Cozinha</button>
-                            </div>
+                            <div class="kanban-cards-area" id="cards-pagamento"></div>
                         </div>
 
-                        <!-- CARD EXEMPLO 3: DINHEIRO (Com troco programado) -->
-                        <div class="pedido-card">
-                            <div class="card-header">
-                                <span class="pedido-id">#1026</span>
-                                <span class="pago-badge dinheiro"><i class="fas fa-money-bill-wave"></i> DINHEIRO</span>
+                        <div class="kanban-column col-preparo">
+                            <div class="column-header">
+                                <h3>Em Preparo <span class="badge" id="badge-preparo">0</span></h3>
                             </div>
-                            <div class="card-body">
-                                <h4>Ana Beatriz</h4>
-                                <p class="pedido-itens">1x Hambúrguer Artesanal, 1x Suco de Laranja</p>
-                                <div class="pedido-financeiro">
-                                    <span class="total-label">Total: <strong class="valor-dinheiro">R$ 35,00</strong></span>
-                                    <span class="troco-label font-atencao">Troco p/ R$ 50,00: <strong class="troco-destaque">R$ 15,00</strong></span>
-                                </div>
+                            <div class="kanban-cards-area" id="cards-preparo"></div>
+                        </div>
+
+                        <div class="kanban-column col-entrega">
+                            <div class="column-header">
+                                <h3>Saiu para Entrega <span class="badge" id="badge-entrega">0</span></h3>
                             </div>
-                            <div class="card-footer">
-                                <button class="btn-avancar"><i class="fas fa-fire"></i> Enviar p/ Cozinha</button>
-                            </div>
+                            <div class="kanban-cards-area" id="cards-entrega"></div>
                         </div>
 
                     </div>
-                </div>
+                </section>
 
-                <!-- COLUNA 3: EM PREPARO -->
-                <div class="kanban-column col-preparo">
-                    <div class="column-header">
-                        <h3>Em Preparo <span class="badge" id="qtd-preparo">0</span></h3>
-                    </div>
-                    <div class="kanban-cards-area" id="cards-preparo">
-                        <div class="empty-column-message">Nenhum na cozinha</div>
-                    </div>
-                </div>
+                <section id="painel-historico" class="aba-painel" style="display: none;">
+                    <div class="historico-box">
+                        <div class="historico-header">
+                            <h3>Histórico Geral de Pedidos</h3>
+                            <div class="filtro-temporal">
+                                <button class="btn-filtro active" data-periodo="hoje"><i class="fas fa-calendar-day"></i> Hoje</button>
+                                <button class="btn-filtro" data-periodo="semana"><i class="fas fa-calendar-week"></i> Esta Semana</button>
+                                <button class="btn-filtro" data-periodo="mes"><i class="fas fa-calendar-alt"></i> Este Mês</button>
+                                <button class="btn-filtro" data-periodo="ano"><i class="fas fa-history"></i> Ano Corrente</button>
+                            </div>
+                        </div>
 
-                <!-- COLUNA 4: SAIU PARA ENTREGA -->
-                <div class="kanban-column col-entrega">
-                    <div class="column-header">
-                        <h3>Saiu para Entrega <span class="badge" id="qtd-entrega">0</span></h3>
-                    </div>
-                    <div class="kanban-cards-area" id="cards-entrega">
-                        <div class="empty-column-message">Nenhum em rota</div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- PAINEL DE HISTÓRICO ATUALIZADO (Sua central de buscas temporal) -->
-            <section id="painel-historico" class="historico-wrapper" style="display: none;">
-                <div class="historico-box">
-                    
-                    <!-- Cabeçalho do Histórico com os Filtros de Tempo que planejamos -->
-                    <div class="historico-header">
-                        <h3>Histórico Geral de Pedidos</h3>
-                        <div class="filtro-temporal">
-                            <button class="btn-filtro active" data-periodo="hoje"><i class="fas fa-calendar-day"></i> Hoje</button>
-                            <button class="btn-filtro" data-periodo="semana"><i class="fas fa-calendar-week"></i> Esta Semana</button>
-                            <button class="btn-filtro" data-periodo="mes"><i class="fas fa-calendar-alt"></i> Este Mês</button>
-                            <button class="btn-filtro" data-periodo="ano"><i class="fas fa-history"></i> Ano Corrente</button>
+                        <div class="table-responsive">
+                            <table class="historico-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Data/Hora</th>
+                                        <th>Cliente</th>
+                                        <th>Itens Pedidos</th>
+                                        <th>Total</th>
+                                        <th>Pagamento</th>
+                                        <th>Status</th>
+                                        <th style="text-align: center;">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="lista-historico-hoje">
+                                    <tr>
+                                        <td><strong>#1010</strong></td>
+                                        <td>29/05 às 21:34</td>
+                                        <td>Luiz Carlos</td>
+                                        <td class="txt-cortado">2x Hambúrguer Artesanal, 1x Batata, 1x Suco</td>
+                                        <td><strong class="valor-dinheiro">R$ 78,00</strong></td>
+                                        <td><span class="pago-badge pix"><i class="fas fa-check-circle"></i> PIX</span></td>
+                                        <td><span class="status-finalizado"><i class="fas fa-check"></i> Entregue</span></td>
+                                        <td style="text-align: center;">
+                                            <button class="btn-detalhes" title="Ver Detalhes do Pedido"><i class="fas fa-eye"></i></button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
+                </section>
 
-                    <!-- Tabela de exibição dos dados -->
-                    <div class="table-responsive">
-                        <table class="historico-table">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Data/Hora</th>
-                                    <th>Cliente</th>
-                                    <th>Itens Pedidos</th>
-                                    <th>Total</th>
-                                    <th>Pagamento</th>
-                                    <th>Status</th>
-                                    <th style="text-align: center;">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="lista-historico-hoje">
-                                <!-- EXEMPLO DE PEDIDO ANTIGO RECENTE -->
-                                <tr>
-                                    <td><strong>#1010</strong></td>
-                                    <td>29/05 às 21:34</td>
-                                    <td>Luiz Carlos</td>
-                                    <td class="txt-cortado">2x Hambúrguer Artesanal, 1x Batata, 1x Suco</td>
-                                    <td><strong class="valor-dinheiro">R$ 78,00</strong></td>
-                                    <td><span class="pago-badge pix"><i class="fas fa-check-circle"></i> PIX</span></td>
-                                    <td><span class="status-finalizado"><i class="fas fa-check"></i> Entregue</span></td>
-                                    <td style="text-align: center;">
-                                        <button class="btn-detalhes" title="Ver Detalhes do Pedido"><i class="fas fa-eye"></i></button>
-                                    </td>
-                                </tr>
-                                <!-- EXEMPLO DE PEDIDO CANCELADO -->
-                                <tr>
-                                    <td><strong>#1009</strong></td>
-                                    <td>29/05 às 20:15</td>
-                                    <td>Marcos Oliveira</td>
-                                    <td class="txt-cortado">1x Pizza Frango c/ Catupiry Grande</td>
-                                    <td><strong class="valor-dinheiro">R$ 55,00</strong></td>
-                                    <td><span class="pago-badge dinheiro"><i class="fas fa-money-bill-wave"></i> Dinheiro</span></td>
-                                    <td><span class="status-cancelado"><i class="fas fa-times"></i> Cancelado</span></td>
-                                    <td style="text-align: center;">
-                                        <button class="btn-detalhes" title="Ver Detalhes do Pedido"><i class="fas fa-eye"></i></button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
+            </div>
         </main>
     </div>
 
-    <!-- Script de inicialização geral do menu e o específico de pedidos -->
     <script src="js/dashboard.js"></script>
     <script src="js/pedidos.js"></script>
 </body>
