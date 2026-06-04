@@ -8,8 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
  */
 async function carregarMensagensDoBanco() {
     try {
-        // Altere para a porta 3002:
-        const resposta = await fetch('http://localhost:3002/api/whatsapp/config');
+        // CORRIGIDO: Removido o localhost para virar um caminho relativo universal
+        const resposta = await fetch('/api/whatsapp/config');
         if (!resposta.ok) throw new Error("Erro ao carregar dados do servidor.");
         
         const dadosConfig = await resposta.json();
@@ -44,8 +44,8 @@ function configurarBotaoSalvar() {
         const msgEntrega = document.getElementById('msg-entrega').value;
         
         try {
-            // Altere para a porta 3002:
-            const resposta = await fetch('http://localhost:3002/api/whatsapp/config', {
+            // CORRIGIDO: Removido o localhost aqui também
+            const resposta = await fetch('/api/whatsapp/config', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
