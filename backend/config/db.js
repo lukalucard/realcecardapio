@@ -1,21 +1,33 @@
 const { Pool } = require('pg');
 
-const pool = new Pool({
-    user: 'postgres',
-    password: '725104',
-    host: '127.0.0.1',
-    port: 5432,
-    database: 'realcecardapio',
-    ssl: false
-});
+let pool;
 
-// Teste de conexão inicial
-pool.connect((err, client, release) => {
+// 1. Se estiver no Render, ele usa a URL de produção automaticamente
+if (process.env.DATABASE_URL) {
+    pool = new Pool({
+        connectionString: process.env.DATABASE_URL,
+        ssl: {
+            rejectUnauthorized: false
+        }
+    });
+} else {
+    // 2. Ambiente local (Seu computador com as credenciais resgatadas)
+    pool = new Pool({
+        user: 'postgres', 
+        host: 'localhost',
+        database: 'realce_cardapio',
+        password: '725104',
+        port: 5432
+    });
+}
+
+// Teste de conexão ao iniciar o servidor
+pool.query('SELECT NOW()', (err, res) => {
     if (err) {
-        return console.error('❌ Erro ao conectar ao banco de dados PostgreSQL:', err.stack);
+        console.error('❌ Erro ao conectar ao banco de dados PostgreSQL:', err.message);
+    } else {
+        console.log('🔌 Banco de Dados PostgreSQL conectado com sucesso!');
     }
-    console.log('🔌 Banco de Dados PostgreSQL conectado com sucesso!');
-    release();
 });
 
 module.exports = pool;

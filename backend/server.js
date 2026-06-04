@@ -13,9 +13,6 @@ app.use(express.json());
 // O '..' faz o Node sair da pasta 'backend' e ir para a raiz do projeto
 app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
-// Altere o console.log também para você ver o novo caminho no terminal:
-console.log("📂 O Node agora está procurando a pasta frontend aqui:", path.join(__dirname, '..', 'frontend'));
-
 // Rota de teste
 app.get('/api/test', (req, res) => {
     res.json({ message: 'Servidor RealceCardápio funcionando!' });
