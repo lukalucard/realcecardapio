@@ -1,6 +1,9 @@
-// LISTAS EM MEMÓRIA (Simulando o Banco de Dados temporariamente)
-let categoriasSalvas = ['Burgers', 'Bebidas'];
-let produtosSalvos = [];
+/* ==========================================================================
+   ESTADO GLOBAL DO SISTEMA (Simulando o Banco de Dados em Memória)
+   ========================================================================== */
+let categoriesSalvas = []; 
+let produtosSalvos = []; 
+let categoriaEmEdicao = null; 
 
 document.addEventListener('DOMContentLoaded', () => {
     inicializarAbasDoSistema();
@@ -9,12 +12,12 @@ document.addEventListener('DOMContentLoaded', () => {
     inicializarConstrutorOpcionais();
     inicializarEnvioFormulario();
     
-    // Renderiza o estado inicial das categorias no seletor e no preview
-    atualizarSeletoresECardapio();
+    // Inicia o seletor com o estado vazio
+    renderizarSelectCategorias();
 });
 
 /* ==========================================================================
-   1. GERENCIADOR DE ABAS (ITENS / PREVIEW / DESIGN)
+   1. GERENCIADOR DE ABAS (PRODUTOS / VISUALIZAR CARDÁPIO / DESIGN)
    ========================================================================== */
 function inicializarAbasDoSistema() {
     const btnMenu = document.getElementById('tab-menu');
@@ -33,7 +36,7 @@ function inicializarAbasDoSistema() {
 
     btnPreview.addEventListener('click', () => {
         alternarAbas(btnPreview, [btnMenu, btnDesign], contentPreview, [contentMenu, contentDesign]);
-        // Toda vez que abrir o preview, garante que ele está atualizado
+        // Renderiza a vitrine simulada do cliente atualizada com os dados da memória
         renderizarPreviewCardapioReal();
     });
 
@@ -53,60 +56,120 @@ function inicializarAbasDoSistema() {
 }
 
 /* ==========================================================================
-   2. GERENCIADOR DE CATEGORIAS DINÂMICAS
+   2. GERENCIADOR DE CATEGORIAS (SUGESTÕES, CRIAÇÃO, EDIÇÃO E EXCLUSÃO)
    ========================================================================== */
 function inicializarControleCategorias() {
     const holderSugestoes = document.querySelector('.suggestions-holder');
     const inputCategoria = document.getElementById('input-nova-categoria');
     const btnConfirmar = document.getElementById('btn-add-categoria');
+    const selectCategoria = document.getElementById('prod-categoria');
+    const btnEditar = document.getElementById('btn-edit-categoria');
+    const btnDeletar = document.getElementById('btn-delete-categoria');
 
-    if (!holderSugestoes || !inputCategoria || !btnConfirmar) return;
+    if (!holderSugestoes || !inputCategoria || !btnConfirmar || !selectCategoria) return;
 
-    // Clicar na sugestão joga o texto no input
+    // Sugestões rápidas jogam o texto direto para o input
     holderSugestoes.addEventListener('click', (e) => {
         const btnSugestao = e.target.closest('.badge-suggestion');
         if (btnSugestao) {
             e.preventDefault();
-            inputCategoria.value = btnSugestao.textContent;
+            inputCategoria.value = btnSugestao.textContent.trim();
             inputCategoria.focus();
         }
     });
 
-    // Confirmar adiciona a categoria na nossa lista global em memória
+    // Confirmar criação ou ajuste de caligrafia
     btnConfirmar.addEventListener('click', (e) => {
         e.preventDefault();
         const nomeCategoria = inputCategoria.value.trim();
 
         if (nomeCategoria === "") {
-            alert("Por favor, digite ou selecione uma categoria antes de confirmar.");
+            alert("Por favor, informe um nome para a categoria antes de confirmar.");
             return;
         }
 
-        // Evita duplicados
-        if (categoriasSalvas.includes(nomeCategoria)) {
-            alert("Esta categoria já existe!");
-            return;
+        if (categoriaEmEdicao !== null) {
+            // Se estamos editando, atualiza o nome antigo no array
+            const index = categoriesSalvas.indexOf(categoriaEmEdicao);
+            if (index !== -1) {
+                categoriesSalvas[index] = nomeCategoria;
+            }
+            
+            // Cascata de segurança: atualiza a categoria dos produtos vinculados
+            produtosSalvos.forEach(p => {
+                if (p.categoria === categoriaEmEdicao) p.categoria = nomeCategoria;
+            });
+
+            categoriaEmEdicao = null;
+            btnConfirmar.textContent = "Confirmar";
+            document.getElementById('label-acao-categoria').textContent = "Criar categorias";
+        } else {
+            // Se for nova, valida duplicados
+            if (categoriesSalvas.includes(nomeCategoria)) {
+                alert("Esta categoria já existe!");
+                return;
+            }
+            categoriesSalvas.push(nomeCategoria);
         }
 
-        // Salva na memória e atualiza a interface
-        categoriasSalvas.push(nomeCategoria);
-        atualizarSeletoresECardapio();
-
-        // Limpa o input
         inputCategoria.value = "";
+        renderizarSelectCategorias();
     });
+
+    // Configurar / Editar: Carrega o item atualmente selecionado no select de volta para o input
+    if (btnEditar) {
+        btnEditar.addEventListener('click', (e) => {
+            e.preventDefault();
+            const valorSelecionado = selectCategoria.value;
+
+            if (!valorSelecionado || valorSelecionado === "Nenhuma categoria cadastrada") {
+                alert("Selecione uma categoria válida na lista abaixo para configurar.");
+                return;
+            }
+
+            inputCategoria.value = valorSelecionado;
+            categoriaEmEdicao = valorSelecionado;
+            btnConfirmar.textContent = "Salvar Alteração";
+            document.getElementById('label-acao-categoria').textContent = "Editando categoria";
+            inputCategoria.focus();
+        });
+    }
+
+    // Deletar: Remove a categoria selecionada no select e limpa os produtos dela
+    if (btnDeletar) {
+        btnDeletar.addEventListener('click', (e) => {
+            e.preventDefault();
+            const valorSelecionado = selectCategoria.value;
+
+            if (!valorSelecionado || valorSelecionado === "Nenhuma categoria cadastrada") {
+                alert("Selecione uma categoria válida para deletar.");
+                return;
+            }
+
+            if (confirm(`Deseja realmente remover a categoria "${valorSelecionado}"? Todos os produtos vinculados a ela perderão o vínculo.`)) {
+                categoriesSalvas = categoriesSalvas.filter(cat => cat !== valorSelecionado);
+                renderizarSelectCategorias();
+            }
+        });
+    }
 }
 
-// Atualiza o <select> do produto com as categorias criadas na hora
-function atualizarSeletoresECardapio() {
+// Atualiza dinamicamente o select de categorias integrado
+function renderizarSelectCategorias() {
     const selectCategoria = document.getElementById('prod-categoria');
     if (!selectCategoria) return;
 
-    // Limpa as opções atuais
     selectCategoria.innerHTML = "";
 
-    // Injeta as categorias atualizadas da memória
-    categoriasSalvas.forEach(cat => {
+    if (categoriesSalvas.length === 0) {
+        const optVazia = document.createElement('option');
+        optVazia.value = "";
+        optVazia.textContent = "Nenhuma categoria cadastrada";
+        selectCategoria.appendChild(optVazia);
+        return;
+    }
+
+    categoriesSalvas.forEach(cat => {
         const option = document.createElement('option');
         option.value = cat;
         option.textContent = cat;
@@ -115,7 +178,7 @@ function atualizarSeletoresECardapio() {
 }
 
 /* ==========================================================================
-   3. ADIÇÃO DE INGREDIENTES EM CHIPS
+   3. ADIÇÃO DINÂMICA DE INGREDIENTES EM CHIPS HIERÁRQUICOS
    ========================================================================== */
 function inicializarGerenciadorIngredientes() {
     const input = document.getElementById('input-ingrediente');
@@ -138,7 +201,12 @@ function inicializarGerenciadorIngredientes() {
     }
 
     btnAdd.addEventListener('click', adicionarChip);
-    input.addEventListener('keypress', (e) => { if (e.key === 'Enter') { e.preventDefault(); adicionarChip(); } });
+    input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            adicionarChip();
+        }
+    });
 
     container.addEventListener('click', (e) => {
         if (e.target.classList.contains('btn-remove-chip')) {
@@ -148,17 +216,19 @@ function inicializarGerenciadorIngredientes() {
 }
 
 /* ==========================================================================
-   4. CONSTRUTOR DE OPCIONAIS (RELAÇÃO 1-N)
+   4. CONSTRUTOR DINÂMICO DE OPCIONAIS E GRUPOS DE COMPLEMENTOS
    ========================================================================== */
 function inicializarConstrutorOpcionais() {
     const builderContainer = document.querySelector('.product-optionals-builder');
     if (!builderContainer) return;
 
     builderContainer.addEventListener('click', (e) => {
+        // Adicionar nova linha de item extra dentro de um grupo específico
         const btnAddItem = e.target.closest('.btn-secondary-sm');
         if (btnAddItem) {
             e.preventDefault();
             const tabelaItens = btnAddItem.closest('.optional-items-table');
+            
             const novaLinha = document.createElement('div');
             novaLinha.className = 'opt-item-row';
             novaLinha.innerHTML = `
@@ -166,39 +236,49 @@ function inicializarConstrutorOpcionais() {
                 <input type="number" step="0.01" placeholder="0.00">
                 <button type="button" class="btn-text-delete"><i class="fas fa-times"></i></button>
             `;
+            
             tabelaItens.insertBefore(novaLinha, btnAddItem);
         }
 
+        // Remover linha de item extra
         const btnDelete = e.target.closest('.btn-text-delete');
         if (btnDelete) {
             e.preventDefault();
             btnDelete.closest('.opt-item-row').remove();
         }
 
+        // Criar um novo bloco completo de grupo de opcionais
         const btnNewGroup = e.target.closest('.btn-secondary');
         if (btnNewGroup && !btnNewGroup.classList.contains('btn-secondary-sm')) {
             e.preventDefault();
+            
             const novoGrupo = document.createElement('div');
             novoGrupo.className = 'optional-group-card';
             novoGrupo.innerHTML = `
                 <div class="opt-group-header">
-                    <input type="text" class="input-inline" placeholder="Nome do Grupo">
-                    <div class="opt-rules"><label>Min:</label> <input type="number" value="0"><label>Max:</label> <input type="number" value="1"></div>
+                    <input type="text" class="input-inline" placeholder="Nome do Grupo (Ex: Escolha o Ponto)">
+                    <div class="opt-rules">
+                        <label>Min:</label> <input type="number" value="0">
+                        <label>Max:</label> <input type="number" value="1">
+                    </div>
                 </div>
                 <div class="optional-items-table">
                     <div class="opt-item-row">
-                        <input type="text" placeholder="Opção 1"><input type="number" step="0.01" placeholder="0.00"><button type="button" class="btn-text-delete"><i class="fas fa-times"></i></button>
+                        <input type="text" placeholder="Opção 1">
+                        <input type="number" step="0.01" placeholder="0.00">
+                        <button type="button" class="btn-text-delete"><i class="fas fa-times"></i></button>
                     </div>
                     <button type="button" class="btn-secondary-sm"><i class="fas fa-plus"></i> Adicionar Item Extra</button>
                 </div>
             `;
+            
             builderContainer.insertBefore(novoGrupo, btnNewGroup);
         }
     });
 }
 
 /* ==========================================================================
-   5. SALVAMENTO DO PRODUTO EM MEMÓRIA
+   5. CAPTURA E PROCESSAMENTO DO PRODUTO PARA SALVAMENTO
    ========================================================================== */
 function inicializarEnvioFormulario() {
     const formulario = document.querySelector('.cardapio-form-grid');
@@ -207,20 +287,32 @@ function inicializarEnvioFormulario() {
     formulario.addEventListener('submit', (e) => {
         e.preventDefault();
 
-        const nome = document.getElementById('prod-nome').value;
-        const preco = parseFloat(document.getElementById('prod-preco').value).toFixed(2);
-        const categoria = document.getElementById('prod-categoria').value;
+        // Como o formulário possui dois blocos de inputs, pegamos os elementos por seletores explícitos
+        const inputNome = formulario.querySelector('input[placeholder*="Realce"]');
+        const inputPreco = formulario.querySelector('input[type="number"]');
+        const selectCategoria = document.getElementById('prod-categoria');
 
-        // Captura os ingredientes direto dos CHIPS dinâmicos que o usuário criou
+        if (!inputNome || !inputPreco || !selectCategoria) return;
+
+        const nome = inputNome.value.trim();
+        const preco = parseFloat(inputPreco.value || 0).toFixed(2);
+        const categoria = selectCategoria.value;
+
+        // Validação estrita de categoria ativa
+        if (!categoria || categoria === "" || categoria === "Nenhuma categoria cadastrada") {
+            alert("Atenção: É necessário criar e selecionar uma categoria válida para o produto.");
+            return;
+        }
+
+        // Lê a lista de chips dinâmicos criados pelo gestor
         const chips = document.querySelectorAll('.ingredient-chip');
         const listaIngredientes = [];
         chips.forEach(chip => {
-            // Remove o texto do ícone "X" para pegar apenas o nome do ingrediente
             const textoLimpo = chip.textContent.replace('X', '').trim();
             listaIngredientes.push(textoLimpo);
         });
 
-        // Captura os grupos de opcionais
+        // Lê a árvore relacional de opcionais
         const gruposOpcionais = [];
         const cartoesGrupo = formulario.querySelectorAll('.optional-group-card');
 
@@ -252,53 +344,47 @@ function inicializarEnvioFormulario() {
             }
         });
 
-        // Monta o objeto completo do produto
+        // Consolida o objeto do produto com ID exclusivo
         const novoProduto = {
-            id: Date.now(), // Gera um ID único temporário
+            id: Date.now(),
             nome,
             preco,
             categoria,
-            ingredientes: listaIngredientes.join(', '), // Junta em texto para o preview
+            ingredientes: listaIngredientes.join(', '),
             opcionais: gruposOpcionais
         };
 
-        // Salva na nossa lista global
-        produtosSalvos.push(novoProduto);
-        
-        alert(`Sucesso! "${nome}" foi cadastrado na categoria "${categoria}".`);
+        produtosSalvos.push(novoProduct);
+        alert(`Sucesso! "${nome}" adicionado com êxito à categoria "${categoria}".`);
 
-        // Reseta o formulário e limpa os chips visuais de ingredientes
+        // Reseta os campos e limpa a área de chips de ingredientes
         formulario.reset();
         document.getElementById('container-ingredientes-chips').innerHTML = "";
     });
 }
 
 /* ==========================================================================
-   6. ATUALIZAÇÃO DA ABA DE PREVIEW EM TEMPO REAL (SUA NOVA PÁGINA)
+   6. RENDERIZAÇÃO AUTOMÁTICA DA VITRINE SIMULADA DO CLIENTE (PREVIEW REAL)
    ========================================================================== */
 function renderizarPreviewCardapioReal() {
     const containerVitrine = document.querySelector('.mock-client-menu-view');
     if (!containerVitrine) return;
 
-    // Limpa a simulação antiga
     containerVitrine.innerHTML = "";
 
     if (produtosSalvos.length === 0) {
-        containerVitrine.innerHTML = `<p style="text-align: center; color: #9ca3af; padding: 20px;">Nenhum produto cadastrado ainda. Cadastre itens para vê-los aqui!</p>`;
+        containerVitrine.innerHTML = `<p style="text-align: center; color: #9ca3af; padding: 40px 20px; font-style: italic;">Nenhum produto cadastrado na sua conta. Cadastre itens para simular o seu cardápio live!</p>`;
         return;
     }
 
-    // Organiza a exibição separando os produtos por categoria igual ao iFood
-    categoriasSalvas.forEach(categoria => {
-        // Filtra os produtos salvos que pertencem a essa categoria específica
+    // Organiza a montagem descendo categoria por categoria de forma ordenada
+    categoriesSalvas.forEach(categoria => {
         const produtosDaCategoria = produtosSalvos.filter(p => p.categoria === categoria);
 
-        // Se houver produtos nessa categoria, renderiza o bloco na tela do simulador
         if (produtosDaCategoria.length > 0) {
             const blocoCategoria = document.createElement('div');
             blocoCategoria.className = 'mock-category-block';
             blocoCategoria.style.marginBottom = '24px';
-
             blocoCategoria.innerHTML = `<h4 class="mock-cat-title">${categoria}</h4>`;
 
             const listaCards = document.createElement('div');
@@ -314,7 +400,7 @@ function renderizarPreviewCardapioReal() {
                         <span class="mock-price">R$ ${produto.preco}</span>
                     </div>
                     <div class="mock-card-img">
-                        <i class="fas ${categoria.toLowerCase() === 'bebidas' ? 'fa-glass-cheers' : 'fa-hamburger'}"></i>
+                        <i class="fas ${categoria.toLowerCase().includes('bebida') ? 'fa-glass-cheers' : 'fa-hamburger'}"></i>
                     </div>
                 `;
                 listaCards.appendChild(card);

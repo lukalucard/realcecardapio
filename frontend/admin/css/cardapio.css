@@ -216,7 +216,6 @@ body {
     flex: 1;
 }
 
-/* SEU BOTÃO CONFIRMAR LARANJA */
 .btn-confirmar {
     background: #FF6B00;
     color: white;
@@ -233,51 +232,44 @@ body {
     background: #e05e00;
 }
 
-/* ESPAÇAMENTO DAS SUGESTÕES */
-.category-suggestions {
-    margin-top: 12px;
-    margin-bottom: 24px;
+/* ALINHAMENTO DO SEU DROPDOWN COM AS AÇÕES */
+.category-select-block {
     display: flex;
-    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+    width: 100%;
+    margin-top: 6px;
+}
+
+.category-select-block select {
+    flex: 1;
+}
+
+.cat-actions {
+    display: flex;
     gap: 8px;
 }
 
-.suggestion-label {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    font-weight: 600;
-    color: #6b7280;
-    letter-spacing: 0.5px;
-}
-
-.suggestions-holder {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.badge-suggestion {
-    background-color: #f1f5f9;
-    color: #4b5563;
+.btn-icon {
+    background-color: white;
     border: 1px solid #e2e8f0;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 500;
+    padding: 10px 14px;
+    border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s;
 }
 
-.badge-suggestion:hover {
-    background-color: rgba(107, 63, 160, 0.1);
-    color: #6B3FA0;
-    border-color: #6B3FA0;
+.btn-icon.edit {
+    color: #3182ce;
 }
 
-.category-lits-item {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+.btn-icon.delete {
+    color: #e53e3e;
+}
+
+.btn-icon:hover {
+    background-color: #f1f5f9;
+    transform: scale(1.02);
 }
 
 /* ==========================================================================

@@ -56,7 +56,7 @@
                     
                     <div class="category-create-row">
                         <div class="filter-group-inline">
-                            <label>Criar categorias</label>
+                            <label id="label-acao-categoria">Criar categorias</label>
                             <div class="input-btn-group">
                                 <input type="text" id="input-nova-categoria" placeholder="Ex: Burger, Pizza, Açai, Bebidas...">
                                 <button type="button" class="btn-confirmar" id="btn-add-categoria">Confirmar</button> 
@@ -78,10 +78,14 @@
                     <div class="categories-list-preview" id="lista-categorias-container">
                         <div class="category-lits-item">
                             <label>Lista de Categorias</label>
-                            <select id="prod-categoria">
-                                <option>Burgers</option>
-                                <option>Bebidas</option>
-                            </select>
+                            <div class="category-select-block">
+                                <select id="prod-categoria">
+                                    </select>
+                                <div class="cat-actions">
+                                    <button type="button" class="btn-icon edit" id="btn-edit-categoria" title="Editar categoria selecionada"><i class="fas fa-edit"></i></button>
+                                    <button type="button" class="btn-icon delete" id="btn-delete-categoria" title="Deletar categoria selecionada"><i class="fas fa-trash-alt"></i></button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
