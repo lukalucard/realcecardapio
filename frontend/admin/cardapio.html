@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel RealceCardápio - Gestão do Cardápio</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="css/cardapio.css">
+</head>
+<body>
+
+    <div class="cardapio-container">
+        
+        <aside class="sidebar">
+            <div class="logo-area">
+                <h2>Realce<span>Cardápio</span></h2>
+            </div>
+            <nav class="menu-nav">
+                <ul>
+                    <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> <span>Início</span></a></li>
+                    <li><a href="pedidos.html"><i class="fas fa-motorcycle"></i> <span>Pedidos</span></a></li>
+                    <li><a href="whatsapp.html"><i class="fab fa-whatsapp"></i> <span>WhatsApp</span></a></li>
+                    <li><a href="cardapio.html" class="active"><i class="fas fa-utensils"></i> <span>Cardápio</span></a></li>
+                    <li><a href="clientes.html"><i class="fas fa-users"></i> <span>Clientes</span></a></li>
+                    <li><a href="estoque.html"><i class="fas fa-boxes"></i> <span>Estoque</span></a></li>
+                    <li><a href="financeiro.html"><i class="fas fa-dollar-sign"></i> <span>Financeiro</span></a></li>
+                    <li><a href="configuracoes.html"><i class="fas fa-sliders-h"></i> <span>Configurações</span></a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="cardapio-main-content">
+            
+            <header class="cardapio-header">
+                <div class="header-title">
+                    <h1>Configurações do Cardápio</h1>
+                    <p>Gerencie categorias, subcategorias, produtos e adicionais do seu restaurante.</p>
+                </div>
+            </header>
+
+            <div class="panel-tabs">
+                <button class="tab-btn active" id="tab-menu">Cadastrar Produtos</button>
+                <button class="tab-btn" id="tab-preview">Visualizar Cardápio</button>
+                <button class="tab-btn" id="tab-design">Personalizar Layout</button>
+            </div>
+
+            <section class="tab-content-section" id="content-menu">      
+                <div class="cardapio-card-box">
+                    <div class="box-header">
+                        <h3><i class="fas fa-folder"></i> Categorias</h3>
+                    </div>
+                    
+                    <div class="category-create-row">
+                        <div class="filter-group-inline">
+                            <label>Criar categorias</label>
+                            <div class="input-btn-group">
+                                <input type="text" id="input-nova-categoria" placeholder="Ex: Burger, Pizza, Açai, Bebidas...">
+                                <button type="button" class="btn-confirmar" id="btn-add-categoria">Confirmar</button> 
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="category-suggestions">
+                        <span class="suggestion-label">Sugestões de cadastro:</span>
+                        <div class="suggestions-holder">
+                            <button type="button" class="badge-suggestion">Burgers</button>
+                            <button type="button" class="badge-suggestion">Pizzas</button>
+                            <button type="button" class="badge-suggestion">Açaí</button>
+                            <button type="button" class="badge-suggestion">Bebidas</button>
+                            <button type="button" class="badge-suggestion">Sobremesas</button>
+                        </div>
+                    </div>
+                    
+                    <div class="categories-list-preview" id="lista-categorias-container">
+                        <div class="category-lits-item">
+                            <label>Lista de Categorias</label>
+                            <select id="prod-categoria">
+                                <option>Burgers</option>
+                                <option>Bebidas</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cardapio-card-box">
+                    <div class="box-header">
+                        <h3><i class="fas fa-hamburger"></i> Cadastro de Produto</h3>
+                    </div>
+                    
+                    <form class="cardapio-form-grid">
+                        <div class="form-input-group">
+                            <label>Nome do Produto</label>
+                            <input type="text" id="prod-nome" placeholder="Ex: Realce Burger Triplo" required>
+                        </div>
+                        
+                        <div class="form-input-group-row">
+                            <div class="filter-group">
+                                <label>Preço Base (R$)</label>
+                                <input type="number" id="prod-preco" step="0.01" placeholder="0,00" required>
+                            </div>
+                            <div class="filter-group">
+                                <label>Categoria Pertencente</label>
+                                <select id="prod-categoria">
+                                    <option>Burgers</option>
+                                    <option>Bebidas</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-input-group">
+                            <label>Ingredientes Base (O que já vem nele fixo)</label>
+                            <div class="ingredients-action-line">
+                                <input type="text" id="input-ingrediente" placeholder="Adicione um ingrediente ...">
+                                <button type="button" class="btn-ingrediente" id="btn-add-ingrediente">+ ingredientes</button>
+                            </div>
+                            <div class="ingredients-holder-chips" id="container-ingredientes-chips"></div>
+                        </div>
+
+                        <div class="product-optionals-builder">
+                            <h4>Grupos de Opcionais / Adicionais</h4>
+                            <p class="help-text">Defina regras de escolha para o cliente (Ex: Ponto da carne, Adicionais pagos).</p>
+                            
+                            <div class="optional-group-card">
+                                <div class="opt-group-header">
+                                    <input type="text" class="input-inline" value="Adicionais Extra">
+                                    <div class="opt-rules">
+                                        <label>Min:</label> <input type="number" value="0">
+                                        <label>Max:</label> <input type="number" value="5">
+                                    </div>
+                                </div>
+                                
+                                <div class="optional-items-table">
+                                    <div class="opt-item-row">
+                                        <input type="text" value="Bacon Crocante">
+                                        <input type="number" step="0.01" value="4.50">
+                                        <button type="button" class="btn-text-delete"><i class="fas fa-times"></i></button>
+                                    </div>
+                                    <button type="button" class="btn-secondary-sm"><i class="fas fa-plus"></i> Adicionar Item Extra</button>
+                                </div>
+                            </div>
+
+                            <button type="button" class="btn-secondary"><i class="fas fa-layer-group"></i> Criar Novo Grupo de Opcionais</button>
+                        </div>
+
+                        <button type="submit" class="btn-save-product">Salvar Produto no Cardápio</button>
+                    </form>
+                </div>
+            </section>
+
+            <section class="tab-content-section hidden" id="content-preview">
+                <div class="cardapio-card-box">
+                    <div class="box-header">
+                        <h3><i class="fas fa-eye"></i> Visualização do Seu Cardápio Live</h3>
+                        <span class="badge-live">Modo de Visualização</span>
+                    </div>
+                    
+                    <div class="mock-client-menu-view">
+                        <div class="mock-category-block">
+                            <h4 class="mock-cat-title">Burgers</h4>
+                            <div class="mock-products-list" id="preview-produtos-cards">
+                                <div class="mock-product-card">
+                                    <div class="mock-card-details">
+                                        <h5>Realce Burger Triplo</h5>
+                                        <p>Bacon Crocante, Queijo Cheddar, Alface e Tomate.</p>
+                                        <span class="mock-price">R$ 35,00</span>
+                                    </div>
+                                    <div class="mock-card-img">
+                                        <i class="fas fa-hamburger"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <section class="tab-content-section hidden" id="content-design">
+                <div class="cardapio-card-box">
+                    <div class="box-header">
+                        <h3><i class="fas fa-palette"></i> Cores e Estilo do Cardápio Online</h3>
+                    </div>
+                    <form class="cardapio-form-grid">
+                        <div class="form-input-group-row">
+                            <div class="filter-group">
+                                <label>Cor Principal (Botões e Destaques)</label>
+                                <input type="color" value="#ff4757">
+                            </div>
+                            <div class="filter-group">
+                                <label>Cor de Fundo da Página</label>
+                                <input type="color" value="#f1f2f6">
+                            </div>
+                        </div>
+
+                        <div class="form-input-group">
+                            <label>Modelo de Visualização dos Cards</label>
+                            <div class="layout-selector-options">
+                                <label class="layout-radio">
+                                    <input type="radio" name="layout-style" checked>
+                                    <span><i class="fas fa-stream"></i> Lista Simples (Padrão Atual)</span>
+                                </label>
+                                <label class="layout-radio">
+                                    <input type="radio" name="layout-style">
+                                    <span><i class="fas fa-th-large"></i> Grade Dupla (Dois por linha)</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn-save-product">Aplicar Configurações Visuais</button>
+                    </form>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script src="js/cardapio.js"></script>
+</body>
+</html> 

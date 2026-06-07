@@ -1,0 +1,745 @@
+/* ==========================================================================
+   ESTILOS GERAIS E RESET
+   ========================================================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f4f5f7;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.cardapio-container {
+    display: flex;
+    height: 100%;
+}
+
+/* ==========================================================================
+   SIDEBAR ROXA GRADIENTE (SUA IDENTIDADE VISUAL)
+   ========================================================================== */
+.sidebar {
+    width: 260px;
+    background: linear-gradient(180deg, #4A2A6E 0%, #6B3FA0 100%);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+}
+
+.logo-area {
+    font-family: "Dancing Script", cursive;
+    padding: 24px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    margin-bottom: 20px;
+}
+
+.logo-area h2 {
+    font-size: 2rem;
+}
+
+.logo-area span {
+    font-weight: 400;
+    color: #FF9F4A;
+}
+
+.menu-nav ul {
+    list-style: none;
+}
+
+.menu-nav li {
+    margin: 4px 12px;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.menu-nav li a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    color: #f0eef5;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.menu-nav li a i {
+    width: 22px;
+    font-size: 1.1rem;
+    text-align: center;
+}
+
+.menu-nav li a.active {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-left: 4px solid #FF9F4A;
+    color: white;
+}
+
+.menu-nav li:hover:not(:has(a.active)) {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* ==========================================================================
+   ESTRUTURA DO CONTEÚDO PRINCIPAL
+   ========================================================================== */
+.cardapio-main-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 32px;
+}
+
+.cardapio-header {
+    background: white;
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-bottom: 28px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.cardapio-header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.cardapio-header p {
+    color: #6b7280;
+    font-size: 0.9rem;
+    margin-top: 4px;
+}
+
+/* ==========================================================================
+   NAVEGAÇÃO POR ABAS (PANEL TABS)
+   ========================================================================== */
+.panel-tabs {
+    display: flex;
+    gap: 20px;
+    border-bottom: 2px solid #e2e8f0;
+    margin-bottom: 24px;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: 12px 4px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #6b7280;
+    cursor: pointer;
+    position: relative;
+}
+
+.tab-btn.active {
+    color: #FF6B00;
+}
+
+.tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: #FF6B00;
+    border-radius: 50px;
+}
+
+/* ==========================================================================
+   ESTILIZAÇÃO DOS CARDS (CARDAPIO-CARD-BOX)
+   ========================================================================== */
+.cardapio-card-box {
+    background: white;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    margin-bottom: 24px;
+}
+
+.box-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.box-header h3,
+.box-header-category h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.box-header h3 i,
+.box-header-category h3 i {
+    color: #6B3FA0;
+    margin-right: 8px;
+}
+
+/* ESTRUTURA DA SEÇÃO DE CATEGORIAS */
+.category-create-row {
+    margin-bottom: 16px;
+    width: 100%;
+}
+
+.filter-group-inline {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.filter-group-inline label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: #6b7280;
+    letter-spacing: 0.5px;
+}
+
+.input-btn-group {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+}
+
+.input-btn-group input {
+    flex: 1;
+}
+
+/* SEU BOTÃO CONFIRMAR LARANJA */
+.btn-confirmar {
+    background: #FF6B00;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+}
+
+.btn-confirmar:hover {
+    background: #e05e00;
+}
+
+/* ESPAÇAMENTO DAS SUGESTÕES */
+.category-suggestions {
+    margin-top: 12px;
+    margin-bottom: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.suggestion-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: #6b7280;
+    letter-spacing: 0.5px;
+}
+
+.suggestions-holder {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.badge-suggestion {
+    background-color: #f1f5f9;
+    color: #4b5563;
+    border: 1px solid #e2e8f0;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.badge-suggestion:hover {
+    background-color: rgba(107, 63, 160, 0.1);
+    color: #6B3FA0;
+    border-color: #6B3FA0;
+}
+
+.category-lits-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* ==========================================================================
+   BOTÕES DO PAINEL
+   ========================================================================== */
+.btn-primary-sm {
+    background: #FF6B00;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-save-product {
+    background: #FF6B00;
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 1rem;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.btn-primary-sm:hover,
+.btn-save-product:hover {
+    background: #e05e00;
+}
+
+/* ==========================================================================
+   FORMULÁRIOS E INPUTS
+   ========================================================================== */
+.cardapio-form-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-input-group-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.form-input-group label,
+.filter-group label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: #6b7280;
+    letter-spacing: 0.5px;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+    padding: 10px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background: white;
+    outline: none;
+    color: #1e293b;
+    width: 100%;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: #6B3FA0;
+    box-shadow: 0 0 0 2px rgba(107, 63, 160, 0.1);
+}
+
+/* ==========================================================================
+   SEÇÃO DE INGREDIENTES DINÂMICOS (SUA SOLUÇÃO)
+   ========================================================================== */
+.ingredients-action-line {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.btn-ingrediente {
+    background-color: #6B3FA0;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background 0.2s;
+}
+
+.btn-ingrediente:hover {
+    background-color: #4a2a6e;
+}
+
+.ingredients-holder-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.ingredient-chip {
+    background-color: #f1f5f9;
+    color: #334155;
+    padding: 6px 12px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #e2e8f0;
+}
+
+.ingredient-chip i {
+    color: #ef4444;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+/* ==========================================================================
+   CONSTRUTOR DE OPCIONAIS / COMPLEMENTOS
+   ========================================================================== */
+.product-optionals-builder {
+    background-color: #f9fafb;
+    border: 1px dashed #d1d5db;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.product-optionals-builder h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.help-text {
+    font-size: 0.8rem;
+    color: #9ca3af;
+    margin-bottom: 15px;
+}
+
+.optional-group-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 15px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.opt-group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+}
+
+.input-inline {
+    font-weight: 700 !important;
+    border: none !important;
+    background: transparent !important;
+    font-size: 1rem !important;
+    width: auto !important;
+    border-bottom: 2px solid transparent !important;
+    border-radius: 0 !important;
+    padding: 4px 0 !important;
+}
+
+.input-inline:focus {
+    border-bottom-color: #FF6B00 !important;
+    box-shadow: none !important;
+}
+
+.opt-rules {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #4b5563;
+}
+
+.opt-rules input {
+    width: 50px;
+    padding: 4px;
+    text-align: center;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+}
+
+.optional-items-table {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.opt-item-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.opt-item-row input[type="text"] {
+    flex: 2;
+}
+
+.opt-item-row input[type="number"] {
+    flex: 1;
+}
+
+.btn-secondary-sm {
+    background-color: #f1f5f9;
+    color: #1e293b;
+    border: 1px solid #e2e8f0;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    align-self: flex-start;
+}
+
+.btn-secondary {
+    background-color: white;
+    color: #2d3748;
+    border: 1px solid #e2e8f0;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+}
+
+.btn-text-delete {
+    background: none;
+    border: none;
+    color: #e53e3e;
+    cursor: pointer;
+    font-size: 1.1rem;
+}
+
+/* ==========================================================================
+   PREVISÃO DE LISTAGEM DE CATEGORIAS
+   ========================================================================== */
+.category-row-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    margin-bottom: 8px;
+}
+
+.sub-indicator {
+    display: block;
+    font-size: 0.8rem;
+    color: #9ca3af;
+    margin-top: 2px;
+}
+
+.cat-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-icon {
+    background-color: white;
+    border: 1px solid #e2e8f0;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #4b5563;
+}
+
+.btn-icon.edit {
+    color: #3182ce;
+}
+
+.btn-icon.delete {
+    color: #e53e3e;
+}
+
+/* ==========================================================================
+   SELETORES DE DESIGN DO MODELO DO CARD
+   ========================================================================== */
+.layout-selector-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 6px;
+}
+
+.layout-radio {
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    background-color: white;
+    font-weight: 600;
+}
+
+.layout-radio input {
+    accent-color: #FF6B00;
+}
+
+.layout-radio:has(input:checked) {
+    border-color: #FF6B00;
+    background-color: rgba(255, 107, 0, 0.02);
+}
+
+/* ==========================================================================
+   SUA NOVA SEÇÃO: VITRINE SIMULADA DO CLIENTE (MOCK UP PÁGINA LIVE)
+   ========================================================================== */
+.badge-live {
+    background-color: #2ed573;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 50px;
+}
+
+.mock-client-menu-view {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 20px;
+    max-width: 480px;
+    margin: 0 auto;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.mock-cat-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 12px;
+    border-left: 4px solid #FF6B00;
+    padding-left: 8px;
+}
+
+.mock-products-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.mock-product-card {
+    background: white;
+    border-radius: 12px;
+    padding: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.mock-card-details h5 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.mock-card-details p {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin: 4px 0 6px 0;
+    max-width: 260px;
+}
+
+.mock-price {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #2ed573;
+}
+
+.mock-card-img {
+    width: 65px;
+    height: 65px;
+    background-color: #f1f5f9;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6B3FA0;
+    font-size: 1.6rem;
+}
+
+/* ==========================================================================
+   MEDIA QUERIES E RESPONSIVIDADE COMPACTA
+   ========================================================================== */
+@media (max-width: 900px) {
+    .sidebar {
+        width: 80px;
+    }
+    
+    .sidebar .logo-area h2 {
+        font-size: 0;
+        padding: 24px 0;
+    }
+    
+    .logo-area h2 span {
+        font-size: 0.9rem;
+        display: block;
+        text-align: center;
+    }
+    
+    .menu-nav li a span {
+        display: none;
+    }
+    
+    .menu-nav li a i {
+        font-size: 1.3rem;
+        margin: 0 auto;
+    }
+    
+    .menu-nav li a {
+        justify-content: center;
+    }
+    
+    .cardapio-main-content {
+        padding: 16px;
+    }
+    
+    .form-input-group-row,
+    .layout-selector-options {
+        grid-template-columns: 1fr;
+    }
+}
+
+.hidden {
+    display: none !important;
+}
