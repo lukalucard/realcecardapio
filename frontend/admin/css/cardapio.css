@@ -1,6 +1,3 @@
-/* ==========================================================================
-   ESTILOS GERAIS E RESET (ALINHADO COM SEU DASHBOARD)
-   ========================================================================== */
 * {
     margin: 0;
     padding: 0;
@@ -19,9 +16,7 @@ body {
     height: 100%;
 }
 
-/* ==========================================================================
-   SIDEBAR ROXA GRADIENTE OFICIAL
-   ========================================================================== */
+/* SIDEBAR ROXA GRADIENTE */
 .sidebar {
     width: 260px;
     background: linear-gradient(180deg, #4A2A6E 0%, #6B3FA0 100%);
@@ -88,9 +83,7 @@ body {
     background-color: rgba(255, 255, 255, 0.1);
 }
 
-/* ==========================================================================
-   ESTRUTURA DO CONTEÚDO PRINCIPAL
-   ========================================================================== */
+/* CONTEÚDO PRINCIPAL */
 .cardapio-main-content {
     flex: 1;
     overflow-y: auto;
@@ -117,9 +110,7 @@ body {
     margin-top: 4px;
 }
 
-/* ==========================================================================
-   NAVEGAÇÃO POR ABAS (PANEL TABS)
-   ========================================================================== */
+/* ABAS */
 .panel-tabs {
     display: flex;
     gap: 20px;
@@ -153,9 +144,6 @@ body {
     border-radius: 50px;
 }
 
-/* ==========================================================================
-   ESTILIZAÇÃO DOS CARDS (CARDAPIO-CARD-BOX)
-   ========================================================================== */
 .cardapio-card-box {
     background: white;
     border-radius: 20px;
@@ -173,20 +161,7 @@ body {
     border-bottom: 1px solid #f1f5f9;
 }
 
-.box-header h3 {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #2d3748;
-}
-
-.box-header h3 i {
-    color: #6B3FA0;
-    margin-right: 8px;
-}
-
-/* ==========================================================================
-   FORMULÁRIOS, INPUTS E SELETORES CORRIGIDOS
-   ========================================================================== */
+/* FORMULÁRIOS E INPUTS UNIVERSAIS */
 .cardapio-form-grid {
     display: flex;
     flex-direction: column;
@@ -210,12 +185,7 @@ body {
     width: 100%;
 }
 
-.filter-group-inline {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
+.filter-group-inline,
 .filter-group {
     display: flex;
     flex-direction: column;
@@ -225,8 +195,7 @@ body {
 .form-input-group label,
 .filter-group label,
 .filter-group-inline label,
-.suggestion-label,
-.label-master {
+.suggestion-label {
     font-size: 0.75rem;
     text-transform: uppercase;
     font-weight: 600;
@@ -240,13 +209,10 @@ body {
     width: 100%;
 }
 
-/* Estilização universal para garantir que nenhum input fique sem estilo */
 input[type="text"],
 input[type="number"],
 select,
-textarea,
-.input-btn-group input,
-.ingredients-action-line input {
+textarea {
     padding: 10px 12px;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
@@ -264,9 +230,6 @@ textarea:focus {
     box-shadow: 0 0 0 2px rgba(107, 63, 160, 0.1);
 }
 
-/* ==========================================================================
-   BOTÕES DO SISTEMA
-   ========================================================================== */
 .btn-confirmar,
 .btn-primary-sm {
     background: #FF6B00;
@@ -299,9 +262,6 @@ textarea:focus {
     background: #e05e00;
 }
 
-/* ==========================================================================
-   SUGESTÕES DE CATEGORIA
-   ========================================================================== */
 .category-suggestions {
     margin-top: 12px;
     margin-bottom: 24px;
@@ -334,41 +294,35 @@ textarea:focus {
     border-color: #6B3FA0;
 }
 
-/* ==========================================================================
-   LISTA DE CATEGORIAS ATIVAS COM EDITAR/DELETAR POR ITEM
-   ========================================================================== */
+/* TRAVA DE ALINHAMENTO EM LINHA DO SELECT E BOTÕES */
 .categories-list-preview {
     margin-top: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+    width: 100%;
 }
 
 .category-lits-item {
     display: flex;
+    flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 16px;
-    background-color: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
+    gap: 12px;
     width: 100%;
 }
 
-.category-lits-item strong {
-    font-size: 0.95rem;
-    color: #1e293b;
+.category-lits-item select {
+    flex: 1;
 }
 
 .cat-actions {
     display: flex;
     gap: 8px;
+    flex-shrink: 0;
 }
 
 .btn-icon {
     background-color: white;
     border: 1px solid #e2e8f0;
-    padding: 8px 12px;
+    padding: 10px 14px;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s;
@@ -384,12 +338,10 @@ textarea:focus {
 
 .btn-icon:hover {
     background-color: #f1f5f9;
-    transform: scale(1.05);
+    transform: scale(1.02);
 }
 
-/* ==========================================================================
-   CHIPS DE INGREDIENTES DINÂMICOS
-   ========================================================================== */
+/* INGREDIENTES CHIPS */
 .ingredients-action-line {
     display: flex;
     gap: 10px;
@@ -405,11 +357,6 @@ textarea:focus {
     font-weight: 600;
     cursor: pointer;
     font-size: 0.85rem;
-    transition: background 0.2s;
-}
-
-.btn-ingrediente:hover {
-    background-color: #4a2a6e;
 }
 
 .ingredients-holder-chips {
@@ -434,29 +381,14 @@ textarea:focus {
 .ingredient-chip i {
     color: #ef4444;
     cursor: pointer;
-    font-size: 0.8rem;
 }
 
-/* ==========================================================================
-   CONSTRUTOR DE OPCIONAIS
-   ========================================================================== */
+/* OPCIONAIS BUILDER */
 .product-optionals-builder {
     background-color: #f9fafb;
     border: 1px dashed #d1d5db;
     border-radius: 12px;
     padding: 20px;
-}
-
-.product-optionals-builder h4 {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #2d3748;
-}
-
-.help-text {
-    font-size: 0.8rem;
-    color: #9ca3af;
-    margin-bottom: 15px;
 }
 
 .optional-group-card {
@@ -465,7 +397,6 @@ textarea:focus {
     border-radius: 12px;
     padding: 16px;
     margin-bottom: 15px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .opt-group-header {
@@ -482,15 +413,6 @@ textarea:focus {
     border: none !important;
     background: transparent !important;
     font-size: 1rem !important;
-    width: auto !important;
-    border-bottom: 2px solid transparent !important;
-    border-radius: 0 !important;
-    padding: 4px 0 !important;
-}
-
-.input-inline:focus {
-    border-bottom-color: #FF6B00 !important;
-    box-shadow: none !important;
 }
 
 .opt-rules {
@@ -498,8 +420,6 @@ textarea:focus {
     align-items: center;
     gap: 6px;
     font-size: 0.85rem;
-    font-weight: 600;
-    color: #4b5563;
 }
 
 .opt-rules input {
@@ -536,10 +456,6 @@ textarea:focus {
     border: 1px solid #e2e8f0;
     padding: 6px 12px;
     border-radius: 6px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    cursor: pointer;
-    align-self: flex-start;
 }
 
 .btn-secondary {
@@ -548,9 +464,6 @@ textarea:focus {
     border: 1px solid #e2e8f0;
     padding: 12px 20px;
     border-radius: 8px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
     width: 100%;
 }
 
@@ -559,21 +472,9 @@ textarea:focus {
     border: none;
     color: #e53e3e;
     cursor: pointer;
-    font-size: 1.1rem;
 }
 
-/* ==========================================================================
-   VITRINE SIMULADA DO CLIENTE (MOCK UP PREVIEW)
-   ========================================================================== */
-.badge-live {
-    background-color: #2ed573;
-    color: white;
-    font-size: 0.75rem;
-    font-weight: 700;
-    padding: 4px 10px;
-    border-radius: 50px;
-}
-
+/* SIMULADOR PREVIEW */
 .mock-client-menu-view {
     background-color: #f8fafc;
     border: 1px solid #e2e8f0;
@@ -581,7 +482,6 @@ textarea:focus {
     padding: 20px;
     max-width: 480px;
     margin: 0 auto;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
 .mock-cat-title {
@@ -607,20 +507,6 @@ textarea:focus {
     justify-content: space-between;
     align-items: center;
     border: 1px solid #f1f5f9;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-}
-
-.mock-card-details h5 {
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: #1e293b;
-}
-
-.mock-card-details p {
-    font-size: 0.8rem;
-    color: #64748b;
-    margin: 4px 0 6px 0;
-    max-width: 260px;
 }
 
 .mock-price {
@@ -638,80 +524,6 @@ textarea:focus {
     align-items: center;
     justify-content: center;
     color: #6B3FA0;
-    font-size: 1.6rem;
-}
-
-/* ==========================================================================
-   SELETORES DE DESIGN
-   ========================================================================== */
-.layout-selector-options {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-top: 6px;
-}
-
-.layout-radio {
-    border: 2px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    cursor: pointer;
-    background-color: white;
-    font-weight: 600;
-}
-
-.layout-radio input {
-    accent-color: #FF6B00;
-}
-
-.layout-radio:has(input:checked) {
-    border-color: #FF6B00;
-    background-color: rgba(255, 107, 0, 0.02);
-}
-
-/* ==========================================================================
-   RESPONSIVIDADE E UTILITÁRIOS
-   ========================================================================== */
-@media (max-width: 900px) {
-    .sidebar {
-        width: 80px;
-    }
-    
-    .sidebar .logo-area h2 {
-        font-size: 0;
-        padding: 24px 0;
-    }
-    
-    .logo-area h2 span {
-        font-size: 0.9rem;
-        display: block;
-        text-align: center;
-    }
-    
-    .menu-nav li a span {
-        display: none;
-    }
-    
-    .menu-nav li a i {
-        font-size: 1.3rem;
-        margin: 0 auto;
-    }
-    
-    .menu-nav li a {
-        justify-content: center;
-    }
-    
-    .cardapio-main-content {
-        padding: 16px;
-    }
-    
-    .form-input-group-row,
-    .layout-selector-options {
-        grid-template-columns: 1fr;
-    }
 }
 
 .hidden {

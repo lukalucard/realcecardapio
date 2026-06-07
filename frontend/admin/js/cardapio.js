@@ -407,3 +407,30 @@ function renderizarPreviewCardapioReal() {
         }
     });
 }
+
+
+// Substitua apenas a função renderizarSelectCategorias por esta:
+function renderizarSelectCategorias() {
+    const selectCategoria = document.getElementById('prod-categoria');
+    const wrapperAtivas = document.getElementById('wrapper-categorias-ativas');
+    
+    if (!selectCategoria || !wrapperAtivas) return;
+
+    // Se a lista estiver vazia, esconde o bloco inteiro de "Categorias Ativas" da tela
+    if (categoriesSalvas.length === 0) {
+        wrapperAtivas.classList.add('hidden');
+        selectCategoria.innerHTML = "";
+        return;
+    }
+
+    // Se tiver no mínimo uma categoria, remove a classe hidden e exibe o bloco em linha
+    wrapperAtivas.classList.remove('hidden');
+    selectCategoria.innerHTML = "";
+
+    categoriesSalvas.forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat;
+        option.textContent = cat;
+        selectCategoria.appendChild(option);
+    });
+}
