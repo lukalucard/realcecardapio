@@ -1,3 +1,6 @@
+/* ==========================================================================
+   ESTILOS GERAIS E RESET
+   ========================================================================== */
 * {
     margin: 0;
     padding: 0;
@@ -161,6 +164,17 @@ body {
     border-bottom: 1px solid #f1f5f9;
 }
 
+.box-header h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.box-header h3 i {
+    color: #6B3FA0;
+    margin-right: 8px;
+}
+
 /* FORMULÁRIOS E INPUTS UNIVERSAIS */
 .cardapio-form-grid {
     display: flex;
@@ -294,7 +308,7 @@ textarea:focus {
     border-color: #6B3FA0;
 }
 
-/* TRAVA DE ALINHAMENTO EM LINHA DO SELECT E BOTÕES */
+/* TRAVA HORIZONTAL DO SELECT E BOTÕES DE AÇÃO */
 .categories-list-preview {
     margin-top: 8px;
     width: 100%;
@@ -524,6 +538,35 @@ textarea:focus {
     align-items: center;
     justify-content: center;
     color: #6B3FA0;
+}
+
+/* SELETORES DE DESIGN */
+.layout-selector-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 6px;
+}
+
+.layout-radio {
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    background-color: white;
+    font-weight: 600;
+}
+
+.layout-radio input {
+    accent-color: #FF6B00;
+}
+
+.layout-radio:has(input:checked) {
+    border-color: #FF6B00;
+    background-color: rgba(255, 107, 0, 0.02);
 }
 
 .hidden {

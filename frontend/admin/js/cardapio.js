@@ -1,5 +1,5 @@
 /* ==========================================================================
-   ESTADO GLOBAL DO SISTEMA (Simulando o Banco de Dados em Memória)
+   ESTADO GLOBAL DO SISTEMA (Banco de Dados em Memória)
    ========================================================================== */
 let categoriesSalvas = []; 
 let produtosSalvos = []; 
@@ -8,12 +8,12 @@ let categoriaEmEdicao = null;
 document.addEventListener('DOMContentLoaded', () => {
     inicializarAbasDoSistema();
     inicializarControleCategorias();
-    inicializarGerenciadorIngredientes();
+    inicializerGerenciadorIngredientes();
     inicializarConstrutorOpcionais();
     inicializarEnvioFormulario();
     
-    // Força o estado inicial vazio na tela
-    atualizarInterfaceCategorias();
+    // Força o estado inicial vazio escondendo o bloco das ativas
+    renderizarSelectCategorias();
 });
 
 /* ==========================================================================
@@ -55,17 +55,19 @@ function inicializarAbasDoSistema() {
 }
 
 /* ==========================================================================
-   2. GERENCIADOR DE CATEGORIAS (CADA ITEM GANHA SEU EDITAR E EXCLUIR)
+   2. GERENCIADOR DE CATEGORIAS (VINCULADO AO SELECT EM LINHA)
    ========================================================================== */
 function inicializarControleCategorias() {
     const holderSugestoes = document.querySelector('.suggestions-holder');
     const inputCategoria = document.getElementById('input-nova-categoria');
     const btnConfirmar = document.getElementById('btn-add-categoria');
-    const containerLista = document.getElementById('lista-categorias-container');
+    const selectCategoria = document.getElementById('prod-categoria');
+    const btnEditar = document.getElementById('btn-edit-categoria');
+    const btnDeletar = document.getElementById('btn-delete-categoria');
 
-    if (!holderSugestoes || !inputCategoria || !btnConfirmar || !containerLista) return;
+    if (!holderSugestoes || !inputCategoria || !btnConfirmar || !selectCategoria) return;
 
-    // Sugestões preenchem o input
+    // Sugestões capturam o texto perfeitamente no clique
     holderSugestoes.addEventListener('click', (e) => {
         const btnSugestao = e.target.closest('.badge-suggestion');
         if (btnSugestao) {
@@ -75,7 +77,7 @@ function inicializarControleCategorias() {
         }
     });
 
-    // Confirmar criação ou salvamento de edição
+    // Confirmar criação / Alteração de escrita
     btnConfirmar.addEventListener('click', (e) => {
         e.preventDefault();
         const nomeCategoria = inputCategoria.value.trim();
@@ -86,13 +88,13 @@ function inicializarControleCategorias() {
         }
 
         if (categoriaEmEdicao !== null) {
-            // Modo Edição: substitui o valor antigo pelo novo ajustado
+            // Modo Edição: Renomeia no array principal
             const index = categoriesSalvas.indexOf(categoriaEmEdicao);
             if (index !== -1) {
                 categoriesSalvas[index] = nomeCategoria;
             }
             
-            // Cascata: atualiza os produtos salvos que usavam a escrita antiga
+            // Cascata: Atualiza os produtos cadastrados com o nome antigo
             produtosSalvos.forEach(p => {
                 if (p.categoria === categoriaEmEdicao) p.categoria = nomeCategoria;
             });
@@ -101,7 +103,7 @@ function inicializarControleCategorias() {
             btnConfirmar.textContent = "Confirmar";
             document.getElementById('label-acao-categoria').textContent = "Criar categorias";
         } else {
-            // Modo Criação: adiciona se não for repetida
+            // Modo Criação: Adiciona nova categoria
             if (categoriesSalvas.includes(nomeCategoria)) {
                 alert("Esta categoria já existe!");
                 return;
@@ -110,77 +112,90 @@ function inicializarControleCategorias() {
         }
 
         inputCategoria.value = "";
-        atualizarInterfaceCategorias();
+        renderizarSelectCategorias();
     });
 
-    // Eventos individuais usando Delegação para capturar cliques nos botões de cada linha criada
-    containerLista.addEventListener('click', (e) => {
-        const btnEdit = e.target.closest('.edit');
-        const btnDelete = e.target.closest('.delete');
-
-        if (btnEdit) {
+    // Ação do Botão Configurar (Editar) ao lado do Select
+    if (btnEditar) {
+        btnEditar.addEventListener('click', (e) => {
             e.preventDefault();
-            const catNome = btnEdit.getAttribute('data-categoria');
-            inputCategoria.value = catNome;
-            categoriaEmEdicao = catNome;
+            const valorSelecionado = selectCategoria.value;
+
+            if (!valorSelecionado || valorSelecionado === "") {
+                alert("Selecione uma categoria válida no dropdown para configurar.");
+                return;
+            }
+
+            inputCategoria.value = valorSelecionado;
+            categoriaEmEdicao = valorSelecionado;
             btnConfirmar.textContent = "Salvar Alteração";
             document.getElementById('label-acao-categoria').textContent = "Editando categoria";
             inputCategoria.focus();
-        }
+        });
+    }
 
-        if (btnDelete) {
+    // Ação do Botão Deletar ao lado do Select
+    if (btnDeletar) {
+        btnDeletar.addEventListener('click', (e) => {
             e.preventDefault();
-            const catNome = btnDelete.getAttribute('data-categoria');
-            if (confirm(`Deseja realmente remover a categoria "${catNome}"? Os produtos dela perderão o vínculo.`)) {
-                categoriesSalvas = categoriesSalvas.filter(cat => cat !== catNome);
-                atualizarInterfaceCategorias();
+            const valorSelecionado = selectCategoria.value;
+
+            if (!valorSelecionado || valorSelecionado === "") {
+                alert("Selecione uma categoria válida para deletar.");
+                return;
             }
-        }
-    });
+
+            if (confirm(`Deseja realmente remover a categoria "${valorSelecionado}"?`)) {
+                categoriesSalvas = categoriesSalvas.filter(cat => cat !== valorSelecionado);
+                
+                // Se deletar o item que estava sendo editado, limpa o estado
+                if (categoriaEmEdicao === valorSelecionado) {
+                    categoriaEmEdicao = null;
+                    btnConfirmar.textContent = "Confirmar";
+                    document.getElementById('label-acao-categoria').textContent = "Criar categorias";
+                    inputCategoria.value = "";
+                }
+                
+                renderizarSelectCategorias();
+            }
+        });
+    }
 }
 
-// Injeta visualmente as linhas com botões próprios e sincroniza o select do produto
-function atualizarInterfaceCategorias() {
-    const containerLista = document.getElementById('lista-categorias-container');
-    const selectProd = document.getElementById('prod-categoria');
+// Controla a visibilidade e popula os dois seletores da tela simultaneamente
+function renderizarSelectCategorias() {
+    const selectCategoria = document.getElementById('prod-categoria');
+    const selectVinculo = document.getElementById('prod-select-vinculo');
+    const wrapperAtivas = document.getElementById('wrapper-categorias-ativas');
+    
+    if (!selectCategoria || !selectVinculo || !wrapperAtivas) return;
 
-    if (containerLista) {
-        containerLista.innerHTML = "";
-        
-        if (categoriesSalvas.length === 0) {
-            containerLista.innerHTML = `<p style="font-size: 0.85rem; color: #9ca3af; font-style: italic; padding: 10px 0;">Nenhuma categoria criada ainda.</p>`;
-        } else {
-            // Monta cada item criado com suas ações individuais de edição/exclusão
-            categoriesSalvas.forEach(cat => {
-                const item = document.createElement('div');
-                item.className = 'category-lits-item';
-                item.style.marginBottom = '8px';
-                item.innerHTML = `
-                    <strong>${cat}</strong>
-                    <div class="cat-actions">
-                        <button type="button" class="btn-icon edit" data-categoria="${cat}"><i class="fas fa-edit"></i></button>
-                        <button type="button" class="btn-icon delete" data-categoria="${cat}"><i class="fas fa-trash-alt"></i></button>
-                    </div>
-                `;
-                containerLista.appendChild(item);
-            });
-        }
+    // Se estiver vazio, esconde o bloco inteiro de "Categorias Ativas" da tela
+    if (categoriesSalvas.length === 0) {
+        wrapperAtivas.classList.add('hidden');
+        selectCategoria.innerHTML = "";
+        selectVinculo.innerHTML = `<option value="">Crie uma categoria primeiro</option>`;
+        return;
     }
 
-    // Sincroniza o dropdown interno do formulário de produtos lá embaixo
-    if (selectProd) {
-        selectProd.innerHTML = "";
-        if (categoriesSalvas.length === 0) {
-            selectProd.innerHTML = `<option value="">Crie uma categoria primeiro</option>`;
-        } else {
-            categoriesSalvas.forEach(cat => {
-                const option = document.createElement('option');
-                option.value = cat;
-                option.textContent = cat;
-                selectProd.appendChild(option);
-            });
-        }
-    }
+    // Exibe o bloco em linha perfeitamente
+    wrapperAtivas.classList.remove('hidden');
+    selectCategoria.innerHTML = "";
+    selectVinculo.innerHTML = "";
+
+    categoriesSalvas.forEach(cat => {
+        // Popula o select de gerência
+        const opt1 = document.createElement('option');
+        opt1.value = cat;
+        opt1.textContent = cat;
+        selectCategoria.appendChild(opt1);
+
+        // Popula o select de vínculo de produtos
+        const opt2 = document.createElement('option');
+        opt2.value = cat;
+        opt2.textContent = cat;
+        selectVinculo.appendChild(opt2);
+    });
 }
 
 /* ==========================================================================
@@ -281,7 +296,7 @@ function inicializarConstrutorOpcionais() {
 }
 
 /* ==========================================================================
-   5. ENVIO DO FORMULÁRIO (CORRIGIDO ERRO DE DIGITAÇÃO DO PRODUCT)
+   5. ENVIO DO FORMULÁRIO (CORRIGIDO ERROS DE DIGITAÇÃO)
    ========================================================================== */
 function inicializarEnvioFormulario() {
     const formulario = document.querySelector('.cardapio-form-grid');
@@ -292,7 +307,7 @@ function inicializarEnvioFormulario() {
 
         const inputNome = document.getElementById('prod-nome');
         const inputPreco = document.getElementById('prod-preco');
-        const selectCategoria = document.getElementById('prod-categoria');
+        const selectCategoria = document.getElementById('prod-select-vinculo');
 
         if (!inputNome || !inputPreco || !selectCategoria) return;
 
@@ -301,7 +316,7 @@ function inicializarEnvioFormulario() {
         const categoria = selectCategoria.value;
 
         if (!categoria || categoria === "") {
-            alert("Crie e selecione uma categoria válida para o produto.");
+            alert("Por favor, crie e selecione uma categoria válida para o produto.");
             return;
         }
 
@@ -323,7 +338,8 @@ function inicializarEnvioFormulario() {
             const linhasItens = cartao.querySelectorAll('.opt-item-row');
             
             linhasItens.forEach((linha) => {
-                const inputs = inline.querySelectorAll('input');
+                // CORREÇÃO DA SINTAXE: Alterado de inline para linha
+                const inputs = linha.querySelectorAll('input');
                 if (inputs[0] && inputs[0].value) {
                     itensDoGrupo.push({
                         nome_adicional: inputs[0].value,
@@ -351,9 +367,9 @@ function inicializarEnvioFormulario() {
             opcionais: gruposOpcionais
         };
 
-        // CORREÇÃO CRÍTICA AQUI: Alterado de novoProduct para novoProduto para destravar o script
+        // CORREÇÃO DO OBJETO: Alterado de novoProduct para novoProduto
         produtosSalvos.push(novoProduto);
-        alert(`Sucesso! "${nome}" salvo com êxito.`);
+        alert(`Sucesso! "${nome}" salvo com êxito no cardápio.`);
 
         formulario.reset();
         document.getElementById('container-ingredientes-chips').innerHTML = "";
@@ -370,7 +386,7 @@ function renderizarPreviewCardapioReal() {
     containerVitrine.innerHTML = "";
 
     if (produtosSalvos.length === 0) {
-        containerVitrine.innerHTML = `<p style="text-align: center; color: #9ca3af; padding: 40px 20px; font-style: italic;">Nenhum produto cadastrado.</p>`;
+        containerVitrine.innerHTML = `<p style="text-align: center; color: #9ca3af; padding: 40px 20px; font-style: italic;">Nenhum produto cadastrado na sua conta. Monte itens para vê-los aqui!</p>`;
         return;
     }
 
@@ -405,32 +421,5 @@ function renderizarPreviewCardapioReal() {
             blocoCategoria.appendChild(listaCards);
             containerVitrine.appendChild(blocoCategoria);
         }
-    });
-}
-
-
-// Substitua apenas a função renderizarSelectCategorias por esta:
-function renderizarSelectCategorias() {
-    const selectCategoria = document.getElementById('prod-categoria');
-    const wrapperAtivas = document.getElementById('wrapper-categorias-ativas');
-    
-    if (!selectCategoria || !wrapperAtivas) return;
-
-    // Se a lista estiver vazia, esconde o bloco inteiro de "Categorias Ativas" da tela
-    if (categoriesSalvas.length === 0) {
-        wrapperAtivas.classList.add('hidden');
-        selectCategoria.innerHTML = "";
-        return;
-    }
-
-    // Se tiver no mínimo uma categoria, remove a classe hidden e exibe o bloco em linha
-    wrapperAtivas.classList.remove('hidden');
-    selectCategoria.innerHTML = "";
-
-    categoriesSalvas.forEach(cat => {
-        const option = document.createElement('option');
-        option.value = cat;
-        option.textContent = cat;
-        selectCategoria.appendChild(option);
     });
 }
