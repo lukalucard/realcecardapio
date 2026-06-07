@@ -102,10 +102,22 @@
                         </div>
 
                         <div class="form-input-group">
-                            <label>Imagem do Produto</label>
-                            <input type="file" id="prod-imagem" accept="image/*">
+                            <label>Imagens do Produto (Máx: 5)</label>
+                            <div class="images-upload-wrapper">
+                                <div class="images-inputs-container" id="container-imagens-inputs">
+                                    <div class="image-upload-box">
+                                        <label for="prod-imagem-1" class="custom-file-upload">
+                                            <i class="fas fa-camera"></i>
+                                            <span>Foto 1</span>
+                                        </label>
+                                        <input type="file" id="prod-imagem-1" class="input-prod-foto" accept="image/*">
+                                        <div class="preview-slot hidden"></div>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn-add-slot-foto" id="btn-add-foto-slot"><i class="fas fa-plus"></i> Mais Imagem</button>
+                            </div>
                         </div>
-                                                
+                        
                         <div class="form-input-group-row">
                             <div class="filter-group">
                                 <label>Preço Base (R$)</label>

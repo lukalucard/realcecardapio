@@ -308,7 +308,7 @@ textarea:focus {
     border-color: #6B3FA0;
 }
 
-/* TRAVA HORIZONTAL DO SELECT E BOTÕES DE AÇÃO */
+/* TRAVA DE ALINHAMENTO EM LINHA DO SELECT E BOTÕES */
 .categories-list-preview {
     margin-top: 8px;
     width: 100%;
@@ -353,6 +353,115 @@ textarea:focus {
 .btn-icon:hover {
     background-color: #f1f5f9;
     transform: scale(1.02);
+}
+
+/* ==========================================================================
+   NOVA ARQUITETURA DE IMAGENS ESTILOSAS (GALERIA UP TO 5)
+   ========================================================================== */
+.images-upload-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    background-color: #f8fafc;
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px dashed #cbd5e1;
+}
+
+.images-inputs-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.image-upload-box {
+    position: relative;
+    width: 85px;
+    height: 85px;
+}
+
+.custom-file-upload {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    height: 100%;
+    border: 2px dashed #6B3FA0;
+    border-radius: 10px;
+    cursor: pointer;
+    color: #6B3FA0;
+    font-size: 0.7rem;
+    font-weight: 700;
+    background-color: white;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.custom-file-upload:hover {
+    border-color: #FF6B00;
+    color: #FF6B00;
+    background-color: rgba(255, 107, 0, 0.02);
+}
+
+.image-upload-box input[type="file"] {
+    display: none !important;
+}
+
+.preview-slot {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid #6B3FA0;
+    background-color: white;
+}
+
+.preview-slot img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.preview-slot .remove-photo-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background-color: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 9px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.btn-add-slot-foto {
+    background-color: white;
+    color: #6B3FA0;
+    border: 1px solid #6B3FA0;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    align-self: flex-start;
+    transition: all 0.2s;
+}
+
+.btn-add-slot-foto:hover {
+    background-color: #6B3FA0;
+    color: white;
 }
 
 /* INGREDIENTES CHIPS */
@@ -540,30 +649,6 @@ textarea:focus {
     color: #6B3FA0;
 }
 
-/* SELETORES DE DESIGN */
-.layout-selector-options {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-top: 6px;
-}
-
-.layout-radio {
-    border: 2px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    cursor: pointer;
-    background-color: white;
-    font-weight: 600;
-}
-
-.layout-radio input {
-    accent-color: #FF6B00;
-}
-
 .layout-radio:has(input:checked) {
     border-color: #FF6B00;
     background-color: rgba(255, 107, 0, 0.02);
@@ -571,11 +656,4 @@ textarea:focus {
 
 .hidden {
     display: none !important;
-}
-
-input[type="file"] {
-    background-color: #ffffff;
-    padding: 8px;
-    cursor: pointer;
-    font-size: 0.85rem;
 }

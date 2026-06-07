@@ -10,14 +10,14 @@ document.addEventListener('DOMContentLoaded', () => {
     inicializarControleCategorias();
     inicializarGerenciadorIngredientes();
     inicializarConstrutorOpcionais();
+    inicializarMotorFotosGaleria(); // Nova engenharia de uploads estilosos
     inicializarEnvioFormulario();
     
-    // Força o estado inicial vazio escondendo o bloco das ativas
     renderizarSelectCategorias();
 });
 
 /* ==========================================================================
-   1. GERENCIADOR DE ABAS (PRODUTOS / PREVIEW / DESIGN)
+   1. GERENCIADOR DE ABAS
    ========================================================================== */
 function inicializarAbasDoSistema() {
     const btnMenu = document.getElementById('tab-menu');
@@ -56,7 +56,7 @@ function inicializarAbasDoSistema() {
 }
 
 /* ==========================================================================
-   2. GERENCIADOR DE CATEGORIAS (RESOLVIDO CONFLITO DE IDS DUPLICADOS)
+   2. GERENCIADOR DE CATEGORIAS
    ========================================================================== */
 function inicializarControleCategorias() {
     const holderSugestoes = document.querySelector('.suggestions-holder');
@@ -67,7 +67,6 @@ function inicializarControleCategorias() {
 
     if (!holderSugestoes || !inputCategoria || !btnConfirmar) return;
 
-    // Sugestões rápidas capturam o texto no clique e jogam no input
     holderSugestoes.addEventListener('click', (e) => {
         const btnSugestao = e.target.closest('.badge-suggestion');
         if (btnSugestao) {
@@ -77,7 +76,6 @@ function inicializarControleCategorias() {
         }
     });
 
-    // Confirmar criação / Alteração de escrita
     btnConfirmar.addEventListener('click', (e) => {
         e.preventDefault();
         const nomeCategoria = inputCategoria.value.trim();
@@ -88,22 +86,17 @@ function inicializarControleCategorias() {
         }
 
         if (categoriaEmEdicao !== null) {
-            // Modo Edição: Renomeia no array principal
             const index = categoriasSalvas.indexOf(categoriaEmEdicao);
             if (index !== -1) {
                 categoriasSalvas[index] = nomeCategoria;
             }
-            
-            // Cascata de segurança: Atualiza os produtos cadastrados com o nome antigo
             produtosSalvos.forEach(p => {
                 if (p.categoria === categoriaEmEdicao) p.categoria = nomeCategoria;
             });
-
             categoriaEmEdicao = null;
             btnConfirmar.textContent = "Confirmar";
             document.getElementById('label-acao-categoria').textContent = "Criar categorias";
         } else {
-            // Modo Criação: Adiciona nova categoria
             if (categoriasSalvas.includes(nomeCategoria)) {
                 alert("Esta categoria já existe!");
                 return;
@@ -115,7 +108,6 @@ function inicializarControleCategorias() {
         renderizarSelectCategorias();
     });
 
-    // Ação do Botão Configurar (Editar) ao lado do Select
     if (btnEditar) {
         btnEditar.addEventListener('click', (e) => {
             e.preventDefault();
@@ -136,7 +128,6 @@ function inicializarControleCategorias() {
         });
     }
 
-    // Ação do Botão Deletar ao lado do Select
     if (btnDeletar) {
         btnDeletar.addEventListener('click', (e) => {
             e.preventDefault();
@@ -151,29 +142,25 @@ function inicializarControleCategorias() {
 
             if (confirm(`Deseja realmente remover a categoria "${valorSelecionado}"?`)) {
                 categoriasSalvas = categoriasSalvas.filter(cat => cat !== valorSelecionado);
-                
                 if (categoriaEmEdicao === valorSelecionado) {
                     categoriaEmEdicao = null;
                     btnConfirmar.textContent = "Confirmar";
                     document.getElementById('label-acao-categoria').textContent = "Criar categorias";
                     inputCategoria.value = "";
                 }
-                
                 renderizarSelectCategorias();
             }
         });
     }
 }
 
-// Popula de forma independente os dois seletores capturando pelas classes pai
 function renderizarSelectCategorias() {
     const selectGerencia = document.querySelector('.category-lits-item select');
-    const selectFormulario = document.querySelector('.cardapio-form-grid select');
+    const selectFormulario = document.getElementById('prod-select-vinculo');
     const wrapperAtivas = document.getElementById('wrapper-categorias-ativas');
     
     if (!wrapperAtivas) return;
 
-    // Se estiver vazio, esconde o bloco inteiro de "Categorias Ativas" da tela
     if (categoriasSalvas.length === 0) {
         wrapperAtivas.classList.add('hidden');
         if (selectGerencia) selectGerencia.innerHTML = "";
@@ -181,10 +168,8 @@ function renderizarSelectCategorias() {
         return;
     }
 
-    // Se tiver itens, exibe o bloco em linha perfeitamente
     wrapperAtivas.classList.remove('hidden');
 
-    // Popula o select superior (Gerência)
     if (selectGerencia) {
         selectGerencia.innerHTML = "";
         categoriasSalvas.forEach(cat => {
@@ -195,7 +180,6 @@ function renderizarSelectCategorias() {
         });
     }
 
-    // Popula o select inferior (Cadastro de Produto)
     if (selectFormulario) {
         selectFormulario.innerHTML = "";
         categoriasSalvas.forEach(cat => {
@@ -208,7 +192,73 @@ function renderizarSelectCategorias() {
 }
 
 /* ==========================================================================
-   3. CHIPS DE INGREDIENTES
+   3. NOVO MOTOR DE FOTOS DA GALERIA (MÁXIMO 5 SLOTS ESTILOSOS)
+   ========================================================================== */
+function inicializarMotorFotosGaleria() {
+    const container = document.getElementById('container-imagens-inputs');
+    const btnAddSlot = document.getElementById('btn-add-foto-slot');
+
+    if (!container || !btnAddSlot) return;
+
+    // Escuta mudanças nos inputs de arquivos para gerar os previews reais
+    container.addEventListener('change', (e) => {
+        if (e.target.classList.contains('input-prod-foto')) {
+            const input = e.target;
+            const boxPai = input.closest('.image-upload-box');
+            const previewSlot = boxPai.querySelector('.preview-slot');
+
+            if (input.files && input.files[0]) {
+                const urlBlob = URL.createObjectURL(input.files[0]);
+                previewSlot.innerHTML = `
+                    <img src="${urlBlob}">
+                    <button type="button" class="remove-photo-badge">&times;</button>
+                `;
+                previewSlot.classList.remove('hidden');
+            }
+        }
+    });
+
+    // Remove a foto do slot específico e limpa o input oculto
+    container.addEventListener('click', (e) => {
+        if (e.target.classList.contains('remove-photo-badge')) {
+            e.preventDefault();
+            const boxPai = e.target.closest('.image-upload-box');
+            const input = boxPai.querySelector('input[type="file"]');
+            const previewSlot = boxPai.querySelector('.preview-slot');
+
+            input.value = ""; // Reseta o arquivo no Windows
+            previewSlot.innerHTML = "";
+            previewSlot.classList.add('hidden');
+        }
+    });
+
+    // Cria um novo Slot estiloso de upload limitado ao teto de 5 unidades
+    btnAddSlot.addEventListener('click', (e) => {
+        e.preventDefault();
+        const totalSlots = container.querySelectorAll('.image-upload-box').length;
+
+        if (totalSlots >= 5) {
+            alert("Limite máximo atingido! O sistema permite até 5 imagens por produto.");
+            return;
+        }
+
+        const proximoIndex = totalSlots + 1;
+        const novoSlot = document.createElement('div');
+        novoSlot.className = 'image-upload-box';
+        novoSlot.innerHTML = `
+            <label for="prod-imagem-${proximoIndex}" class="custom-file-upload">
+                <i class="fas fa-camera"></i>
+                <span>Foto ${proximoIndex}</span>
+            </label>
+            <input type="file" id="prod-imagem-${proximoIndex}" class="input-prod-foto" accept="image/*">
+            <div class="preview-slot hidden"></div>
+        `;
+        container.appendChild(novoSlot);
+    });
+}
+
+/* ==========================================================================
+   4. CHIPS DE INGREDIENTES
    ========================================================================== */
 function inicializarGerenciadorIngredientes() {
     const input = document.getElementById('input-ingrediente');
@@ -246,9 +296,8 @@ function inicializarGerenciadorIngredientes() {
 }
 
 /* ==========================================================================
-   4. CONSTRUTOR DE OPCIONAIS
+   5. CONSTRUTOR DE OPCIONAIS
    ========================================================================== */
-function inline_dummy() {} // Evita conflitos de nomes históricos
 function inicializarConstrutorOpcionais() {
     const builderContainer = document.querySelector('.product-optionals-builder');
     if (!builderContainer) return;
@@ -258,7 +307,6 @@ function inicializarConstrutorOpcionais() {
         if (btnAddItem) {
             e.preventDefault();
             const tabelaItens = btnAddItem.closest('.optional-items-table');
-            
             const novaLinha = document.createElement('div');
             novaLinha.className = 'opt-item-row';
             novaLinha.innerHTML = `
@@ -266,7 +314,6 @@ function inicializarConstrutorOpcionais() {
                 <input type="number" step="0.01" placeholder="0.00">
                 <button type="button" class="btn-text-delete"><i class="fas fa-times"></i></button>
             `;
-            
             tabelaItens.insertBefore(novaLinha, btnAddItem);
         }
 
@@ -279,34 +326,27 @@ function inicializarConstrutorOpcionais() {
         const btnNewGroup = e.target.closest('.btn-secondary');
         if (btnNewGroup && !btnNewGroup.classList.contains('btn-secondary-sm')) {
             e.preventDefault();
-            
             const novoGrupo = document.createElement('div');
             novoGrupo.className = 'optional-group-card';
             novoGrupo.innerHTML = `
                 <div class="opt-group-header">
                     <input type="text" class="input-inline" placeholder="Nome do Grupo">
-                    <div class="opt-rules">
-                        <label>Min:</label> <input type="number" value="0">
-                        <label>Max:</label> <input type="number" value="1">
-                    </div>
+                    <div class="opt-rules"><label>Min:</label> <input type="number" value="0"><label>Max:</label> <input type="number" value="1"></div>
                 </div>
                 <div class="optional-items-table">
                     <div class="opt-item-row">
-                        <input type="text" placeholder="Opção 1">
-                        <input type="number" step="0.01" placeholder="0.00">
-                        <button type="button" class="btn-text-delete"><i class="fas fa-times"></i></button>
+                        <input type="text" placeholder="Opção 1"><input type="number" step="0.01" placeholder="0.00"><button type="button" class="btn-text-delete"><i class="fas fa-times"></i></button>
                     </div>
                     <button type="button" class="btn-secondary-sm"><i class="fas fa-plus"></i> Adicionar Item Extra</button>
                 </div>
             `;
-            
             builderContainer.insertBefore(novoGrupo, btnNewGroup);
         }
     });
 }
 
 /* ==========================================================================
-   5. ENVIO DO FORMULÁRIO (CORRIGIDO ERRO CRÍTICO DO LOOP)
+   6. ENVIO DO FORMULÁRIO (COLETA A ARRAY DE ATÉ 5 FOTOS SEM ERRO)
    ========================================================================== */
 function inicializarEnvioFormulario() {
     const formulario = document.querySelector('.cardapio-form-grid');
@@ -317,7 +357,7 @@ function inicializarEnvioFormulario() {
 
         const inputNome = document.getElementById('prod-nome');
         const inputPreco = document.getElementById('prod-preco');
-        const selectCategoria = document.querySelector('.cardapio-form-grid select');
+        const selectCategoria = document.getElementById('prod-select-vinculo');
 
         if (!inputNome || !inputPreco || !selectCategoria) return;
 
@@ -330,32 +370,25 @@ function inicializarEnvioFormulario() {
             return;
         }
 
-        // DENTRO DE inicializarEnvioFormulario(), LOGO ABAIXO DA CAPTURA DA CATEGORIA:
-        const inputImagem = document.getElementById('prod-imagem');
-        let urlImagemTemporaria = '';
+        // CAPTURA DE TODAS AS IMAGENS ENVIADAS NOS SLOTS ATIVOS
+        const inputsFotos = formulario.querySelectorAll('.input-prod-foto');
+        const listaImagensSalvas = [];
 
-        // Verifica se o usuário selecionou uma imagem real no campo
-        if (inputImagem && inputImagem.files && inputImagem.files[0]) {
-            urlImagemTemporaria = URL.createObjectURL(inputImagem.files[0]);
-        }
+        inputsFotos.forEach(input => {
+            if (input.files && input.files[0]) {
+                const urlBlob = URL.createObjectURL(input.files[0]);
+                listaImagensSalvas.push(urlBlob);
+            }
+        });
 
-        // AGORA, DENTRO DO SEU OBJETO 'const novoProduto', ADICIONE A PROPRIEDADE:
-        const novoProduto = {
-            id: Date.now(),
-            nome,
-            preco,
-            categoria,
-            imagem: urlImagemTemporaria, // <-- A imagem entra aqui
-            ingredientes: listaIngredientes.join(', '),
-            opcionais: gruposOpcionais
-        };
-
+        // Coleta os chips de ingredientes
         const chips = document.querySelectorAll('.ingredient-chip');
         const listaIngredientes = [];
         chips.forEach(chip => {
-            listaIngredientes.push(chip.textContent.replace('X', '').trim());
+            listaIngredientes.push(chip.textContent.replace('×', '').trim());
         });
 
+        // Coleta a árvore estrutural de adicionais
         const gruposOpcionais = [];
         const cartoesGrupo = formulario.querySelectorAll('.optional-group-card');
 
@@ -368,7 +401,6 @@ function inicializarEnvioFormulario() {
             const linhasItens = cartao.querySelectorAll('.opt-item-row');
             
             linhasItens.forEach((linha) => {
-                // CORREÇÃO DEFINITIVA: Alterado de inline para linha 
                 const inputs = linha.querySelectorAll('input'); 
                 if (inputs[0] && inputs[0].value) {
                     itensDoGrupo.push({
@@ -388,25 +420,41 @@ function inicializarEnvioFormulario() {
             }
         });
 
+        // Consolida o objeto final sem repetições ou chaves quebradas
         const novoProduto = {
             id: Date.now(),
-            nome,
-            preco,
-            categoria,
+            nome: nome,
+            preco: preco,
+            categoria: categoria,
+            imagens: listaImagensSalvas, // Array com até 5 links temporários
             ingredientes: listaIngredientes.join(', '),
             opcionais: gruposOpcionais
         };
 
         produtosSalvos.push(novoProduto); 
-        alert(`Sucesso! "${nome}" salvo com êxito no cardápio.`);
+        alert(`Sucesso! "${nome}" adicionado com êxito ao seu cardápio.`);
 
+        // Reseta o formulário e limpa a área de chips visuais
         formulario.reset();
         document.getElementById('container-ingredientes-chips').innerHTML = "";
+        
+        // Remove os previews e limpa a galeria para voltar a ter apenas 1 slot limpo
+        const containerGaleria = document.getElementById('container-imagens-inputs');
+        containerGaleria.innerHTML = `
+            <div class="image-upload-box">
+                <label for="prod-imagem-1" class="custom-file-upload">
+                    <i class="fas fa-camera"></i>
+                    <span>Foto 1</span>
+                </label>
+                <input type="file" id="prod-imagem-1" class="input-prod-foto" accept="image/*">
+                <div class="preview-slot hidden"></div>
+            </div>
+        `;
     });
 }
 
 /* ==========================================================================
-   6. RENDERIZAÇÃO DA VITRINE SIMULADA
+   7. RENDERIZAÇÃO DA VITRINE SIMULADA (EXIBE A FOTO PRINCIPAL CADASTRADA)
    ========================================================================== */
 function renderizarPreviewCardapioReal() {
     const containerVitrine = document.querySelector('.mock-client-menu-view');
@@ -432,13 +480,12 @@ function renderizarPreviewCardapioReal() {
             listaCards.className = 'mock-products-list';
 
             produtosDaCategoria.forEach(produto => {
-                // SUBSTITUA O TRECHO DO CARD POR ESTE DENTRO DO LOOP DO PRODUCT:
                 const card = document.createElement('div');
                 card.className = 'mock-product-card';
 
-                // Se o produto tiver imagem, renderiza a tag <img>, senão mantém o ícone clássico de hambúrguer/bebida
-                const containerImagem = produto.imagem 
-                    ? `<img src="${produto.imagem}" alt="${produto.nome}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">`
+                // Pega a primeira imagem do array para ser o destaque principal na vitrine, senão puxa o ícone
+                const containerImagem = (produto.imagens && produto.imagens.length > 0)
+                    ? `<img src="${produto.imagens[0]}" alt="${produto.nome}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">`
                     : `<i class="fas ${categoria.toLowerCase().includes('bebida') ? 'fa-glass-cheers' : 'fa-hamburger'}"></i>`;
 
                 card.innerHTML = `
