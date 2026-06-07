@@ -1,5 +1,5 @@
 /* ==========================================================================
-   ESTILOS GERAIS E RESET
+   ESTILOS GERAIS E RESET (ALINHADO COM SEU DASHBOARD)
    ========================================================================== */
 * {
     margin: 0;
@@ -20,7 +20,7 @@ body {
 }
 
 /* ==========================================================================
-   SIDEBAR ROXA GRADIENTE (SUA IDENTIDADE VISUAL)
+   SIDEBAR ROXA GRADIENTE OFICIAL
    ========================================================================== */
 .sidebar {
     width: 260px;
@@ -173,20 +173,38 @@ body {
     border-bottom: 1px solid #f1f5f9;
 }
 
-.box-header h3,
-.box-header-category h3 {
+.box-header h3 {
     font-size: 1.1rem;
     font-weight: 600;
     color: #2d3748;
 }
 
-.box-header h3 i,
-.box-header-category h3 i {
+.box-header h3 i {
     color: #6B3FA0;
     margin-right: 8px;
 }
 
-/* ESTRUTURA DA SEÇÃO DE CATEGORIAS */
+/* ==========================================================================
+   FORMULÁRIOS, INPUTS E SELETORES CORRIGIDOS
+   ========================================================================== */
+.cardapio-form-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-input-group-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
 .category-create-row {
     margin-bottom: 16px;
     width: 100%;
@@ -198,7 +216,17 @@ body {
     gap: 6px;
 }
 
-.filter-group-inline label {
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-input-group label,
+.filter-group label,
+.filter-group-inline label,
+.suggestion-label,
+.label-master {
     font-size: 0.75rem;
     text-transform: uppercase;
     font-weight: 600;
@@ -212,12 +240,35 @@ body {
     width: 100%;
 }
 
-.input-btn-group input {
-    flex: 1;
+/* Estilização universal para garantir que nenhum input fique sem estilo */
+input[type="text"],
+input[type="number"],
+select,
+textarea,
+.input-btn-group input,
+.ingredients-action-line input {
+    padding: 10px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    background: white;
+    outline: none;
+    color: #1e293b;
+    width: 100%;
 }
 
-/* SEU BOTÃO CONFIRMAR LARANJA */
-.btn-confirmar {
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: #6B3FA0;
+    box-shadow: 0 0 0 2px rgba(107, 63, 160, 0.1);
+}
+
+/* ==========================================================================
+   BOTÕES DO SISTEMA
+   ========================================================================== */
+.btn-confirmar,
+.btn-primary-sm {
     background: #FF6B00;
     color: white;
     border: none;
@@ -229,25 +280,34 @@ body {
     transition: background 0.2s;
 }
 
-.btn-confirmar:hover {
+.btn-save-product {
+    background: #FF6B00;
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 1rem;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.btn-confirmar:hover,
+.btn-primary-sm:hover,
+.btn-save-product:hover {
     background: #e05e00;
 }
 
-/* ESPAÇAMENTO DAS SUGESTÕES */
+/* ==========================================================================
+   SUGESTÕES DE CATEGORIA
+   ========================================================================== */
 .category-suggestions {
     margin-top: 12px;
     margin-bottom: 24px;
     display: flex;
     flex-direction: column;
     gap: 8px;
-}
-
-.suggestion-label {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    font-weight: 600;
-    color: #6b7280;
-    letter-spacing: 0.5px;
 }
 
 .suggestions-holder {
@@ -274,102 +334,61 @@ body {
     border-color: #6B3FA0;
 }
 
+/* ==========================================================================
+   LISTA DE CATEGORIAS ATIVAS COM EDITAR/DELETAR POR ITEM
+   ========================================================================== */
+.categories-list-preview {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
 .category-lits-item {
     display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-/* ==========================================================================
-   BOTÕES DO PAINEL
-   ========================================================================== */
-.btn-primary-sm {
-    background: #FF6B00;
-    color: white;
-    border: none;
-    padding: 8px 14px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.btn-save-product {
-    background: #FF6B00;
-    color: white;
-    border: none;
-    padding: 14px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    font-size: 1rem;
-    width: 100%;
-    margin-top: 10px;
-}
-
-.btn-primary-sm:hover,
-.btn-save-product:hover {
-    background: #e05e00;
-}
-
-/* ==========================================================================
-   FORMULÁRIOS E INPUTS
-   ========================================================================== */
-.cardapio-form-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.form-input-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.form-input-group-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-}
-
-.form-input-group label,
-.filter-group label {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    font-weight: 600;
-    color: #6b7280;
-    letter-spacing: 0.5px;
-}
-
-.filter-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-input[type="text"],
-input[type="number"],
-select,
-textarea {
-    padding: 10px 12px;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background-color: #f8fafc;
     border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    background: white;
-    outline: none;
-    color: #1e293b;
+    border-radius: 12px;
     width: 100%;
 }
 
-input:focus,
-select:focus,
-textarea:focus {
-    border-color: #6B3FA0;
-    box-shadow: 0 0 0 2px rgba(107, 63, 160, 0.1);
+.category-lits-item strong {
+    font-size: 0.95rem;
+    color: #1e293b;
+}
+
+.cat-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-icon {
+    background-color: white;
+    border: 1px solid #e2e8f0;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-icon.edit {
+    color: #3182ce;
+}
+
+.btn-icon.delete {
+    color: #e53e3e;
+}
+
+.btn-icon:hover {
+    background-color: #f1f5f9;
+    transform: scale(1.05);
 }
 
 /* ==========================================================================
-   SEÇÃO DE INGREDIENTES DINÂMICOS (SUA SOLUÇÃO)
+   CHIPS DE INGREDIENTES DINÂMICOS
    ========================================================================== */
 .ingredients-action-line {
     display: flex;
@@ -419,7 +438,7 @@ textarea:focus {
 }
 
 /* ==========================================================================
-   CONSTRUTOR DE OPCIONAIS / COMPLEMENTOS
+   CONSTRUTOR DE OPCIONAIS
    ========================================================================== */
 .product-optionals-builder {
     background-color: #f9fafb;
@@ -544,83 +563,7 @@ textarea:focus {
 }
 
 /* ==========================================================================
-   PREVISÃO DE LISTAGEM DE CATEGORIAS
-   ========================================================================== */
-.category-row-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 14px 16px;
-    background-color: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    margin-bottom: 8px;
-}
-
-.sub-indicator {
-    display: block;
-    font-size: 0.8rem;
-    color: #9ca3af;
-    margin-top: 2px;
-}
-
-.cat-actions {
-    display: flex;
-    gap: 8px;
-}
-
-.btn-icon {
-    background-color: white;
-    border: 1px solid #e2e8f0;
-    padding: 8px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #4b5563;
-}
-
-.btn-icon.edit {
-    color: #3182ce;
-}
-
-.btn-icon.delete {
-    color: #e53e3e;
-}
-
-/* ==========================================================================
-   SELETORES DE DESIGN DO MODELO DO CARD
-   ========================================================================== */
-.layout-selector-options {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-top: 6px;
-}
-
-.layout-radio {
-    border: 2px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    cursor: pointer;
-    background-color: white;
-    font-weight: 600;
-}
-
-.layout-radio input {
-    accent-color: #FF6B00;
-}
-
-.layout-radio:has(input:checked) {
-    border-color: #FF6B00;
-    background-color: rgba(255, 107, 0, 0.02);
-}
-
-/* ==========================================================================
-   SUA NOVA SEÇÃO: VITRINE SIMULADA DO CLIENTE (MOCK UP PÁGINA LIVE)
+   VITRINE SIMULADA DO CLIENTE (MOCK UP PREVIEW)
    ========================================================================== */
 .badge-live {
     background-color: #2ed573;
@@ -699,7 +642,38 @@ textarea:focus {
 }
 
 /* ==========================================================================
-   MEDIA QUERIES E RESPONSIVIDADE COMPACTA
+   SELETORES DE DESIGN
+   ========================================================================== */
+.layout-selector-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 6px;
+}
+
+.layout-radio {
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    background-color: white;
+    font-weight: 600;
+}
+
+.layout-radio input {
+    accent-color: #FF6B00;
+}
+
+.layout-radio:has(input:checked) {
+    border-color: #FF6B00;
+    background-color: rgba(255, 107, 0, 0.02);
+}
+
+/* ==========================================================================
+   RESPONSIVIDADE E UTILITÁRIOS
    ========================================================================== */
 @media (max-width: 900px) {
     .sidebar {

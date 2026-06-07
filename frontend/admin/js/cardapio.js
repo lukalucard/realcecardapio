@@ -12,12 +12,12 @@ document.addEventListener('DOMContentLoaded', () => {
     inicializarConstrutorOpcionais();
     inicializarEnvioFormulario();
     
-    // Inicia o seletor com o estado vazio
-    renderizarSelectCategorias();
+    // Força o estado inicial vazio na tela
+    atualizarInterfaceCategorias();
 });
 
 /* ==========================================================================
-   1. GERENCIADOR DE ABAS (PRODUTOS / VISUALIZAR CARDÁPIO / DESIGN)
+   1. GERENCIADOR DE ABAS
    ========================================================================== */
 function inicializarAbasDoSistema() {
     const btnMenu = document.getElementById('tab-menu');
@@ -36,7 +36,6 @@ function inicializarAbasDoSistema() {
 
     btnPreview.addEventListener('click', () => {
         alternarAbas(btnPreview, [btnMenu, btnDesign], contentPreview, [contentMenu, contentDesign]);
-        // Renderiza a vitrine simulada do cliente atualizada com os dados da memória
         renderizarPreviewCardapioReal();
     });
 
@@ -56,19 +55,17 @@ function inicializarAbasDoSistema() {
 }
 
 /* ==========================================================================
-   2. GERENCIADOR DE CATEGORIAS (SUGESTÕES, CRIAÇÃO, EDIÇÃO E EXCLUSÃO)
+   2. GERENCIADOR DE CATEGORIAS (CADA ITEM GANHA SEU EDITAR E EXCLUIR)
    ========================================================================== */
 function inicializarControleCategorias() {
     const holderSugestoes = document.querySelector('.suggestions-holder');
     const inputCategoria = document.getElementById('input-nova-categoria');
     const btnConfirmar = document.getElementById('btn-add-categoria');
-    const selectCategoria = document.getElementById('prod-categoria');
-    const btnEditar = document.getElementById('btn-edit-categoria');
-    const btnDeletar = document.getElementById('btn-delete-categoria');
+    const containerLista = document.getElementById('lista-categorias-container');
 
-    if (!holderSugestoes || !inputCategoria || !btnConfirmar || !selectCategoria) return;
+    if (!holderSugestoes || !inputCategoria || !btnConfirmar || !containerLista) return;
 
-    // Sugestões rápidas jogam o texto direto para o input
+    // Sugestões preenchem o input
     holderSugestoes.addEventListener('click', (e) => {
         const btnSugestao = e.target.closest('.badge-suggestion');
         if (btnSugestao) {
@@ -78,7 +75,7 @@ function inicializarControleCategorias() {
         }
     });
 
-    // Confirmar criação ou ajuste de caligrafia
+    // Confirmar criação ou salvamento de edição
     btnConfirmar.addEventListener('click', (e) => {
         e.preventDefault();
         const nomeCategoria = inputCategoria.value.trim();
@@ -89,13 +86,13 @@ function inicializarControleCategorias() {
         }
 
         if (categoriaEmEdicao !== null) {
-            // Se estamos editando, atualiza o nome antigo no array
+            // Modo Edição: substitui o valor antigo pelo novo ajustado
             const index = categoriesSalvas.indexOf(categoriaEmEdicao);
             if (index !== -1) {
                 categoriesSalvas[index] = nomeCategoria;
             }
             
-            // Cascata de segurança: atualiza a categoria dos produtos vinculados
+            // Cascata: atualiza os produtos salvos que usavam a escrita antiga
             produtosSalvos.forEach(p => {
                 if (p.categoria === categoriaEmEdicao) p.categoria = nomeCategoria;
             });
@@ -104,7 +101,7 @@ function inicializarControleCategorias() {
             btnConfirmar.textContent = "Confirmar";
             document.getElementById('label-acao-categoria').textContent = "Criar categorias";
         } else {
-            // Se for nova, valida duplicados
+            // Modo Criação: adiciona se não for repetida
             if (categoriesSalvas.includes(nomeCategoria)) {
                 alert("Esta categoria já existe!");
                 return;
@@ -113,74 +110,83 @@ function inicializarControleCategorias() {
         }
 
         inputCategoria.value = "";
-        renderizarSelectCategorias();
+        atualizarInterfaceCategorias();
     });
 
-    // Configurar / Editar: Carrega o item atualmente selecionado no select de volta para o input
-    if (btnEditar) {
-        btnEditar.addEventListener('click', (e) => {
+    // Eventos individuais usando Delegação para capturar cliques nos botões de cada linha criada
+    containerLista.addEventListener('click', (e) => {
+        const btnEdit = e.target.closest('.edit');
+        const btnDelete = e.target.closest('.delete');
+
+        if (btnEdit) {
             e.preventDefault();
-            const valorSelecionado = selectCategoria.value;
-
-            if (!valorSelecionado || valorSelecionado === "Nenhuma categoria cadastrada") {
-                alert("Selecione uma categoria válida na lista abaixo para configurar.");
-                return;
-            }
-
-            inputCategoria.value = valorSelecionado;
-            categoriaEmEdicao = valorSelecionado;
+            const catNome = btnEdit.getAttribute('data-categoria');
+            inputCategoria.value = catNome;
+            categoriaEmEdicao = catNome;
             btnConfirmar.textContent = "Salvar Alteração";
             document.getElementById('label-acao-categoria').textContent = "Editando categoria";
             inputCategoria.focus();
-        });
-    }
+        }
 
-    // Deletar: Remove a categoria selecionada no select e limpa os produtos dela
-    if (btnDeletar) {
-        btnDeletar.addEventListener('click', (e) => {
+        if (btnDelete) {
             e.preventDefault();
-            const valorSelecionado = selectCategoria.value;
-
-            if (!valorSelecionado || valorSelecionado === "Nenhuma categoria cadastrada") {
-                alert("Selecione uma categoria válida para deletar.");
-                return;
+            const catNome = btnDelete.getAttribute('data-categoria');
+            if (confirm(`Deseja realmente remover a categoria "${catNome}"? Os produtos dela perderão o vínculo.`)) {
+                categoriesSalvas = categoriesSalvas.filter(cat => cat !== catNome);
+                atualizarInterfaceCategorias();
             }
-
-            if (confirm(`Deseja realmente remover a categoria "${valorSelecionado}"? Todos os produtos vinculados a ela perderão o vínculo.`)) {
-                categoriesSalvas = categoriesSalvas.filter(cat => cat !== valorSelecionado);
-                renderizarSelectCategorias();
-            }
-        });
-    }
-}
-
-// Atualiza dinamicamente o select de categorias integrado
-function renderizarSelectCategorias() {
-    const selectCategoria = document.getElementById('prod-categoria');
-    if (!selectCategoria) return;
-
-    selectCategoria.innerHTML = "";
-
-    if (categoriesSalvas.length === 0) {
-        const optVazia = document.createElement('option');
-        optVazia.value = "";
-        optVazia.textContent = "Nenhuma categoria cadastrada";
-        selectCategoria.appendChild(optVazia);
-        return;
-    }
-
-    categoriesSalvas.forEach(cat => {
-        const option = document.createElement('option');
-        option.value = cat;
-        option.textContent = cat;
-        selectCategoria.appendChild(option);
+        }
     });
 }
 
+// Injeta visualmente as linhas com botões próprios e sincroniza o select do produto
+function atualizarInterfaceCategorias() {
+    const containerLista = document.getElementById('lista-categorias-container');
+    const selectProd = document.getElementById('prod-categoria');
+
+    if (containerLista) {
+        containerLista.innerHTML = "";
+        
+        if (categoriesSalvas.length === 0) {
+            containerLista.innerHTML = `<p style="font-size: 0.85rem; color: #9ca3af; font-style: italic; padding: 10px 0;">Nenhuma categoria criada ainda.</p>`;
+        } else {
+            // Monta cada item criado com suas ações individuais de edição/exclusão
+            categoriesSalvas.forEach(cat => {
+                const item = document.createElement('div');
+                item.className = 'category-lits-item';
+                item.style.marginBottom = '8px';
+                item.innerHTML = `
+                    <strong>${cat}</strong>
+                    <div class="cat-actions">
+                        <button type="button" class="btn-icon edit" data-categoria="${cat}"><i class="fas fa-edit"></i></button>
+                        <button type="button" class="btn-icon delete" data-categoria="${cat}"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+                `;
+                containerLista.appendChild(item);
+            });
+        }
+    }
+
+    // Sincroniza o dropdown interno do formulário de produtos lá embaixo
+    if (selectProd) {
+        selectProd.innerHTML = "";
+        if (categoriesSalvas.length === 0) {
+            selectProd.innerHTML = `<option value="">Crie uma categoria primeiro</option>`;
+        } else {
+            categoriesSalvas.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat;
+                option.textContent = cat;
+                selectProd.appendChild(option);
+            });
+        }
+    }
+}
+
 /* ==========================================================================
-   3. ADIÇÃO DINÂMICA DE INGREDIENTES EM CHIPS HIERÁRQUICOS
+   3. CHIPS DE INGREDIENTES
    ========================================================================== */
-function inicializarGerenciadorIngredientes() {
+function inicializerGerenciadorIngredientes() {
     const input = document.getElementById('input-ingrediente');
     const btnAdd = document.getElementById('btn-add-ingrediente');
     const container = document.getElementById('container-ingredientes-chips');
@@ -216,14 +222,13 @@ function inicializarGerenciadorIngredientes() {
 }
 
 /* ==========================================================================
-   4. CONSTRUTOR DINÂMICO DE OPCIONAIS E GRUPOS DE COMPLEMENTOS
+   4. CONSTRUTOR DE OPCIONAIS
    ========================================================================== */
 function inicializarConstrutorOpcionais() {
     const builderContainer = document.querySelector('.product-optionals-builder');
     if (!builderContainer) return;
 
     builderContainer.addEventListener('click', (e) => {
-        // Adicionar nova linha de item extra dentro de um grupo específico
         const btnAddItem = e.target.closest('.btn-secondary-sm');
         if (btnAddItem) {
             e.preventDefault();
@@ -240,14 +245,12 @@ function inicializarConstrutorOpcionais() {
             tabelaItens.insertBefore(novaLinha, btnAddItem);
         }
 
-        // Remover linha de item extra
         const btnDelete = e.target.closest('.btn-text-delete');
         if (btnDelete) {
             e.preventDefault();
             btnDelete.closest('.opt-item-row').remove();
         }
 
-        // Criar um novo bloco completo de grupo de opcionais
         const btnNewGroup = e.target.closest('.btn-secondary');
         if (btnNewGroup && !btnNewGroup.classList.contains('btn-secondary-sm')) {
             e.preventDefault();
@@ -256,7 +259,7 @@ function inicializarConstrutorOpcionais() {
             novoGrupo.className = 'optional-group-card';
             novoGrupo.innerHTML = `
                 <div class="opt-group-header">
-                    <input type="text" class="input-inline" placeholder="Nome do Grupo (Ex: Escolha o Ponto)">
+                    <input type="text" class="input-inline" placeholder="Nome do Grupo">
                     <div class="opt-rules">
                         <label>Min:</label> <input type="number" value="0">
                         <label>Max:</label> <input type="number" value="1">
@@ -278,7 +281,7 @@ function inicializarConstrutorOpcionais() {
 }
 
 /* ==========================================================================
-   5. CAPTURA E PROCESSAMENTO DO PRODUTO PARA SALVAMENTO
+   5. ENVIO DO FORMULÁRIO (CORRIGIDO ERRO DE DIGITAÇÃO DO PRODUCT)
    ========================================================================== */
 function inicializarEnvioFormulario() {
     const formulario = document.querySelector('.cardapio-form-grid');
@@ -287,9 +290,8 @@ function inicializarEnvioFormulario() {
     formulario.addEventListener('submit', (e) => {
         e.preventDefault();
 
-        // Como o formulário possui dois blocos de inputs, pegamos os elementos por seletores explícitos
-        const inputNome = formulario.querySelector('input[placeholder*="Realce"]');
-        const inputPreco = formulario.querySelector('input[type="number"]');
+        const inputNome = document.getElementById('prod-nome');
+        const inputPreco = document.getElementById('prod-preco');
         const selectCategoria = document.getElementById('prod-categoria');
 
         if (!inputNome || !inputPreco || !selectCategoria) return;
@@ -298,21 +300,17 @@ function inicializarEnvioFormulario() {
         const preco = parseFloat(inputPreco.value || 0).toFixed(2);
         const categoria = selectCategoria.value;
 
-        // Validação estrita de categoria ativa
-        if (!categoria || categoria === "" || categoria === "Nenhuma categoria cadastrada") {
-            alert("Atenção: É necessário criar e selecionar uma categoria válida para o produto.");
+        if (!categoria || categoria === "") {
+            alert("Crie e selecione uma categoria válida para o produto.");
             return;
         }
 
-        // Lê a lista de chips dinâmicos criados pelo gestor
         const chips = document.querySelectorAll('.ingredient-chip');
         const listaIngredientes = [];
         chips.forEach(chip => {
-            const textoLimpo = chip.textContent.replace('X', '').trim();
-            listaIngredientes.push(textoLimpo);
+            listaIngredientes.push(chip.textContent.replace('X', '').trim());
         });
 
-        // Lê a árvore relacional de opcionais
         const gruposOpcionais = [];
         const cartoesGrupo = formulario.querySelectorAll('.optional-group-card');
 
@@ -325,7 +323,7 @@ function inicializarEnvioFormulario() {
             const linhasItens = cartao.querySelectorAll('.opt-item-row');
             
             linhasItens.forEach((linha) => {
-                const inputs = linha.querySelectorAll('input');
+                const inputs = inline.querySelectorAll('input');
                 if (inputs[0] && inputs[0].value) {
                     itensDoGrupo.push({
                         nome_adicional: inputs[0].value,
@@ -344,7 +342,6 @@ function inicializarEnvioFormulario() {
             }
         });
 
-        // Consolida o objeto do produto com ID exclusivo
         const novoProduto = {
             id: Date.now(),
             nome,
@@ -354,17 +351,17 @@ function inicializarEnvioFormulario() {
             opcionais: gruposOpcionais
         };
 
-        produtosSalvos.push(novoProduct);
-        alert(`Sucesso! "${nome}" adicionado com êxito à categoria "${categoria}".`);
+        // CORREÇÃO CRÍTICA AQUI: Alterado de novoProduct para novoProduto para destravar o script
+        produtosSalvos.push(novoProduto);
+        alert(`Sucesso! "${nome}" salvo com êxito.`);
 
-        // Reseta os campos e limpa a área de chips de ingredientes
         formulario.reset();
         document.getElementById('container-ingredientes-chips').innerHTML = "";
     });
 }
 
 /* ==========================================================================
-   6. RENDERIZAÇÃO AUTOMÁTICA DA VITRINE SIMULADA DO CLIENTE (PREVIEW REAL)
+   6. RENDERIZAÇÃO DA VITRINE SIMULADA
    ========================================================================== */
 function renderizarPreviewCardapioReal() {
     const containerVitrine = document.querySelector('.mock-client-menu-view');
@@ -373,11 +370,10 @@ function renderizarPreviewCardapioReal() {
     containerVitrine.innerHTML = "";
 
     if (produtosSalvos.length === 0) {
-        containerVitrine.innerHTML = `<p style="text-align: center; color: #9ca3af; padding: 40px 20px; font-style: italic;">Nenhum produto cadastrado na sua conta. Cadastre itens para simular o seu cardápio live!</p>`;
+        containerVitrine.innerHTML = `<p style="text-align: center; color: #9ca3af; padding: 40px 20px; font-style: italic;">Nenhum produto cadastrado.</p>`;
         return;
     }
 
-    // Organiza a montagem descendo categoria por categoria de forma ordenada
     categoriesSalvas.forEach(categoria => {
         const produtosDaCategoria = produtosSalvos.filter(p => p.categoria === categoria);
 
@@ -396,7 +392,7 @@ function renderizarPreviewCardapioReal() {
                 card.innerHTML = `
                     <div class="mock-card-details">
                         <h5>${produto.nome}</h5>
-                        <p>${produto.ingredientes || 'Sem ingredientes base informados.'}</p>
+                        <p>${produto.ingredientes || 'Sem ingredientes base.'}</p>
                         <span class="mock-price">R$ ${produto.preco}</span>
                     </div>
                     <div class="mock-card-img">
