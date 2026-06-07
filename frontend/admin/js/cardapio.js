@@ -1,14 +1,14 @@
 /* ==========================================================================
    ESTADO GLOBAL DO SISTEMA (Banco de Dados em Memória)
    ========================================================================== */
-let categoriesSalvas = []; 
+let categoriasSalvas = []; 
 let produtosSalvos = []; 
 let categoriaEmEdicao = null; 
 
 document.addEventListener('DOMContentLoaded', () => {
     inicializarAbasDoSistema();
     inicializarControleCategorias();
-    inicializerGerenciadorIngredientes();
+    inicializarGerenciadorIngredientes();
     inicializarConstrutorOpcionais();
     inicializarEnvioFormulario();
     
@@ -43,7 +43,7 @@ function inicializarAbasDoSistema() {
         btnDesign.classList.add('active');
         [btnMenu, btnPreview].forEach(b => b.classList.remove('active'));
         contentDesign.classList.remove('hidden');
-        [contentMenu, contentPreview].forEach(c => c.classList.add('hidden'));
+        [contentMenu, contentPreview].forEach(c => c.classList.add('hidden')); 
     });
 
     function alternarAbas(abaAtiva, abasInativas, conteudoAtivo, conteudosInativos) {
@@ -67,7 +67,7 @@ function inicializarControleCategorias() {
 
     if (!holderSugestoes || !inputCategoria || !btnConfirmar || !selectCategoria) return;
 
-    // Sugestões capturam o texto perfeitamente no clique
+    // Sugestões rápidas capturam o texto no clique
     holderSugestoes.addEventListener('click', (e) => {
         const btnSugestao = e.target.closest('.badge-suggestion');
         if (btnSugestao) {
@@ -89,9 +89,9 @@ function inicializarControleCategorias() {
 
         if (categoriaEmEdicao !== null) {
             // Modo Edição: Renomeia no array principal
-            const index = categoriesSalvas.indexOf(categoriaEmEdicao);
+            const index = categoriasSalvas.indexOf(categoriaEmEdicao);
             if (index !== -1) {
-                categoriesSalvas[index] = nomeCategoria;
+                categoriasSalvas[index] = nomeCategoria;
             }
             
             // Cascata: Atualiza os produtos cadastrados com o nome antigo
@@ -104,11 +104,11 @@ function inicializarControleCategorias() {
             document.getElementById('label-acao-categoria').textContent = "Criar categorias";
         } else {
             // Modo Criação: Adiciona nova categoria
-            if (categoriesSalvas.includes(nomeCategoria)) {
+            if (categoriasSalvas.includes(nomeCategoria)) {
                 alert("Esta categoria já existe!");
                 return;
             }
-            categoriesSalvas.push(nomeCategoria);
+            categoriasSalvas.push(nomeCategoria);
         }
 
         inputCategoria.value = "";
@@ -146,9 +146,8 @@ function inicializarControleCategorias() {
             }
 
             if (confirm(`Deseja realmente remover a categoria "${valorSelecionado}"?`)) {
-                categoriesSalvas = categoriesSalvas.filter(cat => cat !== valorSelecionado);
+                categoriasSalvas = categoriasSalvas.filter(cat => cat !== valorSelecionado);
                 
-                // Se deletar o item que estava sendo editado, limpa o estado
                 if (categoriaEmEdicao === valorSelecionado) {
                     categoriaEmEdicao = null;
                     btnConfirmar.textContent = "Confirmar";
@@ -171,7 +170,7 @@ function renderizarSelectCategorias() {
     if (!selectCategoria || !selectVinculo || !wrapperAtivas) return;
 
     // Se estiver vazio, esconde o bloco inteiro de "Categorias Ativas" da tela
-    if (categoriesSalvas.length === 0) {
+    if (categoriasSalvas.length === 0) {
         wrapperAtivas.classList.add('hidden');
         selectCategoria.innerHTML = "";
         selectVinculo.innerHTML = `<option value="">Crie uma categoria primeiro</option>`;
@@ -183,7 +182,7 @@ function renderizarSelectCategorias() {
     selectCategoria.innerHTML = "";
     selectVinculo.innerHTML = "";
 
-    categoriesSalvas.forEach(cat => {
+    categoriasSalvas.forEach(cat => {
         // Popula o select de gerência
         const opt1 = document.createElement('option');
         opt1.value = cat;
@@ -201,7 +200,7 @@ function renderizarSelectCategorias() {
 /* ==========================================================================
    3. CHIPS DE INGREDIENTES
    ========================================================================== */
-function inicializerGerenciadorIngredientes() {
+function inicializarGerenciadorIngredientes() {
     const input = document.getElementById('input-ingrediente');
     const btnAdd = document.getElementById('btn-add-ingrediente');
     const container = document.getElementById('container-ingredientes-chips');
@@ -296,7 +295,7 @@ function inicializarConstrutorOpcionais() {
 }
 
 /* ==========================================================================
-   5. ENVIO DO FORMULÁRIO (CORRIGIDO ERROS DE DIGITAÇÃO)
+   5. ENVIO DO FORMULÁRIO (TOTALMENTE CORRIGIDO)
    ========================================================================== */
 function inicializarEnvioFormulario() {
     const formulario = document.querySelector('.cardapio-form-grid');
@@ -338,8 +337,7 @@ function inicializarEnvioFormulario() {
             const linhasItens = cartao.querySelectorAll('.opt-item-row');
             
             linhasItens.forEach((linha) => {
-                // CORREÇÃO DA SINTAXE: Alterado de inline para linha
-                const inputs = linha.querySelectorAll('input');
+                const inputs = linha.querySelectorAll('input'); 
                 if (inputs[0] && inputs[0].value) {
                     itensDoGrupo.push({
                         nome_adicional: inputs[0].value,
@@ -367,8 +365,7 @@ function inicializarEnvioFormulario() {
             opcionais: gruposOpcionais
         };
 
-        // CORREÇÃO DO OBJETO: Alterado de novoProduct para novoProduto
-        produtosSalvos.push(novoProduto);
+        produtosSalvos.push(novoProduto); 
         alert(`Sucesso! "${nome}" salvo com êxito no cardápio.`);
 
         formulario.reset();
@@ -390,7 +387,7 @@ function renderizarPreviewCardapioReal() {
         return;
     }
 
-    categoriesSalvas.forEach(categoria => {
+    categoriasSalvas.forEach(categoria => {
         const produtosDaCategoria = produtosSalvos.filter(p => p.categoria === categoria);
 
         if (produtosDaCategoria.length > 0) {
