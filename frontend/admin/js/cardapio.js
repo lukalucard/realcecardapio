@@ -330,6 +330,26 @@ function inicializarEnvioFormulario() {
             return;
         }
 
+        // DENTRO DE inicializarEnvioFormulario(), LOGO ABAIXO DA CAPTURA DA CATEGORIA:
+        const inputImagem = document.getElementById('prod-imagem');
+        let urlImagemTemporaria = '';
+
+        // Verifica se o usuário selecionou uma imagem real no campo
+        if (inputImagem && inputImagem.files && inputImagem.files[0]) {
+            urlImagemTemporaria = URL.createObjectURL(inputImagem.files[0]);
+        }
+
+        // AGORA, DENTRO DO SEU OBJETO 'const novoProduto', ADICIONE A PROPRIEDADE:
+        const novoProduto = {
+            id: Date.now(),
+            nome,
+            preco,
+            categoria,
+            imagem: urlImagemTemporaria, // <-- A imagem entra aqui
+            ingredientes: listaIngredientes.join(', '),
+            opcionais: gruposOpcionais
+        };
+
         const chips = document.querySelectorAll('.ingredient-chip');
         const listaIngredientes = [];
         chips.forEach(chip => {
@@ -412,8 +432,15 @@ function renderizarPreviewCardapioReal() {
             listaCards.className = 'mock-products-list';
 
             produtosDaCategoria.forEach(produto => {
+                // SUBSTITUA O TRECHO DO CARD POR ESTE DENTRO DO LOOP DO PRODUCT:
                 const card = document.createElement('div');
                 card.className = 'mock-product-card';
+
+                // Se o produto tiver imagem, renderiza a tag <img>, senão mantém o ícone clássico de hambúrguer/bebida
+                const containerImagem = produto.imagem 
+                    ? `<img src="${produto.imagem}" alt="${produto.nome}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">`
+                    : `<i class="fas ${categoria.toLowerCase().includes('bebida') ? 'fa-glass-cheers' : 'fa-hamburger'}"></i>`;
+
                 card.innerHTML = `
                     <div class="mock-card-details">
                         <h5>${produto.nome}</h5>
@@ -421,7 +448,7 @@ function renderizarPreviewCardapioReal() {
                         <span class="mock-price">R$ ${produto.preco}</span>
                     </div>
                     <div class="mock-card-img">
-                        <i class="fas ${categoria.toLowerCase().includes('bebida') ? 'fa-glass-cheers' : 'fa-hamburger'}"></i>
+                        ${containerImagem}
                     </div>
                 `;
                 listaCards.appendChild(card);

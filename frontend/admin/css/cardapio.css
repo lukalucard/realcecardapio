@@ -572,3 +572,10 @@ textarea:focus {
 .hidden {
     display: none !important;
 }
+
+input[type="file"] {
+    background-color: #ffffff;
+    padding: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
