@@ -43,7 +43,8 @@ function inicializarAbasDoSistema() {
         btnDesign.classList.add('active');
         [btnMenu, btnPreview].forEach(b => b.classList.remove('active'));
         contentDesign.classList.remove('hidden');
-        [contentMenu, contentPreview].forEach(c => c.classList.add('hidden')); 
+        contentMenu.classList.add('hidden');
+        contentPreview.classList.add('hidden');
     });
 
     function alternarAbas(abaAtiva, abasInativas, conteudoAtivo, conteudosInativos) {
@@ -67,7 +68,7 @@ function inicializarControleCategorias() {
 
     if (!holderSugestoes || !inputCategoria || !btnConfirmar || !selectCategoria) return;
 
-    // Sugestões rápidas capturam o texto no clique
+    // Sugestões capturam o texto no clique
     holderSugestoes.addEventListener('click', (e) => {
         const btnSugestao = e.target.closest('.badge-suggestion');
         if (btnSugestao) {
@@ -295,7 +296,7 @@ function inicializarConstrutorOpcionais() {
 }
 
 /* ==========================================================================
-   5. ENVIO DO FORMULÁRIO (TOTALMENTE CORRIGIDO)
+   5. ENVIO DO FORMULÁRIO (CORRIGIDO ERROS DE DIGITAÇÃO)
    ========================================================================== */
 function inicializarEnvioFormulario() {
     const formulario = document.querySelector('.cardapio-form-grid');
@@ -337,6 +338,7 @@ function inicializarEnvioFormulario() {
             const linhasItens = cartao.querySelectorAll('.opt-item-row');
             
             linhasItens.forEach((linha) => {
+                // CORRIGIDO: Alterado de inline para linha de forma definitiva
                 const inputs = linha.querySelectorAll('input'); 
                 if (inputs[0] && inputs[0].value) {
                     itensDoGrupo.push({
@@ -361,10 +363,11 @@ function inicializarEnvioFormulario() {
             nome,
             preco,
             categoria,
-            ingredientes: listaIngredientes.join(', '),
+            ingredients: listaIngredientes.join(', '),
             opcionais: gruposOpcionais
         };
 
+        // CORRIGIDO: Alterado de novoProduct para novoProduto
         produtosSalvos.push(novoProduto); 
         alert(`Sucesso! "${nome}" salvo com êxito no cardápio.`);
 
@@ -405,7 +408,7 @@ function renderizarPreviewCardapioReal() {
                 card.innerHTML = `
                     <div class="mock-card-details">
                         <h5>${produto.nome}</h5>
-                        <p>${produto.ingredientes || 'Sem ingredientes base.'}</p>
+                        <p>${produto.ingredients || 'Sem ingredientes base.'}</p>
                         <span class="mock-price">R$ ${produto.preco}</span>
                     </div>
                     <div class="mock-card-img">
