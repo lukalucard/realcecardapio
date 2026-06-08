@@ -36,48 +36,11 @@
             </div>
         </header>
 
-        <nav class="categories-carousel">
-            <button class="category-btn active">Burgers</button>
-            <button class="category-btn">Bebidas</button>
-        </nav>
+        <nav class="categories-carousel" id="carousel-categorias">
+            </nav>
 
-        <main class="menu-products">
-            <section class="menu-section">
-                <h2 class="section-title">Burgers</h2>
-                
-                <div class="product-card">
-                    <div class="product-details">
-                        <h3>Realce Burger Duplo</h3>
-                        <p class="product-description">Dois blends de carne artesanal de 150g, muito queijo cheddar derretido, bacon crocante e maionese da casa no pão brioche.</p>
-                        <span class="product-price">R$ 38,90</span>
-                    </div>
-                    <div class="product-image-area">
-                        <div class="img-placeholder">
-                            <i class="fas fa-hamburger"></i>
-                        </div>
-                        <button class="btn-add-item">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="product-card">
-                    <div class="product-details">
-                        <h3>Classic Cheese</h3>
-                        <p class="product-description">Blend artesanal de 150g, queijo prato, alface, tomate fresco e molho especial.</p>
-                        <span class="product-price">R$ 28,90</span>
-                    </div>
-                    <div class="product-image-area">
-                        <div class="img-placeholder">
-                            <i class="fas fa-hamburger"></i>
-                        </div>
-                        <button class="btn-add-item">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                    </div>
-                </div>
-            </section>
-        </main>
+        <main class="menu-products" id="vitrine-produtos">
+            </main>
 
         <div class="persistent-cart-container hidden" id="persistent-cart">
             <div class="cart-title-area">
@@ -95,6 +58,39 @@
                 <button type="button" class="btn-go-to-delivery" id="btn-abrir-checkout">
                     Confirmar e Inserir Endereço <i class="fas fa-arrow-right"></i>
                 </button>
+            </div>
+        </div>
+
+        <div class="modal-overlay hidden" id="modal-detalhes-produto">
+            <div class="modal-content">
+                <header class="modal-header-product">
+                    <button class="btn-back-modal" id="btn-fechar-detalhes"><i class="fas fa-chevron-down"></i></button>
+                </header>
+                
+                <div class="product-modal-body">
+                    <div class="product-gallery-slider" id="modal-produto-galeria">
+                        </div>
+
+                    <div class="product-info-header">
+                        <h2 id="modal-produto-nome">Nome do Produto</h2>
+                        <span class="product-modal-price" id="modal-produto-preco">R$ 0,00</span>
+                        <p id="modal-produto-descricao">Descrição ou ingredientes base.</p>
+                    </div>
+
+                    <div id="modal-produto-opcionais-container">
+                        </div>
+                </div>
+
+                <footer class="modal-product-footer">
+                    <div class="qty-counter-container">
+                        <button type="button" class="btn-qty-modal" id="btn-modal-menos"><i class="fas fa-minus"></i></button>
+                        <span id="txt-modal-quantidade">1</span>
+                        <button type="button" class="btn-qty-modal" id="btn-modal-mais"><i class="fas fa-plus"></i></button>
+                    </div>
+                    <button type="button" class="btn-add-to-bag" id="btn-modal-adicionar-sacola">
+                        Adicionar <span id="txt-modal-botao-preco">R$ 0,00</span>
+                    </button>
+                </footer>
             </div>
         </div>
 
