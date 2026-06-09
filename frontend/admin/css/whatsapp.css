@@ -2,6 +2,12 @@
    ESTILOS ESPECÍFICOS: PAINEL INTEGRACAO WHATSAPP (REALCE CARDÁPIO)
    ========================================================================== */
 
+.menu-nav li.active a {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-left: 4px solid #FF9F4A;
+    color: white;
+}
+
 /* 1. Status Badges Dinâmicos do Cabeçalho */
 .status-badge-desconectado {
     background-color: rgba(239, 68, 68, 0.1);

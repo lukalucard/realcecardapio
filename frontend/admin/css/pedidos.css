@@ -2,6 +2,12 @@
    ESTILOS GERAIS DO PAINEL DE PEDIDOS (REALCE CARDÁPIO)
    ========================================================================== */
 
+.menu-nav li.active a {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-left: 4px solid #FF9F4A;
+    color: white;
+}
+
 .page-header {
     display: flex;
     flex-direction: column;
