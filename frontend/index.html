@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RealceCardápio - Cardápio Digital e Gestão de Delivery</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    
+    <div class="content">
+        <header class="header">
+            <div class="container header-container">
+                <h1 class="logo">Realce<span>Cardápio</span></h1>
+
+                <div class="header-right">
+                    <button class="btn btn-outline btn-open-modal">Criar Conta</button>
+                    <button class="btn btn-secondary" id="openLogin">Entrar</button>
+                </div>
+            </div>
+        </header>
+
+        <main class="main">
+            <section class="hero">
+                <div class="container">
+                    <div class="badge">Novidade v1.0</div>
+                    <h2>O cardápio digital que <span class="text-gradient">realça suas vendas</span> no WhatsApp</h2>
+                    <p>Crie sua vitrine online em minutos, organize seus pedidos, configure opcionais e turbine o faturamento do seu delivery sem pagar comissões abusivas.</p>
+                    
+                    <div class="hero-btns-wrapper">
+                        <div class="hero-btns-row">
+                            <button class="btn btn-primary btn-lg btn-open-modal">Cadastrar Meu Delivery</button>
+                            
+                            <a href="admin/dashboard.html" class="btn btn-outline btn-lg" id="btnGuest">
+                                👁️ Experimentar Sem Cadastro
+                            </a>
+                        </div>
+                        <span class="btn-subtext">⚡ Teste o painel completo agora mesmo</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="trust-bar">
+                <div class="container">
+                    <span>TECNOLOGIAS E ECOSSISTEMA INTEGRADO:</span>
+                    <div class="trust-logos">
+                        <img src="https://img.icons8.com/ios-filled/50/ffffff/whatsapp.png" alt="WhatsApp">
+                        <img src="https://img.icons8.com/ios-filled/50/ffffff/delivery.png" alt="Delivery Logistics">
+                        <img src="https://img.icons8.com/ios-filled/50/ffffff/database.png" alt="Neon Database Backend">
+                        <img src="https://img.icons8.com/ios-filled/50/ffffff/cloud.png" alt="Render Cloud Infrastructure">
+                    </div>
+                </div>
+            </section>
+
+            <section class="how-it-works">
+                <div class="container">
+                    <h2>Como funciona o RealceCardápio</h2>
+                    <div class="steps">
+                        <div class="step">
+                            <span>1</span>
+                            <h3>Monte sua Identidade</h3>
+                            <p>Configure o nome, slogan, insira sua logo e defina as 3 cores da sua marca.</p>
+                        </div>
+
+                        <div class="step">
+                            <span>2</span>
+                            <h3>Cadastre seus Produtos</h3>
+                            <p>Adicione fotos dos pratos, preços e crie regras de opcionais para combos.</p>
+                        </div>
+
+                        <div class="step">
+                            <span>3</span>
+                            <h3>Compartilhe o Link</h3>
+                            <p>Coloque o link exclusivo da sua loja na bio do Instagram e no topo do WhatsApp.</p>
+                        </div>
+
+                        <div class="step">
+                            <span>4</span>
+                            <h3>Receba os Pedidos</h3>
+                            <p>Acompanhe tudo organizado no painel em tempo real, sem textos perdidos no chat.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="features">
+                <div class="container">
+                    <h2>Por que profissionalizar com a gente?</h2>
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <h3>Fim da Perda de Tempo</h3>
+                            <p>Chega de ficar decifrando áudios ou textos confusos. O cliente monta o pedido completo e envia mastigado.</p>
+                        </div>
+
+                        <div class="feature-card">
+                            <h3>Branding Personalizado</h3>
+                            <p>O cardápio é seu. Ajuste banners, posicionamento de marca e cores para criar conexão real com seu cliente.</p>
+                        </div>
+
+                        <div class="feature-card">
+                            <h3>Gestão Multi-lojas</h3>
+                            <p>Pronto para escalar. Controle múltiplos estabelecimentos e cardápios através de uma única conta administrativa.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="pricing">
+                <div class="container">
+                    <h2>Planos Feitos para o seu Crescimento</h2>
+                    <div class="pricing-grid">
+                        <div class="plan-card highlight">
+                            <h3>Plano Inicial</h3>
+                            <p class="price">R$0</p>
+                            <ul>
+                                <li>✔ Cardápio Web Exclusivo</li>
+                                <li>✔ Painel Administrativo Completo</li>
+                                <li>✔ Cadastro de Opcionais ilimitado</li>
+                                <li>✔ Integração Direta WhatsApp</li>
+                            </ul>
+                            <button class="btn btn-primary btn-open-modal">Começar Grátis Agora</button>
+                        </div>
+
+                        <div class="plan-card disabled">
+                            <h3>Plano Premium</h3>
+                            <p class="price">Em breve</p>
+                            <ul>
+                                <li>✔ Impressão Automática de Pedidos</li>
+                                <li>✔ Relatórios de Faturamento Avançados</li>
+                                <li>✔ Gestão de Motoboys e Rotas</li>
+                                <li>✔ Chatbot Automatizado Exclusivo</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>              
+            </section>
+
+            <section class="cta">
+                <div class="container">
+                    <h2>Dê ao seu Delivery o destaque que ele merece</h2>
+                    <p>Sem pegadinhas, sem taxas sobre faturamento e sem necessidade de cartão de crédito.</p>
+                    <button class="btn btn-primary btn-open-modal">Criar Minha Conta Grátis</button>
+                </div> 
+            </section>
+
+            <section class="faq">
+                <div class="container">
+                    <h2>Perguntas Frequentes</h2>
+                    <p class="faq-subtitle">Tudo o que você precisa saber sobre o RealceCardápio</p>
+
+                    <div class="faq-grid">
+                        <div class="faq-item">
+                            <h3>Eu pago alguma taxa por pedido realizado?</h3>
+                            <p>Não! Diferente dos marketplaces tradicionais, o RealceCardápio é uma plataforma independente. Todo o lucro das suas vendas é 100% seu.</p>
+                        </div>
+
+                        <div class="faq-item">
+                            <h3>Como o cliente acessa o meu cardápio?</h3>
+                            <p>O sistema gera um endereço web único com o nome do seu perfil. O cliente só precisa clicar no link (pelo celular ou computador) para ver seus produtos.</p>
+                        </div>
+
+                        <div class="faq-item">
+                            <h3>Consigo alterar preços e produtos quando quiser?</h3>
+                            <p>Sim! Através do seu painel administrativo, qualquer alteração de preço, pausa de produto esgotado ou troca de cor reflete na hora no site del cliente.</p>
+                        </div>
+
+                        <div class="faq-item">
+                            <h3>Preciso instalar algum aplicativo no computador?</h3>
+                            <p>Não. O RealceCardápio é um sistema 100% na nuvem. Você gerencia suas vendas, produtos e aparências direto pelo navegador de qualquer dispositivo.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div class="modal" id="loginModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-box">
+            <h2>Entrar</h2>
+            <input type="email" id="loginEmail" placeholder="Email" class="input" required>
+            
+            <div class="input-group">
+                <input type="password" id="loginPassword" placeholder="Senha" class="input" required>
+                <span id="toggleLoginPassword" class="eye-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
+                        <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
+                    </svg>
+                </span>
+            </div>
+
+            <button class="btn btn-primary btn-full">Entrar</button>
+            <p class="switch-text">Não tem conta? <span id="goRegister">Criar conta</span></p>
+        </div>
+    </div>
+
+    <div class="modal" id="registerModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-box">
+            <h2>Criar Conta</h2>
+            <input type="text" id="regName" placeholder="Nome Completo" required>
+
+            <div class="input-group">
+                <input type="text" id="regPerfil" placeholder="Nome da Loja (ex: burgerrealce)" required>
+                <small id="perfilStatus"></small> 
+            </div>
+
+            <input type="email" id="regEmail" placeholder="Seu melhor e-mail" required>
+            <input type="tel" id="regPhone" placeholder="(00) 00000-0000" maxlength="15" required>
+
+            <div class="password-wrapper">
+                <input type="password" id="regPassword" placeholder="Crie uma senha forte" class="input" required>
+                <span id="toggleRegPassword" class="eye-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
+                        <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
+                    </svg>
+                </span>
+
+                <div id="passwordCard" class="password-card">
+                    <div class="hint-item" id="req-length"><span>✔</span> Mínimo 8 caracteres</div>
+                    <div class="hint-item" id="req-upper"><span>✔</span> Uma letra maiúscula (A-Z)</div>
+                    <div class="hint-item" id="req-lower"><span>✔</span> Uma letra minúscula (a-z)</div> 
+                    <div class="hint-item" id="req-number"><span>✔</span> Pelo menos um número</div>
+                    <div class="hint-item" id="req-special"><span>✔</span> Símbolo (!@#$%*)</div>
+                </div>
+            </div>
+
+            <div class="password-wrapper separation-top">
+                <input type="password" id="regConfirmPassword" placeholder="Confirme sua senha" class="input" required>
+                <span id="toggleConfirmPassword" class="eye-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
+                        <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
+                    </svg>
+                </span>
+            </div>
+
+            <div class="terms-row">
+                <input type="checkbox" id="termsCheck">
+                <label for="termsCheck">Li e aceito os <a href="#" class="terms-link">Termos de Uso</a></label>
+            </div>
+
+            <button class="btn btn-primary btn-full">Criar Minha Conta</button>
+            <p class="switch-text">Já tem conta? <span id="goLogin">Entrar</span></p>
+        </div>
+    </div>
+
+    <script src="js/modal.js"></script>
+</body>
+</html>
