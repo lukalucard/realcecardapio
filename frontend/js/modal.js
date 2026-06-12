@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // URL base do seu servidor back-end (mude para localhost:3000 quando testar local)
-    const API_URL = 'https://realcemidias.onrender.com';
+    // CORRIGIDO: Agora apontando para o servidor certo do RealceCardápio
+    const API_URL = 'https://realcecardapio.onrender.com';
 
     /* ==========================================================================
        1. SELETORES GERAIS DE ELEMENTOS
