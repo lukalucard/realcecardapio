@@ -12,7 +12,10 @@ const pool = require('./config/db'); // Mantém sua conexão modularizada do Neo
 const app = express();
 
 // Middlewares Globais e de Segurança
-app.use(helmet()); 
+// Configuração do Helmet liberando o CSP para não travar imagens e requisições externas
+app.use(helmet({
+    contentSecurityPolicy: false,
+}));
 app.use(cors()); 
 app.use(express.json());
 
