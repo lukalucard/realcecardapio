@@ -19,7 +19,7 @@
                 <h1 class="logo">Realce<span>Cardápio</span></h1>
 
                 <div class="header-right">
-                    <button class="btn btn-outline btn-open-modal">Criar Conta</button>
+                    <button class="btn btn-outline btn-open-modal">Fazer Meu Cadastro</button>
                     <button class="btn btn-secondary" id="openLogin">Entrar</button>
                 </div>
             </div>
@@ -34,10 +34,10 @@
                     
                     <div class="hero-btns-wrapper">
                         <div class="hero-btns-row">
-                            <button class="btn btn-primary btn-lg btn-open-modal">Cadastrar Meu Delivery</button>
+                            <button class="btn btn-primary btn-lg btn-open-modal">Fazer Meu Cadastro</button>
                             
                             <a href="admin/dashboard.html" class="btn btn-outline btn-lg" id="btnGuest">
-                                👁️ Experimentar Sem Cadastro
+                                👁️ Entrar Sem Cadastro
                             </a>
                         </div>
                         <span class="btn-subtext">⚡ Teste o painel completo agora mesmo</span>
@@ -49,10 +49,10 @@
                 <div class="container">
                     <span>TECNOLOGIAS E ECOSSISTEMA INTEGRADO:</span>
                     <div class="trust-logos">
-                        <img src="https://img.icons8.com/ios-filled/50/ffffff/whatsapp.png" alt="WhatsApp">
-                        <img src="https://img.icons8.com/ios-filled/50/ffffff/delivery.png" alt="Delivery Logistics">
-                        <img src="https://img.icons8.com/ios-filled/50/ffffff/database.png" alt="Neon Database Backend">
-                        <img src="https://img.icons8.com/ios-filled/50/ffffff/cloud.png" alt="Render Cloud Infrastructure">
+                        <img src="https://img.icons8.com/ios-filled/50/0f172a/whatsapp.png" alt="WhatsApp">
+                        <img src="https://img.icons8.com/ios-filled/50/0f172a/delivery.png" alt="Delivery Logistics">
+                        <img src="https://img.icons8.com/ios-filled/50/0f172a/database.png" alt="Neon Database Backend">
+                        <img src="https://img.icons8.com/ios-filled/50/0f172a/cloud.png" alt="Render Cloud Infrastructure">
                     </div>
                 </div>
             </section>
@@ -123,7 +123,7 @@
                                 <li>✔ Cadastro de Opcionais ilimitado</li>
                                 <li>✔ Integração Direta WhatsApp</li>
                             </ul>
-                            <button class="btn btn-primary btn-open-modal">Começar Grátis Agora</button>
+                            <button class="btn btn-primary btn-open-modal">Fazer Meu Cadastro</button>
                         </div>
 
                         <div class="plan-card disabled">
@@ -144,7 +144,7 @@
                 <div class="container">
                     <h2>Dê ao seu Delivery o destaque que ele merece</h2>
                     <p>Sem pegadinhas, sem taxas sobre faturamento e sem necessidade de cartão de crédito.</p>
-                    <button class="btn btn-primary btn-open-modal">Criar Minha Conta Grátis</button>
+                    <button class="btn btn-primary btn-open-modal">Fazer Meu Cadastro</button>
                 </div> 
             </section>
 
@@ -166,7 +166,7 @@
 
                         <div class="faq-item">
                             <h3>Consigo alterar preços e produtos quando quiser?</h3>
-                            <p>Sim! Através do seu painel administrativo, qualquer alteração de preço, pausa de produto esgotado ou troca de cor reflete na hora no site del cliente.</p>
+                            <p>Sim! Através do seu painel administrativo, qualquer alteração de preço, pausa de produto esgotado ou troca de cor reflete na hora no site do cliente.</p>
                         </div>
 
                         <div class="faq-item">
@@ -183,20 +183,27 @@
         <div class="modal-overlay"></div>
         <div class="modal-box">
             <h2>Entrar</h2>
-            <input type="email" id="loginEmail" placeholder="Email" class="input" required>
             
-            <div class="input-group">
-                <input type="password" id="loginPassword" placeholder="Senha" class="input" required>
-                <span id="toggleLoginPassword" class="eye-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
-                        <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
-                    </svg>
-                </span>
+            <div class="form-group">
+                <label for="loginEmail">E-mail</label>
+                <input type="email" id="loginEmail" placeholder="Digite seu e-mail" class="input" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="loginPassword">Senha</label>
+                <div class="input-group">
+                    <input type="password" id="loginPassword" placeholder="Digite sua senha" class="input" required>
+                    <span id="toggleLoginPassword" class="eye-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
+                            <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
+                        </svg>
+                    </span>
+                </div>
             </div>
 
             <button class="btn btn-primary btn-full">Entrar</button>
-            <p class="switch-text">Não tem conta? <span id="goRegister">Criar conta</span></p>
+            <p class="switch-text">Não tem conta? <span id="goRegister">Fazer Meu Cadastro</span></p>
         </div>
     </div>
 
@@ -204,42 +211,62 @@
         <div class="modal-overlay"></div>
         <div class="modal-box">
             <h2>Criar Conta</h2>
-            <input type="text" id="regName" placeholder="Nome Completo" required>
-
-            <div class="input-group">
-                <input type="text" id="regPerfil" placeholder="Nome da Loja (ex: burgerrealce)" required>
-                <small id="perfilStatus"></small> 
+            
+            <div class="form-group">
+                <label for="regName">Nome Completo</label>
+                <input type="text" id="regName" placeholder="Ex: Luiz Silva" required>
             </div>
 
-            <input type="email" id="regEmail" placeholder="Seu melhor e-mail" required>
-            <input type="tel" id="regPhone" placeholder="(00) 00000-0000" maxlength="15" required>
-
-            <div class="password-wrapper">
-                <input type="password" id="regPassword" placeholder="Crie uma senha forte" class="input" required>
-                <span id="toggleRegPassword" class="eye-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
-                        <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
-                    </svg>
-                </span>
-
-                <div id="passwordCard" class="password-card">
-                    <div class="hint-item" id="req-length"><span>✔</span> Mínimo 8 caracteres</div>
-                    <div class="hint-item" id="req-upper"><span>✔</span> Uma letra maiúscula (A-Z)</div>
-                    <div class="hint-item" id="req-lower"><span>✔</span> Uma letra minúscula (a-z)</div> 
-                    <div class="hint-item" id="req-number"><span>✔</span> Pelo menos um número</div>
-                    <div class="hint-item" id="req-special"><span>✔</span> Símbolo (!@#$%*)</div>
+            <div class="form-group">
+                <label for="regPerfil">Nome da Loja</label>
+                <div class="input-group">
+                    <input type="text" id="regPerfil" placeholder="Ex: burgerrealce" required>
+                    <small id="perfilStatus"></small> 
                 </div>
             </div>
 
-            <div class="password-wrapper separation-top">
-                <input type="password" id="regConfirmPassword" placeholder="Confirme sua senha" class="input" required>
-                <span id="toggleConfirmPassword" class="eye-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
-                        <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
-                    </svg>
-                </span>
+            <div class="form-group">
+                <label for="regEmail">E-mail</label>
+                <input type="email" id="regEmail" placeholder="seu@email.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="regPhone">Telefone / WhatsApp</label>
+                <input type="tel" id="regPhone" placeholder="(00) 00000-0000" maxlength="15" required>
+            </div>
+
+            <div class="form-group">
+                <label for="regPassword">Crie uma senha forte</label>
+                <div class="password-wrapper">
+                    <input type="password" id="regPassword" placeholder="No mínimo 8 caracteres" class="input" required>
+                    <span id="toggleRegPassword" class="eye-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
+                            <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
+                        </svg>
+                    </span>
+
+                    <div id="passwordCard" class="password-card">
+                        <div class="hint-item" id="req-length"><span>✔</span> Mínimo 8 caracteres</div>
+                        <div class="hint-item" id="req-upper"><span>✔</span> Uma letra maiúscula (A-Z)</div>
+                        <div class="hint-item" id="req-lower"><span>✔</span> Uma letra minúscula (a-z)</div> 
+                        <div class="hint-item" id="req-number"><span>✔</span> Pelo menos um número</div>
+                        <div class="hint-item" id="req-special"><span>✔</span> Símbolo (!@#$%*)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="regConfirmPassword">Confirme sua senha</label>
+                <div class="password-wrapper">
+                    <input type="password" id="regConfirmPassword" placeholder="Digite a mesma senha" class="input" required>
+                    <span id="toggleConfirmPassword" class="eye-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
+                            <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/>
+                        </svg>
+                    </span>
+                </div>
             </div>
 
             <div class="terms-row">
