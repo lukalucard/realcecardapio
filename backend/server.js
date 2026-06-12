@@ -1,21 +1,145 @@
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const pool = require('./config/db'); 
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const helmet = require('helmet');
+const pool = require('./config/db'); // Mantém sua conexão modularizada do Neon
 
 // Inicialização
 const app = express();
 
-// Middlewares Globais
+// Middlewares Globais e de Segurança
+app.use(helmet()); 
 app.use(cors()); 
 app.use(express.json());
 
-// O '..' faz o Node sair da pasta 'backend' e ir para a raiz do projeto
+// Servir arquivos estáticos da raiz do Frontend
 app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
-// Rota de teste
+// ==========================================================================
+// [NOVO] MIDDLEWARE DE AUTENTICAÇÃO (BARREIRA PARA ROTAS PRIVADAS)
+// ==========================================================================
+function authMiddleware(req, res, next) {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+        return res.status(401).json({ message: 'Token não fornecido' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secreto_temporario');
+        req.user = decoded; // Injeta os dados do lojista logado na requisição
+        next();
+    } catch (err) {
+        return res.status(403).json({ message: 'Token inválido ou expirado' });
+    }
+}
+
+// Rota de teste operacional
 app.get('/api/test', (req, res) => {
-    res.json({ message: 'Servidor RealceCardápio funcionando!' });
+    res.json({ message: 'Servidor RealceCardápio funcionando perfeitamente! ✅' });
+});
+
+// ==========================================================================
+// [NOVO] ROTAS DE SISTEMA DE AUTENTICAÇÃO (MANTENDO PARIDADE COM SEU MODAL.JS)
+// ==========================================================================
+
+// Verificar disponibilidade do nome da loja no cadastro
+app.get('/check-perfil', async (req, res) => {
+    const { perfil } = req.query;
+    if (!perfil) return res.json({ available: false });
+
+    try {
+        const result = await pool.query('SELECT id FROM users WHERE perfil = $1', [perfil.toLowerCase().trim()]);
+        res.json({ available: result.rows.length === 0 });
+    } catch (error) {
+        console.error("Erro ao checar perfil:", error.message);
+        res.status(500).json({ error: "Erro ao consultar banco de dados" });
+    }
+});
+
+// Registrar um novo gestor/estabelecimento
+app.post('/register', async (req, res) => {
+    const { name, perfil, email, phone, password } = req.body;
+
+    if (!name || !perfil || !email || !phone || !password) {
+        return res.status(400).json({ message: 'Preencha todos os campos obrigatórios' });
+    }
+
+    const regexSenha = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+    if (!regexSenha.test(password)) {
+        return res.status(400).json({ message: 'A senha não atende aos requisitos de segurança.' });
+    }
+
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const result = await pool.query(
+            'INSERT INTO users (name, perfil, email, phone, password) VALUES ($1, $2, $3, $4, $5) RETURNING id, name, perfil, email',
+            [name, perfil.toLowerCase().trim(), email.toLowerCase().trim(), phone, hashedPassword]
+        );
+
+        res.status(201).json({ message: 'Usuário criado com sucesso!', user: result.rows[0] });
+    } catch (error) {
+        if (error.code === '23505') {
+            if (error.detail.includes('email')) {
+                return res.status(400).json({ message: 'Este e-mail já está em uso.' });
+            }
+            if (error.detail.includes('perfil')) {
+                return res.status(400).json({ message: 'Este nome de perfil já está ocupado.' });
+            }
+        }
+        console.error('Erro no registro de usuário:', error.message);
+        res.status(500).json({ message: 'Erro interno no servidor' });
+    }
+});
+
+// Login do Gestor
+app.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+        const result = await pool.query('SELECT * FROM users WHERE email = $1', [email.toLowerCase().trim()]);
+        if (result.rows.length === 0) {
+            return res.status(400).json({ message: 'Credenciais inválidas' });
+        }
+
+        const user = result.rows[0];
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Credenciais inválidas' });
+        }
+
+        const token = jwt.sign(
+            { id: user.id, perfil: user.perfil },
+            process.env.JWT_SECRET || 'fallback_secreto_temporario',
+            { expiresIn: '1d' }
+        );
+
+        res.json({ 
+            message: 'Login realizado!', 
+            token, 
+            user: { id: user.id, name: user.name, perfil: user.perfil, email: user.email } 
+        });
+    } catch (error) {
+        console.error('Erro no login:', error.message);
+        res.status(500).json({ message: 'Erro no servidor' });
+    }
+});
+
+// Buscar dados do usuário autenticado logado
+app.get('/me', authMiddleware, async (req, res) => {
+    try {
+        const result = await pool.query('SELECT id, name, perfil, email FROM users WHERE id = $1', [req.user.id]);
+        if (result.rows.length === 0) return res.status(404).json({ message: 'Usuário não encontrado' });
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('Erro na rota /me:', err.message);
+        res.status(403).json({ message: 'Token inválido ou expirado' });
+    }
 });
 
 // -------------------- ROTAS DO CARDÁPIO & PEDIDOS --------------------
@@ -35,7 +159,7 @@ app.post('/api/pedidos', async (req, res) => {
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
             [cliente_nome, cliente_telefone, cliente_endereco, JSON.stringify(itens), subtotal, taxa_entrega, total, forma_pagamento]
         );
-        res.status(201).json({ id: result.rows[0].id, message: 'Pedido recebido com sucesso!' });
+        res.status(201).json({ id: result.rows[0].id, message: 'Pedido received com sucesso!' });
     } catch (error) {
         console.error(error);
         res.status(500).json({ erro: 'Erro ao salvar o pedido' });
@@ -43,7 +167,6 @@ app.post('/api/pedidos', async (req, res) => {
 });
 
 // -------- CRUD Categorias --------
-
 app.get('/api/categorias', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM categorias ORDER BY ordem, id');
@@ -98,7 +221,6 @@ app.delete('/api/categorias/:id', async (req, res) => {
 });
 
 // -------- CRUD Produtos --------
-
 app.get('/api/produtos', async (req, res) => {
     const { categoria_id, apenas_disponiveis } = req.query;
     try {
@@ -184,10 +306,7 @@ app.delete('/api/produtos/:id', async (req, res) => {
     }
 });
 
-
-// ==========================================================================
-// [NOVO] ROTA PARA BUSCAR PEDIDOS ATIVOS DA ESTEIRA GESTORA
-// ==========================================================================
+// ROTA PARA BUSCAR PEDIDOS ATIVOS DA ESTEIRA GESTORA
 app.get('/api/pedidos/ativos', async (req, res) => {
     try {
         const resultado = await pool.query(
@@ -200,10 +319,7 @@ app.get('/api/pedidos/ativos', async (req, res) => {
     }
 });
 
-
-// ==========================================================================
-// [NOVO] ROTA PARA AVANÇAR O STATUS DO PEDIDO NO TRILHO (CORRIGIDA)
-// ==========================================================================
+// ROTA PARA AVANÇAR O STATUS DO PEDIDO NO TRILHO
 app.put('/api/pedidos/:id/avancar', async (req, res) => {
     const { id } = req.params;
     const { status_atual, sub_status_atual } = req.body;
@@ -212,7 +328,6 @@ app.put('/api/pedidos/:id/avancar', async (req, res) => {
     let novoSubStatus = 'aguardando';
 
     try {
-        // Alinhamento inteligente entre os termos 'novos' e 'pedidos'
         if (status_atual === 'pedidos' || status_atual === 'novos') {
             novoStatus = 'pagamento';
             novoSubStatus = 'aguardando';
@@ -236,7 +351,6 @@ app.put('/api/pedidos/:id/avancar', async (req, res) => {
             }
         }
 
-        // Atualização atômica no banco de dados
         await pool.query(
             "UPDATE pedidos SET status = $1, sub_status = $2 WHERE id = $3",
             [novoStatus, novoSubStatus, id]
@@ -249,17 +363,13 @@ app.put('/api/pedidos/:id/avancar', async (req, res) => {
     }
 });
 
-
-// 1. ROTA PARA BUSCAR AS MENSAGENS SALVAS
+// ROTA PARA BUSCAR AS MENSAGENS SALVAS DO WHATSAPP
 app.get('/api/whatsapp/config', async (req, res) => {
     try {
-        // Busca o registro único de configuração
         const resultado = await pool.query('SELECT * FROM configuracoes_whatsapp WHERE id = 1');
-        
         if (resultado.rows.length === 0) {
             return res.status(404).json({ erro: "Configuração não encontrada." });
         }
-        
         res.json(resultado.rows[0]);
     } catch (erro) {
         console.error("❌ Erro ao buscar configurações do WhatsApp:", erro);
@@ -267,19 +377,16 @@ app.get('/api/whatsapp/config', async (req, res) => {
     }
 });
 
-// 2. ROTA PARA SALVAR AS ALTERAÇÕES DO GESTOR
+// ROTA PARA SALVAR AS ALTERAÇÕES DO GESTOR NO WHATSAPP
 app.put('/api/whatsapp/config', async (req, res) => {
     const { msg_novo, msg_preparo, msg_entrega } = req.body;
-    
     try {
-        // Atualiza a linha fixa id = 1 com os novos textos da tela
         await pool.query(
             `UPDATE configuracoes_whatsapp 
              SET msg_novo = $1, msg_preparo = $2, msg_entrega = $3 
              WHERE id = 1`,
             [msg_novo, msg_preparo, msg_entrega]
         );
-        
         res.json({ mensagem: "Configurações do WhatsApp salvas com sucesso!" });
     } catch (erro) {
         console.error("❌ Erro ao salvar configurações do WhatsApp:", erro);
@@ -287,10 +394,8 @@ app.put('/api/whatsapp/config', async (req, res) => {
     }
 });
 
-
-
-// Servir arquivos estáticos do Frontend (Sempre por último para não interceptar as APIs!)
-app.use(express.static(path.join(__dirname, '../frontend/admin')));
+// Servir arquivos estáticos da pasta administrativa (Executa se nenhuma API acima bater)
+app.use(express.style = express.static(path.join(__dirname, '../frontend/admin')));
 
 const PORT = process.env.PORT || 3002;
 app.listen(PORT, () => {
