@@ -1,0 +1,94 @@
+<aside class="sidebar" id="sidebar">
+    
+    <div class="sidebar-header">
+        <div class="sidebar-logo-space">
+            <h1 class="logo-admin">R<span>C</span></h1>
+        </div>
+        <button id="toggle-sidebar" class="toggle-btn" data-tooltip="Recolher Menu">
+            <i class="fas fa-chevron-left" id="toggle-icon"></i>
+        </button>
+    </div>
+
+    <nav class="sidebar-nav">
+        
+        <button class="nav-item active" data-target="dashboard" data-tooltip="Dashboard">
+            <i class="fas fa-chart-line"></i>
+            <span class="nav-text">Dashboard</span>
+        </button>
+        
+        <button class="nav-item" data-target="pedidos" data-tooltip="Pedidos Recebidos">
+            <i class="fas fa-shopping-basket"></i>
+            <span class="nav-text">Pedidos</span>
+            <span class="badge" id="badge-pedidos">0</span>
+        </button>
+        
+        <button class="nav-item" data-target="produtos" data-tooltip="Gerenciar Cardápio">
+            <i class="fas fa-hamburger"></i>
+            <span class="nav-text">Meus Produtos</span>
+        </button>
+        
+        <button class="nav-item" data-target="configuracoes" data-tooltip="Configurações da Loja">
+            <i class="fas fa-store"></i>
+            <span class="nav-text">Configurar Loja</span>
+        </button>
+        
+    </nav>
+
+    <div class="user-menu" id="userMenu">
+        
+        <div class="user-profile-header" id="userProfileHeader">
+            <div id="userAvatarContainer" class="user-avatar-circle">
+                <img id="user-display-avatar" src="" alt="Avatar do Usuário">
+                <span id="user-initials-fallback">V</span>
+            </div>
+            <span class="user-name" id="userNameDisplay">Visitante</span>
+            <i class="fas fa-chevron-up" id="chevronIcon"></i>
+        </div>
+
+        <div class="user-dropdown" id="userDropdown">
+            
+            <div class="dropdown-section guest-only-section" id="guestSection">
+                <p class="dropdown-notice">Modo de Teste Ativo</p>
+                <button class="dropdown-item btn-register-now" id="btn-dropdown-register">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Criar Minha Conta</span>
+                </button>
+                <button class="dropdown-item btn-login-now" id="btn-dropdown-login">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Fazer Login</span>
+                </button>
+            </div>
+
+            <div class="dropdown-section user-only-section" id="userSectionA">
+                <button class="dropdown-item" id="btn-billing">
+                    <i class="fas fa-credit-card"></i>
+                    <span>Plano e Assinatura</span>
+                </button>
+                <button class="dropdown-item" id="btn-settings">
+                    <i class="fas fa-user-cog"></i>
+                    <span>Configurações</span>
+                </button>
+            </div>
+
+            <div class="dropdown-section">
+                <button class="dropdown-item" id="btn-help">
+                    <i class="fas fa-question-circle"></i>
+                    <span>Suporte / Ajuda</span>
+                </button>
+                <button class="dropdown-item" id="btn-theme">
+                    <i class="fas fa-moon"></i>
+                    <span>Tema (Dark/Light)</span>
+                </button>
+            </div>
+
+            <div class="dropdown-section">
+                <button class="dropdown-item logout-btn" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span id="logoutText">Voltar</span>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+</aside>

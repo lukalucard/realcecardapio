@@ -12,30 +12,13 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap" rel="stylesheet">
 
+    <link rel="stylesheet" href="css/admin.css">
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/whatsapp.css">
 </head>
 <body>
     <div class="dashboard-container">
-        
-        <aside class="sidebar">
-            <div class="logo-area">
-                <h2>Realce<span>Cardápio</span></h2>
-            </div>
-            <nav class="menu-nav">
-                <ul>
-                    <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> <span>Início</span></a></li>
-                    <li><a href="loja.html"><i class="fas fa-tachometer-alt"></i> <span>Loja</span></a></li>
-                    <li><a href="pedidos.html"><i class="fas fa-motorcycle"></i> <span>Pedidos</span></a></li>
-                    <li class="active"><a href="whatsapp.html"><i class="fab fa-whatsapp"></i> <span>WhatsApp</span></a></li>
-                    <li><a href="cardapio.html"><i class="fas fa-utensils"></i> <span>Cardápio</span></a></li>
-                    <li><a href="clientes.html"><i class="fas fa-users"></i> <span>Clientes</span></a></li>
-                    <li><a href="estoque.html"><i class="fas fa-boxes"></i> <span>Estoque</span></a></li>
-                    <li><a href="financeiro.html"><i class="fas fa-dollar-sign"></i> <span>Financeiro</span></a></li>
-                    <li><a href="configuracoes.html"><i class="fas fa-sliders-h"></i> <span>Configurações</span></a></li>
-                </ul>
-            </nav>
-        </aside>
+        <div id="sidebar-container"></div>
 
         <main class="main-content">
             
@@ -115,6 +98,7 @@
         </main>
     </div>
 
+    <script src="js/admin.js"></script>
     <script src="js/dashboard.js"></script>
     <script src="js/whatsapp.js"></script>
 </body>
