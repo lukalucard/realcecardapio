@@ -208,6 +208,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Armazena com segurança a sessão no navegador do lojista
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('user', JSON.stringify(data.user));
+                    
+                    // Remoção preventiva para não misturar os acessos
+                    localStorage.removeItem('guestMode');
 
                     // Redireciona o lojista para o Dashboard principal
                     window.location.href = 'admin/dashboard.html'; 
@@ -260,6 +263,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error("Erro no cadastro:", error);
                 alert("Erro ao conectar com o servidor.");
             }
+        });
+    }
+
+    /* ==========================================================================
+       10. COORDENAÇÃO DE ENTRADA DO MODO VISITANTE (SEM CADASTRO)
+       ========================================================================== */
+    const btnGuest = document.getElementById("btnGuest");
+
+    if (btnGuest) {
+        btnGuest.addEventListener('click', (e) => {
+            // Segura o redirecionamento imediato da tag <a>
+            e.preventDefault();
+
+            // Seta o passaporte de visitante legítimo que o admin.js tanto pede
+            localStorage.setItem('guestMode', 'true');
+
+            // Deixa a mesa limpa de dados antigos para o painel renderizar liso
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('paginaAtiva'); 
+
+            // Agora sim, faz a transição controlada para a rota de admin
+            window.location.href = 'admin/dashboard.html';
         });
     }
 });
