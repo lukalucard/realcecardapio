@@ -14,16 +14,14 @@ body {
     overflow: hidden;
 }
 
-/* Mantenha este bloco original */
 .cardapio-container {
     display: flex;
     height: 100%;
     width: 100%;
 }
 
-/* ADICIONE O BLOCO NOVO EXATAMENTE AQUI: */
 /* ==========================================================================
-   SUPORTE ANTI-PISCADA (SKELETON CONTAINER)
+   SUPORTE ANTI-PISCADA (SKELETON CONTAINER — O PAI RESOLUTO)
    ========================================================================== */
 #sidebar-container {
     width: 260px;
@@ -37,26 +35,18 @@ body {
     width: 76px;
 }
 
-
-
 /* ==========================================================================
-   2. SIDEBAR ROXA GRADIENTE (ALTURA FIXADA EM 100VH)
+   2. SIDEBAR ROXA GRADIENTE (FILHA QUE SE ADAPTA EM 100%)
    ========================================================================== */
 .sidebar {
-    width: 260px;
-    height: 100vh;
-    background: linear-gradient(180deg, #4A2A6E 0%, #6B3FA0 100%);
+    width: 100%; /* RESOLVIDO: Ocupa os 260px ou 76px do pai sem travar ou tampar */
+    height: 100%;
+    background: transparent; /* Usa o degradê do container de fundo */
     color: #ffffff;
     display: flex;
     flex-direction: column;
     box-shadow: 2px 0 12px rgba(0, 0, 0, 0.1);
-    flex-shrink: 0;
     overflow: visible;
-    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.sidebar.collapsed {
-    width: 76px;
 }
 
 /* Cabeçalho superior do menu */
@@ -94,7 +84,7 @@ body {
 }
 
 /* ==========================================================================
-   3. ESTILIZAÇÃO COMPLETA DA SUA LOGO EM P (REGRA DE OCULTAR NO COLLAPSED)
+   3. ESTILIZAÇÃO COMPLETA DA SUA LOGO EM P (OCULTA NO MODO RECOLHIDO)
    ========================================================================== */
 .logo-admin {
     font-family: "Dancing Script", cursive;
@@ -109,7 +99,6 @@ body {
     color: #FF9F4A;
 }
 
-/* Oculta a logo do seu parágrafo quando a sidebar estiver colapsada */
 .sidebar.collapsed .logo-admin {
     display: none;
 }
