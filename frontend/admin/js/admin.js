@@ -1,16 +1,14 @@
 document.addEventListener('DOMContentLoaded', async () => {
     
-    // URL Corrigida automaticamente para o seu ambiente oficial de produção
     const API_URL = 'https://realcecardapio.onrender.com';
 
     /* ==========================================================================
-       1. CONTROLE E TRAVA DE SEGURANÇA (LOGADO VS VISITANTE)
+       1. VERIFICAÇÃO E TRAVA DE ACESSO (SEGURANÇA ATIVA)
        ========================================================================== */
     const token = localStorage.getItem('token');
     const userJson = localStorage.getItem('user');
     const guestMode = localStorage.getItem('guestMode') === 'true';
 
-    // Se não estiver logado E não for um visitante autorizado, barra o acesso
     if (!guestMode && (!token || !userJson)) {
         window.location.href = '../index.html';
         return;
@@ -19,7 +17,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const userData = userJson ? JSON.parse(userJson) : null;
 
     /* ==========================================================================
-       2. INJEÇÃO DO COMPONENTE SIDEBAR NA TELA
+       2. INJEÇÃO DINÂMICA DA SIDEBAR GLOBAL
        ========================================================================== */
     const sidebarContainer = document.getElementById('sidebar-container');
     if (!sidebarContainer) return;
@@ -29,52 +27,35 @@ document.addEventListener('DOMContentLoaded', async () => {
         const html = await response.text();
         sidebarContainer.innerHTML = html;
 
-        // Mapeamento de elementos após a injeção acontecer
+        // Mapeamento dos elementos após renderizar na tela
         const sidebar = document.getElementById('sidebar');
         const toggleBtn = document.getElementById('toggle-sidebar');
         const toggleIcon = document.getElementById('toggle-icon');
-        const navItems = document.querySelectorAll('.nav-item');
-        const sections = document.querySelectorAll('.content-section');
         const userMenu = document.getElementById('userMenu');
         const userDropdown = document.getElementById('userDropdown');
         const chevronIcon = document.getElementById('chevronIcon');
         const logoutBtn = document.getElementById('logoutBtn');
+        const navLinks = document.querySelectorAll('.nav-item');
 
         /* ==========================================================================
-           3. ROTEAMENTO INTERNO E ATIVAÇÃO DE ABAS (.content-section)
+           3. SISTEMA DE ABA ATIVA AUTOMÁTICA (ROTEAMENTO MULTI-PÁGINAS)
            ========================================================================== */
-        function ativarPagina(target) {
-            navItems.forEach(item => item.classList.remove('active'));
-            sections.forEach(section => section.classList.remove('active'));
+        // Lê a URL atual do navegador (Ex: "cardapio.html")
+        const currentPath = window.location.pathname;
+        const currentPage = currentPath.split("/").pop(); 
 
-            const btnAtivo = document.querySelector(`[data-target="${target}"]`);
-            const secaoAtiva = document.getElementById(target);
-
-            if (btnAtivo) btnAtivo.classList.add('active');
-            if (secaoAtiva) secaoAtiva.classList.add('active');
-        }
-
-        // Adiciona evento de clique em cada botão da sidebar
-        navItems.forEach(item => {
-            item.addEventListener('click', () => {
-                const target = item.getAttribute('data-target');
-                if (!target) return;
-
-                localStorage.setItem('paginaAtiva', target);
-                ativarPagina(target);
-            });
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            const linkHref = link.getAttribute('href');
+            
+            // Se o link bater com a página atual, ele ganha o destaque roxo/laranja
+            if (currentPage === linkHref) {
+                link.classList.add('active');
+            }
         });
 
-        // Restaura a aba ativa onde o usuário parou
-        const paginaSalva = localStorage.getItem('paginaAtiva');
-        if (paginaSalva) {
-            ativarPagina(paginaSalva);
-        } else {
-            ativarPagina('dashboard'); // Página padrão inicial
-        }
-
         /* ==========================================================================
-           4. LÓGICA DE RECOLHER A BARRA (COMPACTAR)
+           4. MECANISMO DE RECOLHER/EXPANDIR MENU (PERSISTENTE)
            ========================================================================== */
         const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
         if (isCollapsed) {
@@ -90,18 +71,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                 localStorage.setItem('sidebarCollapsed', collapsedActive);
 
                 if (collapsedActive) {
-                    toggleIcon.classList.replace('fa-chevron-left', 'fa-chevron-right');
+                    if (toggleIcon) toggleIcon.classList.replace('fa-chevron-left', 'fa-chevron-right');
                     toggleBtn.setAttribute('data-tooltip', 'Abrir menu');
-                    userDropdown.classList.remove('active'); // Fecha dropdown para não flutuar solto
+                    userDropdown.classList.remove('active'); 
                 } else {
-                    toggleIcon.classList.replace('fa-chevron-right', 'fa-chevron-left');
-                    toggleBtn.setAttribute('data-tooltip', 'Fechar menu');
+                    if (toggleIcon) toggleIcon.classList.replace('fa-chevron-right', 'fa-chevron-left');
+                    toggleBtn.setAttribute('data-tooltip', 'Recolher Menu');
                 }
             });
         }
 
         /* ==========================================================================
-           5. ADAPTAÇÃO VISUAL DO PERFIL (AVATAR E SESSÕES INTERNAS)
+           5. ADAPTAÇÃO INTERNA DO PERFIL DO USUÁRIO
            ========================================================================== */
         const guestSection = document.getElementById('guestSection');
         const userSectionA = document.getElementById('userSectionA');
@@ -116,7 +97,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             const nameDisplay = document.getElementById('userNameDisplay');
 
             if (data && data.name) {
-                // Modo Lojista Cadastrado
                 if (nameDisplay) nameDisplay.textContent = data.name;
 
                 const inicial = data.name.charAt(0).toUpperCase();
@@ -132,14 +112,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 } else {
                     if (imgElement) imgElement.style.display = 'none';
                     if (initialsElement) initialsElement.style.display = 'block';
-                    avatarContainer.style.background = '#FF6B00';
+                    avatarContainer.style.background = '#FF9F4A';
                 }
                 
                 if (guestSection) guestSection.style.display = 'none';
                 if (userSectionA) userSectionA.style.display = 'block';
                 if (logoutText) logoutText.textContent = "Sair da Conta";
             } else {
-                // Modo Visitante Sem Cadastro
                 if (nameDisplay) nameDisplay.textContent = "Visitante";
                 if (initialsElement) initialsElement.textContent = "V";
                 if (imgElement) imgElement.style.display = 'none';
@@ -152,17 +131,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
-        // Renderiza imediatamente com os dados locais salvos no login
         configurarAvatarUsuario(userData);
 
         /* ==========================================================================
-           6. GERENCIAMENTO DA JANELA FLUTUANTE (OPEN / CLOSE DROPDOWN)
+           6. CONTROLE DA JANELA FLUTUANTE DROPDOWN (OPEN / CLOSE)
            ========================================================================== */
         if (userMenu) {
             userMenu.addEventListener('click', (e) => {
                 e.stopPropagation();
                 if (sidebar.classList.contains('collapsed')) {
-                    sidebar.classList.remove('collapsed'); // Expande a barra ao clicar se tiver fechada
+                    sidebar.classList.remove('collapsed');
                     if (toggleIcon) toggleIcon.classList.replace('fa-chevron-right', 'fa-chevron-left');
                 }
                 userDropdown.classList.toggle('active');
@@ -188,19 +166,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         /* ==========================================================================
-           7. SISTEMA DE DESCONEXÃO E SAÍDA (LOGOUT)
+           7. FLUXO DE DESCONEXÃO (LOGOUT)
            ========================================================================== */
         if (logoutBtn) {
             logoutBtn.addEventListener('click', () => {
-                localStorage.removeItem('paginaAtiva');
-                localStorage.removeItem('guestMode');
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
+                localStorage.clear();
                 window.location.href = '../index.html';
             });
         }
 
-        // Redirecionamento dos links internos de visitantes para a home
         document.getElementById('btn-dropdown-register').addEventListener('click', () => {
             window.location.href = '../index.html?action=register';
         });
@@ -209,7 +183,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         /* ==========================================================================
-           8. SESSÃO EXTRA: VERIFICAÇÃO DE ASSINATURA EM TEMPO REAL NO NEON
+           8. ATUALIZAÇÃO ASSÍNCRONA DE DADOS COM O NEON (POSTGRESQL)
            ========================================================================== */
         if (token && userData) {
             try {
@@ -220,17 +194,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 if (res.ok) {
                     const freshData = await res.json();
-                    configurarAvatarUsuario(freshData); // Atualiza com dados atualizados do Postgres
+                    configurarAvatarUsuario(freshData); 
                 } else if (res.status === 401) {
                     localStorage.clear();
                     window.location.href = '../index.html';
                 }
             } catch (error) {
-                console.log("Servidor offline ou instável, mantendo cache local de segurança.");
+                console.log("Servidor em standby ou offline, mantendo dados locais de segurança.");
             }
         }
 
     } catch (error) {
-        console.error("Erro crítico no carregamento do ecossistema administrativo:", error);
+        console.error("Erro crítico na inicialização do painel administrativo:", error);
     }
 });

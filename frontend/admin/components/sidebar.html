@@ -1,9 +1,7 @@
 <aside class="sidebar" id="sidebar">
     
     <div class="sidebar-header">
-        <div class="sidebar-logo-space">
-            <p class="logo-admin">Realce<span>Cardapio</span></p>
-        </div>
+        <p class="logo-admin">Realce<span>Cardapio</span></p>
         <button id="toggle-sidebar" class="toggle-btn" data-tooltip="Recolher Menu">
             <i class="fas fa-chevron-left" id="toggle-icon"></i>
         </button>
@@ -11,26 +9,26 @@
 
     <nav class="sidebar-nav">
         
-        <button class="nav-item active" data-target="dashboard" data-tooltip="Dashboard">
+        <a href="dashboard.html" class="nav-item" data-tooltip="Dashboard">
             <i class="fas fa-chart-line"></i>
             <span class="nav-text">Dashboard</span>
-        </button>
+        </a>
         
-        <button class="nav-item" data-target="pedidos" data-tooltip="Pedidos Recebidos">
+        <a href="pedidos.html" class="nav-item" data-tooltip="Pedidos Recebidos">
             <i class="fas fa-shopping-basket"></i>
             <span class="nav-text">Pedidos</span>
-            <span class="badge" id="badge-pedidos">0</span>
-        </button>
+            <span class="badge-count" id="badge-pedidos">0</span>
+        </a>
         
-        <button class="nav-item" data-target="produtos" data-tooltip="Gerenciar Cardápio">
+        <a href="cardapio.html" class="nav-item" data-tooltip="Gerenciar Cardápio">
             <i class="fas fa-hamburger"></i>
             <span class="nav-text">Meus Produtos</span>
-        </button>
+        </a>
         
-        <button class="nav-item" data-target="configuracoes" data-tooltip="Configurações da Loja">
+        <a href="configuracoes.html" class="nav-item" data-tooltip="Configurações da Loja">
             <i class="fas fa-store"></i>
             <span class="nav-text">Configurar Loja</span>
-        </button>
+        </a>
         
     </nav>
 
@@ -38,7 +36,7 @@
         
         <div class="user-profile-header" id="userProfileHeader">
             <div id="userAvatarContainer" class="user-avatar-circle">
-                <img id="user-display-avatar" src="" alt="Avatar do Usuário">
+                <img id="user-display-avatar" src="" alt="Avatar">
                 <span id="user-initials-fallback">V</span>
             </div>
             <span class="user-name" id="userNameDisplay">Visitante</span>
@@ -47,7 +45,7 @@
 
         <div class="user-dropdown" id="userDropdown">
             
-            <div class="dropdown-section guest-only-section" id="guestSection">
+            <div class="dropdown-section" id="guestSection">
                 <p class="dropdown-notice">Modo de Teste Ativo</p>
                 <button class="dropdown-item btn-register-now" id="btn-dropdown-register">
                     <i class="fas fa-user-plus"></i>
@@ -59,10 +57,10 @@
                 </button>
             </div>
 
-            <div class="dropdown-section user-only-section" id="userSectionA">
+            <div class="dropdown-section" id="userSectionA">
                 <button class="dropdown-item" id="btn-billing">
                     <i class="fas fa-credit-card"></i>
-                    <span>Plano e Assinatura</span>
+                    <span>Assinatura e Plano</span>
                 </button>
                 <button class="dropdown-item" id="btn-settings">
                     <i class="fas fa-user-cog"></i>

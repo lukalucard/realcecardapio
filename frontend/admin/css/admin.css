@@ -21,10 +21,11 @@ body {
 }
 
 /* ==========================================================================
-   2. SIDEBAR ROXA GRADIENTE (MECANISMO COMPACTÁVEL)
+   2. SIDEBAR ROXA GRADIENTE (ALTURA FIXADA EM 100VH)
    ========================================================================== */
 .sidebar {
     width: 260px;
+    height: 100vh;
     background: linear-gradient(180deg, #4A2A6E 0%, #6B3FA0 100%);
     color: #ffffff;
     display: flex;
@@ -39,19 +40,21 @@ body {
     width: 76px;
 }
 
+/* Cabeçalho superior do menu */
 .sidebar-header {
     width: 100%;
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     align-items: center;
-    padding: 10px 15px;
+    padding: 20px 15px;
 }
 
 .sidebar.collapsed .sidebar-header {
     justify-content: center;
-    padding: 10px 0;
+    padding: 20px 0;
 }
 
+/* Estilo do Botão de Recolher/Abrir */
 .toggle-btn {
     width: 32px;
     height: 32px;
@@ -72,32 +75,28 @@ body {
 }
 
 /* ==========================================================================
-   3. ÁREA DA LOGO (SUAS TAGS ORIGINAIS)
+   3. ESTILIZAÇÃO COMPLETA DA SUA LOGO EM P (REGRA DE OCULTAR NO COLLAPSED)
    ========================================================================== */
-.logo-area {
+.logo-admin {
     font-family: "Dancing Script", cursive;
-    padding: 10px 20px 24px 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    margin-bottom: 20px;
-}
-
-.logo-area h2,
-.logo-area p {
-    font-size: 2rem;
+    font-size: 1.8rem;
     color: #ffffff;
+    font-weight: 700;
+    white-space: nowrap;
 }
 
-.logo-area span {
+.logo-admin span {
     font-weight: 400;
     color: #FF9F4A;
 }
 
-.sidebar.collapsed .logo-area {
+/* Oculta a logo do seu parágrafo quando a sidebar estiver colapsada */
+.sidebar.collapsed .logo-admin {
     display: none;
 }
 
 /* ==========================================================================
-   4. NAVEGAÇÃO DO MENU (CORRIGIDO PARA .sidebar-nav E .nav-item)
+   4. NAVEGAÇÃO DOS LINKS REAIS DA SIDEBAR (.sidebar-nav e .nav-item)
    ========================================================================== */
 .sidebar-nav {
     display: flex;
@@ -135,7 +134,7 @@ body {
     display: none;
 }
 
-/* Estados Ativo e Hover */
+/* Regras de seleção ativa e hover */
 .nav-item.active {
     background-color: rgba(255, 255, 255, 0.2);
     border-left: 4px solid #FF9F4A;
@@ -162,7 +161,7 @@ body {
 }
 
 /* ==========================================================================
-   5. SISTEMA DOS BALÕES FLUTUANTES (TOOLTIPS NO HOVER)
+   5. MECANISMO DOS BALÕES FLUTUANTES (TOOLTIPS NO HOVER)
    ========================================================================== */
 .sidebar.collapsed .nav-item::after {
     content: attr(data-tooltip);
@@ -203,7 +202,7 @@ body {
 }
 
 /* ==========================================================================
-   6. MENU DO USUÁRIO INTEGRADO NA BASE
+   6. COMPONENTE DO USUÁRIO INTEGRADO NA BASE
    ========================================================================== */
 .user-menu {
     position: relative;
@@ -352,7 +351,7 @@ body {
 }
 
 /* ==========================================================================
-   7. ÁREA DO CONTEÚDO DA TELA
+   7. ÁREA DO CONTEÚDO DA TELA (MAIN CONTENT)
    ========================================================================== */
 .cardapio-main-content {
     flex: 1;
