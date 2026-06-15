@@ -21,7 +21,7 @@ body {
 }
 
 /* ==========================================================================
-   2. SIDEBAR ROXA GRADIENTE (MECANISMO COMPACTÁVEL ADAPTADO)
+   2. SIDEBAR ROXA GRADIENTE (MECANISMO COMPACTÁVEL)
    ========================================================================== */
 .sidebar {
     width: 260px;
@@ -31,16 +31,14 @@ body {
     flex-direction: column;
     box-shadow: 2px 0 12px rgba(0, 0, 0, 0.1);
     flex-shrink: 0;
-    overflow: visible; /* Mantido visible para o tooltip não ser cortado */
+    overflow: visible;
     transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Estado Compactado disparado pelo JS */
 .sidebar.collapsed {
     width: 76px;
 }
 
-/* Cabeçalho que abraça o seu botão de controle interno */
 .sidebar-header {
     width: 100%;
     display: flex;
@@ -54,7 +52,6 @@ body {
     padding: 10px 0;
 }
 
-/* Botão de recolher interno suave */
 .toggle-btn {
     width: 32px;
     height: 32px;
@@ -75,7 +72,7 @@ body {
 }
 
 /* ==========================================================================
-   3. ÁREA DA LOGO (SUAS TAGS ORIGINAIS PRESERVADAS)
+   3. ÁREA DA LOGO (SUAS TAGS ORIGINAIS)
    ========================================================================== */
 .logo-area {
     font-family: "Dancing Script", cursive;
@@ -95,27 +92,21 @@ body {
     color: #FF9F4A;
 }
 
-/* Esconde a logo suavemente ao encolher */
 .sidebar.collapsed .logo-area {
     display: none;
 }
 
 /* ==========================================================================
-   4. NAVEGAÇÃO DO MENU (SISTEMA DE BOTÕES COM SEUS ESTILOS)
+   4. NAVEGAÇÃO DO MENU (CORRIGIDO PARA .sidebar-nav E .nav-item)
    ========================================================================== */
-.menu-nav ul {
-    list-style: none;
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
-.menu-nav li {
-    margin: 4px 12px;
-    border-radius: 8px;
-    transition: background 0.2s;
-    position: relative; /* Necessário para ancorar o balão flutuante */
-}
-
-.menu-nav li button {
-    width: 100%;
+.nav-item {
+    margin: 0 12px;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -130,34 +121,32 @@ body {
     cursor: pointer;
     transition: all 0.2s;
     text-align: left;
+    position: relative;
+    width: calc(100% - 24px);
 }
 
-.menu-nav li button i {
+.nav-item i {
     width: 22px;
     font-size: 1.1rem;
     text-align: center;
 }
 
-/* Sumir com o texto do botão no modo encolhido */
 .sidebar.collapsed .nav-text {
     display: none;
 }
 
-/* Suas regras de seleção ativa e hover */
-.menu-nav li.active {
+/* Estados Ativo e Hover */
+.nav-item.active {
     background-color: rgba(255, 255, 255, 0.2);
     border-left: 4px solid #FF9F4A;
-}
-
-.menu-nav li.active button {
     color: #ffffff;
+    font-weight: 600;
 }
 
-.menu-nav li:hover:not(.active) {
+.nav-item:hover:not(.active) {
     background-color: rgba(255, 255, 255, 0.1);
 }
 
-/* Badge de Notificação */
 .badge-count {
     background: #FF9F4A;
     color: #ffffff;
@@ -175,7 +164,7 @@ body {
 /* ==========================================================================
    5. SISTEMA DOS BALÕES FLUTUANTES (TOOLTIPS NO HOVER)
    ========================================================================== */
-.sidebar.collapsed .menu-nav li::after {
+.sidebar.collapsed .nav-item::after {
     content: attr(data-tooltip);
     position: absolute;
     left: 80px;
@@ -193,7 +182,7 @@ body {
     z-index: 2500;
 }
 
-.sidebar.collapsed .menu-nav li::before {
+.sidebar.collapsed .nav-item::before {
     content: '';
     position: absolute;
     left: 74px;
@@ -207,14 +196,14 @@ body {
     z-index: 2500;
 }
 
-.sidebar.collapsed .menu-nav li:hover::after,
-.sidebar.collapsed .menu-nav li:hover::before {
+.sidebar.collapsed .nav-item:hover::after,
+.sidebar.collapsed .nav-item:hover::before {
     opacity: 1;
     transform: translateX(0);
 }
 
 /* ==========================================================================
-   6. MENU DO USUÁRIO INTEGRADO NA BASE (ESTILO SUAVE)
+   6. MENU DO USUÁRIO INTEGRADO NA BASE
    ========================================================================== */
 .user-menu {
     position: relative;
@@ -285,7 +274,6 @@ body {
     display: none;
 }
 
-/* Dropdown Flutuante Interno */
 .user-dropdown {
     position: absolute;
     bottom: 65px;
@@ -358,14 +346,13 @@ body {
     color: #ef4444;
 }
 
-/* Reposicionamento do Dropdown com a barra colapsada */
 .sidebar.collapsed .user-dropdown {
     left: 76px;
     bottom: 10px;
 }
 
 /* ==========================================================================
-   7. ÁREA DO CONTEÚDO DA TELA (SUA REGRA ORIGINAL DE VOLTA)
+   7. ÁREA DO CONTEÚDO DA TELA
    ========================================================================== */
 .cardapio-main-content {
     flex: 1;
