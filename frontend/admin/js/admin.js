@@ -34,11 +34,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const cachedHTML = localStorage.getItem('sidebarTemplateCache');
         
         if (cachedHTML) {
-            // Se tiver cache, injeta na velocidade da luz
             sidebarContainer.innerHTML = cachedHTML;
             inicializarMecanismosSidebar();
         } else {
-            // Se for a primeira vez do usuário, busca do servidor e salva no cache
             carregarSidebarDoServidor();
         }
     }
@@ -48,7 +46,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch('components/sidebar.html');
             const html = await response.text();
             
-            // Grava no cache do navegador para os próximos cliques
             localStorage.setItem('sidebarTemplateCache', html);
             
             sidebarContainer.innerHTML = html;
@@ -71,7 +68,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const logoutBtn = document.getElementById('logoutBtn');
         const navLinks = document.querySelectorAll('.nav-item');
 
-        // Sincroniza a classe de recolhimento na tag interna <aside>
         const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
         if (isCollapsed && sidebar) {
             sidebar.classList.add('collapsed');
@@ -79,7 +75,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (toggleBtn) toggleBtn.setAttribute('data-tooltip', 'Abrir menu');
         }
 
-        // Roteamento de Destaque das Abas Ativas
         const currentPath = window.location.pathname;
         const currentPage = currentPath.split("/").pop(); 
 
@@ -91,7 +86,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Evento do Botão de Recolher/Abrir
         if (toggleBtn && sidebar) {
             toggleBtn.addEventListener('click', () => {
                 sidebar.classList.toggle('collapsed');
@@ -111,10 +105,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // Configuração dinâmica do perfil do usuário
         configurarDadosDoPerfil();
 
-        // Controle do Dropdown Flutuante do Usuário
         if (userMenu) {
             userMenu.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -140,7 +132,6 @@ document.addEventListener('DOMContentLoaded', () => {
             userDropdown.addEventListener('click', (e) => e.stopPropagation());
         }
 
-        // Eventos de saída e redirecionamentos de login/cadastro dentro do menu
         if (logoutBtn) {
             logoutBtn.addEventListener('click', () => {
                 localStorage.clear();
@@ -160,6 +151,11 @@ document.addEventListener('DOMContentLoaded', () => {
             btnLog.addEventListener('click', () => {
                 window.location.href = '../index.html?action=login';
             });
+        }
+
+        // CORREÇÃO CIRÚRGICA AQUI: Envelopando a chamada assíncrona do Neon corretamente
+        if (token && userData) {
+            sincronizarDadosComServidor();
         }
     }
 
@@ -209,9 +205,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* ==========================================================================
-       6. SINCRO ASSÍNCRONA DE DADOS COM O NEON (BACKEND)
+       6. SINCRO ASSÍNCRONA DE DADOS COM O NEON (CORRIGIDO COM ASYNC)
        ========================================================================== */
-    if (token && userData) {
+    async function sincronizarDadosComServidor() {
         try {
             const res = await fetch(`${API_URL}/me`, {
                 method: 'GET',
