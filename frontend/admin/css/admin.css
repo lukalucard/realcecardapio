@@ -39,14 +39,16 @@ body {
    2. SIDEBAR ROXA GRADIENTE (FILHA QUE SE ADAPTA EM 100%)
    ========================================================================== */
 .sidebar {
-    width: 100%; /* RESOLVIDO: Ocupa os 260px ou 76px do pai sem travar ou tampar */
+    width: 100%;
     height: 100%;
-    background: transparent; /* Usa o degradê do container de fundo */
+    background: transparent;
     color: #ffffff;
     display: flex;
     flex-direction: column;
     box-shadow: 2px 0 12px rgba(0, 0, 0, 0.1);
     overflow: visible;
+    /* ADICIONADO: Sincroniza a velocidade de fechamento idêntica à do contêiner pai */
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
 }
 
 /* Cabeçalho superior do menu */
@@ -218,6 +220,33 @@ body {
     margin-top: auto;
     padding: 0 12px;
     margin-bottom: 15px;
+}
+
+/* O menu quando a barra está ABERTA (sobe para cima do perfil) */
+.user-dropdown {
+    position: absolute;
+    bottom: 65px;
+    left: 12px;
+    width: 236px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    display: none;
+    flex-direction: column;
+    box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.15);
+    z-index: 9999; /* Garante que fique por cima de qualquer conteúdo */
+}
+
+.user-dropdown.active {
+    display: flex;
+}
+
+/* CORREÇÃO CIRÚRGICA: Quando a sidebar estiver FECHADA, o menu joga para a DIREITA (fora da barra) */
+#sidebar-container.collapsed .user-dropdown {
+    left: 85px;       /* Empurra para fora dos 76px da barra encolhida */
+    bottom: 10px;     /* Alinha horizontalmente com o botão do perfil */
+    width: 200px;     /* Um pouco mais compacto para o modo flutuante */
+    position: fixed;  /* Desprende do fluxo interno para não esticar a barra */
 }
 
 .user-profile-header {

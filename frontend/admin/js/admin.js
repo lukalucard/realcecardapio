@@ -107,21 +107,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         configurarDadosDoPerfil();
 
+        // Controle do Dropdown Flutuante do Usuário (Sem forçar a abertura da barra)
         if (userMenu) {
             userMenu.addEventListener('click', (e) => {
                 e.stopPropagation();
-                if (sidebar && sidebar.classList.contains('collapsed')) {
-                    sidebar.classList.remove('collapsed');
-                    sidebarContainer.classList.remove('collapsed');
-                    localStorage.setItem('sidebarCollapsed', 'false');
-                    if (toggleIcon) toggleIcon.classList.replace('fa-chevron-right', 'fa-chevron-left');
-                }
+                
+                // REMOVIDO: Tiramos o código que dava classList.remove('collapsed')
+                
                 if (userDropdown) userDropdown.classList.toggle('active');
                 if (chevronIcon && userDropdown) {
                     chevronIcon.style.transform = userDropdown.classList.contains('active') ? 'rotate(180deg)' : 'rotate(0deg)';
                 }
             });
         }
+
 
         document.addEventListener('click', () => {
             if (userDropdown) userDropdown.classList.remove('active');
