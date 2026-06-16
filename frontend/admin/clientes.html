@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RealceCardápio - Gestão de Clientes</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/clientes.css">
+</head>
+<body>
+
+    <div class="cardapio-container">
+        <div id="sidebar-container"></div>
+
+        <main class="cardapio-main-content">
+            <div class="page-header">
+                <h1>Gestão de Clientes</h1>
+                <p>Monitore a fidelidade dos clientes da sua açaiteria e crie ofertas direcionadas.</p>
+            </div>
+
+            <div class="tabs-container">
+                <button class="tab-btn active" data-tab="clientes-salvos">
+                    <i class="fas fa-address-book"></i> Clientes Salvos
+                </button>
+                <button class="tab-btn" data-tab="crm-clientes">
+                    <i class="fas fa-funnel-dollar"></i> CRM Clientes
+                </button>
+            </div>
+
+            <div id="clientes-salvos" class="tab-content active">
+                <div class="summary-card-single">
+                    <div class="summary-icon icon-purple">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="summary-info">
+                        <h3>0</h3>
+                        <p>Total de Clientes Cadastrados</p>
+                    </div>
+                </div>
+                
+                <div class="empty-state-box">
+                    <i class="fas fa-user-clock empty-icon"></i>
+                    <p>Nenhum cliente registrado ainda. Os clientes da açaiteria aparecerão aqui automaticamente assim que finalizarem os primeiros pedidos no cardápio de teste!</p>
+                </div>
+            </div>
+
+            <div id="crm-clientes" class="tab-content">
+                <div class="crm-summary-grid">
+                    <div class="summary-card">
+                        <div class="summary-icon icon-green">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <div class="summary-info">
+                            <h3>0</h3>
+                            <p>Clientes Fiéis (3+ pedidos)</p>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-card">
+                        <div class="summary-icon icon-amber">
+                            <i class="fas fa-hourglass-half"></i>
+                        </div>
+                        <div class="summary-info">
+                            <h3>0</h3>
+                            <p>Em Alerta (Sumido há 7 dias)</p>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-card">
+                        <div class="summary-icon icon-red">
+                            <i class="fas fa-skull-crossbones"></i>
+                        </div>
+                        <div class="summary-info">
+                            <h3>0</h3>
+                            <p>Crítico (Sumido há 15+ dias)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="empty-state-box">
+                    <i class="fas fa-chart-pie empty-icon"></i>
+                    <p>O funil de comportamento de compra será alimentado com o histórico dos pedidos para gerar os alertas de retorno automaticamente.</p>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="js/admin.js"></script>
+    <script src="js/clientes.js"></script>
+</body>
+</html>
