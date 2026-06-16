@@ -1,0 +1,219 @@
+/* ==========================================================================
+   DESIGN COMPLETO DO CONTROLE DE ESTOQUE
+   ========================================================================== */
+
+.page-header {
+    margin-bottom: 24px;
+}
+
+.page-header h1 {
+    font-size: 1.8rem;
+    color: #1e293b;
+    font-weight: 700;
+}
+
+.page-header p {
+    color: #64748b;
+    font-size: 0.95rem;
+    margin-top: 4px;
+}
+
+/* Abas */
+.tabs-container {
+    display: flex;
+    gap: 16px;
+    border-bottom: 2px solid #e2e8f0;
+    margin-bottom: 24px;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: 12px 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    position: relative;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tab-btn:hover,
+.tab-btn.active {
+    color: #6B3FA0;
+}
+
+.tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #6B3FA0;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Cards Indicadores */
+.stock-grid-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.stock-card-mini {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.01);
+}
+
+.stock-card-mini .card-label {
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.stock-card-mini .card-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.stock-card-mini.alert-amber {
+    border-left: 4px solid #f59e0b;
+    background: #fffbeb;
+}
+
+.stock-card-mini.alert-amber .card-value {
+    color: #b45309;
+}
+
+/* Tabelas Customizadas */
+.table-container {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.stock-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.95rem;
+}
+
+.stock-table th {
+    background: #f8fafc;
+    padding: 14px 16px;
+    color: #475569;
+    font-weight: 600;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.stock-table td {
+    padding: 14px 16px;
+    color: #334155;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+/* Linha com Alerta Crítico */
+.stock-table tr.row-alert td {
+    background-color: #fffbeb;
+}
+
+.tag-cat {
+    background: #f1f5f9;
+    color: #475569;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* Badges de Status */
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.status-ok { background: #dcfce7; color: #16a34a; }
+.status-warning { background: #fef3c7; color: #d97706; }
+
+/* Bloco de Formulário Mockado */
+.form-action-container {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+}
+
+.mock-form-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.mock-input {
+    flex: 1;
+    min-width: 180px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 0.9rem;
+    color: #475569;
+    background: #f8fafc;
+    font-weight: 500;
+}
+
+.placeholder-text {
+    color: #94a3b8;
+    font-weight: 400;
+}
+
+.btn-stock-save {
+    background: #94a3b8;
+    color: #ffffff;
+    border: none;
+    padding: 0 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: not-allowed;
+}
+
+/* Estado Vazio */
+.empty-state-box {
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 12px;
+    text-align: center;
+    border: 1px dashed #cbd5e1;
+    color: #64748b;
+}
+
+.empty-icon {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+    color: #94a3b8;
+}
