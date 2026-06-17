@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RealceCardápio - Painel Financeiro</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/financeiro.css">
+</head>
+<body>
+
+    <div class="cardapio-container">
+        <div id="sidebar-container"></div>
+
+        <main class="cardapio-main-content">              
+            <header class="page-header">
+                <h1>Painel Financeiro</h1>
+                <p>Acompanhe o faturamento da açaiteria, registre despesas e analise os lucros do seu negócio.</p>
+                
+                <nav class="tabs-container">
+                    <button class="tab-btn active" data-tab="fluxo-caixa">
+                        <i class="fas fa-cash-register"></i> Fluxo de Caixa
+                    </button>
+                    <button class="tab-btn" data-tab="relatorios-financeiros">
+                        <i class="fas fa-chart-pie"></i> Relatórios (DRE)
+                    </button>
+                </nav>
+            </header>
+
+            <section id="fluxo-caixa" class="tab-content active">                
+                <div class="finance-grid-cards">
+                    <div class="finance-card saldo-positivo">
+                        <span class="card-label">Saldo Atual</span>
+                        <span class="card-value">R$ 1.250,00</span>
+                    </div>
+                    <div class="finance-card faturamento">
+                        <span class="card-label">Faturamento (Mês)</span>
+                        <span class="card-value">R$ 3.400,00</span>
+                    </div>
+                    <div class="finance-card despesas">
+                        <span class="card-label">Despesas Pagas</span>
+                        <span class="card-value">R$ 2.150,00</span>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <h3 class="table-title">Últimos Lançamentos</h3>
+                    <table class="finance-table">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Descrição / Origem</th>
+                                <th>Categoria</th>
+                                <th>Tipo</th>
+                                <th>Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>16/06/2026</td>
+                                <td>Pedido #1042 - Cardápio Digital</td>
+                                <td><span class="tag-fin">Vendas</span></td>
+                                <td><span class="type-badge type-entry">Entrada</span></td>
+                                <td class="val-entry">+ R$ 45,00</td>
+                            </tr>
+                            <tr>
+                                <td>15/06/2026</td>
+                                <td>Compra de Insumos - Mercado Central</td>
+                                <td><span class="tag-fin">Estoque</span></td>
+                                <td><span class="type-badge type-exit">Saída</span></td>
+                                <td class="val-exit">- R$ 380,00</td>
+                            </tr>
+                            <tr>
+                                <td>14/06/2026</td>
+                                <td>Pedido #1041 - Cardápio Digital</td>
+                                <td><span class="tag-fin">Vendas</span></td>
+                                <td><span class="type-badge type-entry">Entrada</span></td>
+                                <td class="val-entry">+ R$ 32,00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="relatorios-financeiros" class="tab-content">
+                <div class="report-box">
+                    <h3>Demonstrativo de Resultado Simplicado</h3>
+                    <p>Análise de lucratividade real da açaiteria.</p>
+                </div>
+
+                <div class="empty-state-box">
+                    <i class="fas fa-chart-line empty-icon"></i>
+                    <p>Gráficos de faturamento mensal e relatórios consolidados de lucro líquido serão gerados automaticamente conforme o histórico de pedidos e movimentações for alimentado.</p>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script src="js/admin.js"></script>
+    <script src="js/financeiro.js"></script>
+</body>
+</html>

@@ -1,0 +1,209 @@
+/* ==========================================================================
+   DESIGN DO PAINEL FINANCEIRO SEMÂNTICO
+   ========================================================================== */
+
+.page-header {
+    margin-bottom: 24px;
+}
+
+.page-header h1 {
+    font-size: 1.8rem;
+    color: #1e293b;
+    font-weight: 700;
+}
+
+.page-header p {
+    color: #64748b;
+    font-size: 0.95rem;
+    margin-top: 4px;
+}
+
+/* Navegação por Abas */
+.tabs-container {
+    display: flex;
+    gap: 16px;
+    border-bottom: 2px solid #e2e8f0;
+    margin-bottom: 24px;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: 12px 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    position: relative;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tab-btn:hover,
+.tab-btn.active {
+    color: #6B3FA0;
+}
+
+.tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #6B3FA0;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Grid de Indicadores Financeiros */
+.finance-grid-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.finance-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.01);
+}
+
+.finance-card .card-label {
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.finance-card .card-value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+/* Destques Visuais dos Cards */
+.finance-card.saldo-positivo { border-left: 4px solid #6B3FA0; }
+.finance-card.faturamento { border-left: 4px solid #22c55e; }
+.finance-card.despesas { border-left: 4px solid #ef4444; }
+
+/* Tabela Financeira */
+.table-container {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    padding-top: 15px;
+}
+
+.table-title {
+    font-size: 1.1rem;
+    color: #1e293b;
+    font-weight: 700;
+    padding: 5px 16px 15px 16px;
+}
+
+.finance-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.95rem;
+}
+
+.finance-table th {
+    background: #f8fafc;
+    padding: 14px 16px;
+    color: #475569;
+    font-weight: 600;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.finance-table td {
+    padding: 14px 16px;
+    color: #334155;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.tag-fin {
+    background: #e2e8f0;
+    color: #475569;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* Badges de Tipo de Lançamento */
+.type-badge {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.type-entry { 
+    background: #dcfce7; 
+    color: #16a34a; 
+}
+
+.type-exit { 
+    background: #fee2e2; 
+    color: #dc2626; 
+}
+
+/* Cores de Valores */
+.val-entry { 
+    color: #16a34a; 
+    font-weight: 600; 
+}
+
+.val-exit {
+    color: #dc2626; 
+    font-weight: 600; 
+}
+
+/* Relatórios e Caixa Vazio */
+.report-box {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+}
+
+.report-box h3 { 
+    font-size: 1.1rem; 
+    color: #1e293b; 
+    font-weight: 700; 
+}
+
+.report-box p { font-size: 0.85rem; color: #64748b; margin-top: 2px; }
+
+.empty-state-box {
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 12px;
+    text-align: center;
+    border: 1px dashed #cbd5e1;
+    color: #64748b;
+}
+
+.empty-icon { 
+    font-size: 2.5rem; 
+    margin-bottom: 12px; 
+    color: #94a3b8; 
+}
