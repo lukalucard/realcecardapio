@@ -24,39 +24,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function travarFormularioCardapio() {
     const isGuest = localStorage.getItem('guestMode') === 'true';
-    const lojaCadastrada = localStorage.getItem('loja_nome'); // Verifica se salvou a loja no cache
+    const lojaCadastrada = localStorage.getItem('loja_nome'); 
+    const formulario = document.querySelector('.cardapio-form-grid');
     
-    const principalContent = document.querySelector('.cardapio-main-content');
-    if (!principalContent) return;
-
-    // Interceptador geral no container principal para barrar antes de digitar
-    principalContent.addEventListener('click', (e) => {
-        // SCENARIO 1: Usuário é um visitante logado no modo de testes
-        if (isGuest) {
+    // SCENARIO 1: Usuário é um visitante (Modo de Teste)
+    if (isGuest) {
+        if (formulario) formulario.style.opacity = '0.5'; // Deixa o fundo cinza/bloqueado
+        
+        // DISPARA O AVISO IMEDIATAMENTE AO ABRIR A TELA
+        mostrarAlertaVisitante(
+            '🔒 Cadastro Negado! Você está no Modo de Teste. Entre ou cadastre uma conta para montar o seu cardápio personalizado!', 
+            'fas fa-utensils'
+        );
+        
+        // Mantém o bloqueio de cliques caso ele tente fechar ou burlar
+        document.querySelector('.cardapio-main-content').addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            if (document.activeElement) document.activeElement.blur();
-            
-            mostrarAlertaVisitante(
-                '🔒 Cadastro Negado! Você está no Modo de Teste. Entre ou cadastre uma conta para montar o seu cardápio personalizado!', 
-                'fas fa-utensils'
-            );
-            return;
-        }
+            mostrarAlertaVisitante('🔒 Modo de Teste Ativo. Entre ou cadastre-se para liberar!', 'fas fa-utensils');
+        }, true);
+        return;
+    }
 
-        // SCENARIO 2: Logado, mas tentando criar cardápio sem ter configurado a loja antes
-        if (!lojaCadastrada) {
+    // SCENARIO 2: Logado, mas não configurou a loja ainda
+    if (!lojaCadastrada) {
+        if (formulario) formulario.style.opacity = '0.5';
+
+        // DISPARA O AVISO IMEDIATAMENTE AO ABRIR A TELA
+        mostrarAlertaLojaPendente(
+            '🏪 Loja Não Encontrada! Você precisa salvar os dados institucionais na página "Gestão de Loja" antes de começar a criar o seu cardápio.',
+            'fas fa-store-slash'
+        );
+
+        document.querySelector('.cardapio-main-content').addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            if (document.activeElement) document.activeElement.blur();
-
-            // Alerta personalizado seguindo o padrão visual do projeto
-            mostrarAlertaLojaPendente(
-                '🏪 Loja Não Encontrada! Você precisa salvar os dados institucionais na página "Gestão de Loja" antes de começar a criar o seu cardápio.',
-                'fas fa-store-slash'
-            );
-        }
-    }, true); // Captura o clique no topo antes que ele chegue nos inputs
+            mostrarAlertaLojaPendente('🏪 Cadastre sua loja primeiro para liberar o cardápio.', 'fas fa-store-slash');
+        }, true);
+    }
 }
 
 function salvarEstadoNoCache() {

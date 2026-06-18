@@ -12,17 +12,22 @@ function travarFormularioLoja() {
     const isGuest = localStorage.getItem('guestMode') === 'true';
     if (!isGuest) return;
 
-    const principalContent = document.querySelector('.cardapio-main-content');
-    if (!principalContent) return;
+    // Deixa os cartões do formulário opacos indicando o bloqueio
+    const cards = document.querySelectorAll('.settings-card');
+    cards.forEach(card => card.style.opacity = '0.5');
 
-    principalContent.addEventListener('click', (e) => {
-        // Ignora os cliques caso o usuário esteja apenas alternando entre as abas superiores
-        if (e.target.classList.contains('tab-btn')) return;
+    // DISPARA O AVISO IMEDIATAMENTE AO ABRIR A TELA
+    mostrarAlertaVisitante(
+        '🎨 Branding Bloqueado! Para aplicar as cores e logomarca da sua açaiteria na vitrine real, entre ou cadastre uma conta gratuita para liberar.', 
+        'fas fa-palette'
+    );
 
+    // Bloqueia qualquer tentativa de clique posterior
+    document.querySelector('.cardapio-main-content').addEventListener('click', (e) => {
+        if (e.target.classList.contains('tab-btn')) return; // Permite trocar de aba para ver o layout
         e.preventDefault();
         e.stopPropagation();
-        if (document.activeElement) document.activeElement.blur();
-
+        
         mostrarAlertaVisitante(
             '🎨 Branding Bloqueado! Para aplicar as cores e logomarca da sua açaiteria na vitrine real, entre ou cadastre uma conta gratuita para liberar.', 
             'fas fa-palette'
