@@ -1,87 +1,158 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>RealceCardápio - Dashboard</title>
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RealceCardápio - Painel de Controle</title>
     
     <link rel="stylesheet" href="css/admin.css">
     <link rel="stylesheet" href="css/dashboard.css">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="dashboard-container">
+
+    <div class="cardapio-container">
         <div id="sidebar-container"></div>
 
-        <main class="main-content">
-            <div class="top-bar">
-                <form id="form-filtros" class="filters">
-                    <div class="filter-group">
-                        <label for="periodo">Período</label>
-                        <select id="periodo">
-                            <option value="este_mes" selected>Este mês</option>
-                            <option value="mes_passado">Mês passado</option>
-                            <option value="ultimos_30">Últimos 30 dias</option>
-                        </form>
-                    </div>
-                    <div class="filter-group">
-                        <label>Horário</label>
-                        <div class="time-inputs">
-                            <input type="time" id="hora_inicio" value="00:00"> até <input type="time" id="hora_fim" value="23:59">
-                        </div>
-                    </div>
-                    <button type="submit" class="btn-primary"><i class="fas fa-search"></i> Aplicar</button>
-                </div>
-            </div>
+        <main class="cardapio-main-content">            
+            
+            <header class="page-header">
+                <h1>Painel de Controle</h1>
+                <p>Bem-vindo de volta! Aqui está o resumo em tempo real da operação da sua açaiteria.</p>
+            </header>
 
-            <div class="cards-grid">
-                <div class="card-metric">
-                    <div class="card-header">
-                        <span class="title">Valor Total de Vendas</span>
-                        <i class="fas fa-dollar-sign icon"></i>
+            <section class="dash-section">
+                <div class="section-meta">
+                    <div class="meta-title">
+                        <i class="fas fa-shopping-basket icon-pedidos"></i>
+                        <h2>Gestão de Pedidos</h2>
                     </div>
-                    <div class="value" id="faturamento-total">R$ 0,00</div>
-                    <div class="variation neutral" id="faturamento-v">0.0% vs período anterior</div>
+                    <a href="pedidos.html" class="btn-dash-redirect">Ir para Pedidos</a>
                 </div>
-                <div class="card-metric">
-                    <div class="card-header">
-                        <span class="title">Ticket Médio</span>
-                        <i class="fas fa-receipt icon"></i>
+                
+                <div class="dash-grid-mini">
+                    <div class="dash-card-info">
+                        <span class="info-label">Novos (Hoje)</span>
+                        <span class="info-value">0</span>
                     </div>
-                    <div class="value" id="ticket-medio">R$ 0,00</div>
-                    <div class="variation neutral" id="ticket-v">0.0% vs período anterior</div>
-                </div>
-                <div class="card-metric">
-                    <div class="card-header">
-                        <span class="title">Total de Pedidos</span>
-                        <i class="fas fa-motorcycle icon"></i>
+                    <div class="dash-card-info">
+                        <span class="info-label">Em Produção</span>
+                        <span class="info-value">0</span>
                     </div>
-                    <div class="value" id="total-pedidos">0</div>
-                    <div class="variation positive" id="pedidos-v">Dinâmico</div>
+                    <div class="dash-card-info">
+                        <span class="info-label">Saiu para Entrega</span>
+                        <span class="info-value">0</span>
+                    </div>
                 </div>
-            </div>
+            </section>
 
-            <div class="row-two-columns">
-                <div class="chart-box">
-                    <h3>Vendas por período</h3>
-                    <div class="chart-placeholder">
-                        <i class="fas fa-chart-line"></i>
-                        <p>Gráfico integrado ao banco de dados</p>
+            <section class="dash-section">
+                <div class="section-meta">
+                    <div class="meta-title">
+                        <i class="fas fa-utensils icon-cardapio"></i>
+                        <h2>Gestão de Cardápios</h2>
+                    </div>
+                    <a href="cardapio.html" class="btn-dash-redirect">Ir para Cardápio</a>
+                </div>
+                
+                <div class="dash-grid-mini">
+                    <div class="dash-card-info">
+                        <span class="info-label">Produtos Ativos</span>
+                        <span class="info-value">12</span>
+                    </div>
+                    <div class="dash-card-info">
+                        <span class="info-label">Categorias Criadas</span>
+                        <span class="info-value">4</span>
+                    </div>
+                    <div class="dash-card-info">
+                        <span class="info-label">Status da Vitrine</span>
+                        <span class="status-indicator-open">Loja Aberta</span>
                     </div>
                 </div>
-                <div class="products-box">
-                    <h3>Produtos mais vendidos</h3>
-                    <div class="products-list" id="lista-mais-vendidos">
-                        <p class="empty-message"><i class="fas fa-box-open"></i> Carregando produtos...</p>
+            </section>
+
+            <section class="dash-section">
+                <div class="section-meta">
+                    <div class="meta-title">
+                        <i class="fas fa-store icon-loja"></i>
+                        <h2>Gestão de Loja</h2>
+                    </div>
+                    <a href="loja.html" class="btn-dash-redirect">Ir para Loja</a>
+                </div>
+                
+                <div class="dash-text-summary">
+                    <p><strong>Link da Vitrine:</strong> <span class="mock-link">realcecardapio.com/acaiteria</span></p>
+                    <p><strong>Branding Ativo:</strong> Paleta Roxa & Laranja (Açaiteria da Sobrinha)</p>
+                </div>
+            </section>
+
+            <section class="dash-section">
+                <div class="section-meta">
+                    <div class="meta-title">
+                        <i class="fas fa-users icon-clientes"></i>
+                        <h2>Gestão de Clientes</h2>
+                    </div>
+                    <a href="clientes.html" class="btn-dash-redirect">Ir para Clientes</a>
+                </div>
+                
+                <div class="dash-grid-mini">
+                    <div class="dash-card-info">
+                        <span class="info-label">Clientes Cadastrados</span>
+                        <span class="info-value">0</span>
+                    </div>
+                    <div class="dash-card-info alert-purple">
+                        <span class="info-label">Clientes Fiéis (CRM)</span>
+                        <span class="info-value">0</span>
                     </div>
                 </div>
-            </div>
+            </section>
+
+            <section class="dash-section">
+                <div class="section-meta">
+                    <div class="meta-title">
+                        <i class="fas fa-boxes icon-estoque"></i>
+                        <h2>Gestão de Estoque</h2>
+                    </div>
+                    <a href="Estoque.html" class="btn-dash-redirect">Ir para Estoque</a>
+                </div>
+                
+                <div class="dash-grid-mini">
+                    <div class="dash-card-info">
+                        <span class="info-label">Total de Insumos</span>
+                        <span class="info-value">3</span>
+                    </div>
+                    <div class="dash-card-info alert-amber">
+                        <span class="info-label">Itens em Alerta Crítico</span>
+                        <span class="info-value">1</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="dash-section" style="margin-bottom: 40px;">
+                <div class="section-meta">
+                    <div class="meta-title">
+                        <i class="fas fa-wallet icon-financeiro"></i>
+                        <h2>Gestão Financeira</h2>
+                    </div>
+                    <a href="Financeiro.html" class="btn-dash-redirect">Ir para Financeiro</a>
+                </div>
+                
+                <div class="dash-grid-mini">
+                    <div class="dash-card-info positive">
+                        <span class="info-label">Saldo em Caixa</span>
+                        <span class="info-value">R$ 1.250,00</span>
+                    </div>
+                    <div class="dash-card-info">
+                        <span class="info-label">Faturamento Mensal</span>
+                        <span class="info-value">R$ 3.400,00</span>
+                    </div>
+                </div>
+            </section>
+
         </main>
     </div>
 

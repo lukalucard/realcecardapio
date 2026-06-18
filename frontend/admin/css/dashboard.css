@@ -1,287 +1,155 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+/* ==========================================================================
+   ESTILOS GERAIS DO DASHBOARD CENTRALIZADO
+   ========================================================================== */
+
+.page-header {
+    margin-bottom: 30px;
 }
 
-body {
-    font-family: 'Inter', sans-serif;
-    background-color: #f4f5f7;
-    height: 100vh;
-    overflow: hidden;
+.page-header h1 {
+    font-size: 1.8rem;
+    color: #1e293b;
+    font-weight: 700;
 }
 
-.dashboard-container {
-    display: flex;
-    height: 100%;
+.page-header p {
+    color: #64748b;
+    font-size: 0.95rem;
+    margin-top: 4px;
 }
 
-/* SIDEBAR */
-.sidebar {
-    width: 260px;
-    background: linear-gradient(180deg, #4A2A6E 0%, #6B3FA0 100%);
-    color: white;
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-    box-shadow: 2px 0 12px rgba(0,0,0,0.1);
-}
-
-.logo-area {
-    font-family: "Dancing Script", cursive;
-    padding: 24px 20px;
-    border-bottom: 1px solid rgba(255,255,255,0.2);
+/* Blocos de Seções Verticais */
+.dash-section {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px;
     margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.01);
 }
 
-.logo-area h2 {
-    font-size: 2rem;
+.section-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 16px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
 }
 
-.logo-area span {
-    font-weight: 400;
-    color: #FF9F4A;
-}
-
-.menu-nav ul {
-    list-style: none;
-}
-
-.menu-nav li {
-    margin: 4px 12px;
-    border-radius: 8px;
-    transition: background 0.2s;
-}
-
-.menu-nav li a {
+.meta-title {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 12px 16px;
-    color: #f0eef5;
-    text-decoration: none;
-    font-size: 0.95rem;
-    font-weight: 500;
+}
+
+.meta-title i {
+    font-size: 1.3rem;
+}
+
+.meta-title h2 {
+    font-size: 1.2rem;
+    color: #1e293b;
+    font-weight: 700;
+}
+
+/* Identidade de Cores para os Ícones das Seções */
+.icon-pedidos { color: #FF6B00; }
+.icon-cardapio { color: #0284c7; }
+.icon-loja { color: #0d9488; }
+.icon-clientes { color: #6B3FA0; }
+.icon-estoque { color: #b45309; }
+.icon-financeiro { color: #16a34a; }
+
+/* Botões de Redirecionamento da Seção */
+.btn-dash-redirect {
+    background: #f1f5f9;
+    color: #475569;
+    padding: 8px 16px;
     border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
     transition: all 0.2s;
 }
 
-.menu-nav li a i {
-    width: 22px;
-    font-size: 1.1rem;
-    text-align: center;
+.btn-dash-redirect:hover {
+    background: #6B3FA0;
+    color: #ffffff;
 }
 
-.menu-nav li.active a {
-    background-color: rgba(255, 255, 255, 0.2);
-    border-left: 4px solid #FF9F4A;
-    color: white;
+/* Grid Interno de Informações Resumidas */
+.dash-grid-mini {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
 }
 
-.menu-nav li.active a {
-    color: white;
-}
-
-.menu-nav li:hover:not(.active) {
-    background-color: rgba(255,255,255,0.1);
-}
-
-/* MAIN CONTENT */
-.main-content {
-    flex: 1;
-    overflow-y: auto;
-    padding: 24px 32px;
-}
-
-/* TOP BAR + FILTERS */
-.top-bar {
-    background: white;
-    border-radius: 16px;
-    padding: 20px 24px;
-    margin-bottom: 28px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-}
-
-.filters {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    align-items: flex-end;
-}
-
-.filter-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.filter-group label {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    font-weight: 600;
-    color: #6b7280;
-    letter-spacing: 0.5px;
-}
-
-.time-inputs {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: #4b5563;
-}
-
-.filter-group select, .filter-group input {
-    padding: 8px 12px;
+.dash-card-info {
+    background: #f8fafc;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
-    font-size: 0.9rem;
-    background: white;
-}
-
-/* Botão padrão unificado com a tela de cardápio */
-.btn-primary {
-    background: #FF6B00;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.9rem;
-    transition: background 0.2s, transform 0.1s;
-}
-
-.btn-primary:hover {
-    background: #e05e00;
-}
-
-.btn-primary:active {
-    transform: scale(0.98);
-}
-
-/* CARDS */
-.cards-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 20px;
-    margin-bottom: 32px;
-}
-
-.card-metric {
-    background: white;
-    border-radius: 20px;
-    padding: 20px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-}
-
-.card-header {
+    padding: 14px;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
+    flex-direction: column;
+    gap: 4px;
 }
 
-.card-header .title {
-    font-size: 0.85rem;
+.dash-card-info .info-label {
+    font-size: 0.8rem;
+    color: #64748b;
     font-weight: 500;
-    color: #4b5563;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
 }
 
-.card-header .icon {
-    font-size: 1.4rem;
-    color: #6B3FA0;
-    opacity: 0.7;
-}
-
-.card-metric .value {
-    font-size: 2rem;
+.dash-card-info .info-value {
+    font-size: 1.3rem;
     font-weight: 700;
-    margin-bottom: 8px;
     color: #1e293b;
 }
 
-.variation {
-    font-size: 0.75rem;
-    font-weight: 500;
+/* Variações de Alertas Rápidos do Dashboard */
+.dash-card-info.alert-amber {
+    border-left: 3px solid #f59e0b;
+    background: #fffbeb;
 }
 
-.variation.negative { color: #e53e3e; }
-.variation.positive { color: #38a169; }
-.variation.neutral { color: #718096; }
-
-/* TWO COLUMNS */
-.row-two-columns {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
+.dash-card-info.alert-amber .info-value {
+    color: #b45309;
 }
 
-.chart-box, .products-box {
-    background: white;
-    border-radius: 20px;
-    padding: 20px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+.dash-card-info.alert-purple {
+    border-left: 3px solid #6B3FA0;
+    background: #faf5ff;
 }
 
-.chart-box h3, .products-box h3 {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 16px;
-    color: #2d3748;
+.dash-card-info.alert-purple .info-value {
+    color: #553280;
 }
 
-.chart-placeholder {
-    background-color: #f9fafb;
-    border-radius: 12px;
-    padding: 48px 20px;
-    text-align: center;
-    color: #9ca3af;
-    border: 1px dashed #d1d5db;
+.dash-card-info.positive .info-value {
+    color: #16a34a;
 }
 
-.chart-placeholder i {
-    font-size: 3rem;
-    margin-bottom: 12px;
-    display: inline-block;
-    color: #cbd5e0;
+/* Status Aberto / Fechado */
+.status-indicator-open {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #16a34a;
+    margin-top: auto;
+    margin-bottom: auto;
 }
 
-/* Estilo para a lista dinâmica de mais vendidos */
-.item-mais-vendido {
+/* Layout de Texto da Seção de Loja */
+.dash-text-summary {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 0;
-    border-bottom: 1px solid #f1f5f9;
-}
-.item-mais-vendido:last-child {
-    border-bottom: none;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 0.95rem;
+    color: #334155;
 }
 
-.products-list .empty-message {
-    text-align: center;
-    padding: 32px 16px;
-    color: #9ca3af;
-}
-
-/* Responsivo */
-@media (max-width: 900px) {
-    .sidebar { width: 80px; }
-    .sidebar .logo-area h2 { font-size: 0; }
-    .logo-area h2 span {
-        font-size: 1rem;
-        display: block;
-        text-align: center;
-    }
-    .menu-nav li a span { display: none; }
-    .menu-nav li a i { font-size: 1.3rem; margin: 0 auto; }
-    .menu-nav li a { justify-content: center; }
-    .main-content { padding: 16px; }
-    .row-two-columns { grid-template-columns: 1fr; }
-    .filters { flex-direction: column; align-items: stretch; }
+.mock-link {
+    color: #6B3FA0;
+    font-weight: 600;
 }
