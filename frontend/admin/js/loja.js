@@ -1,28 +1,64 @@
 document.addEventListener('DOMContentLoaded', () => {
     inicializarNavegacaoAbas();
     inicializarPreviewVisualMotor();
-});
-
-document.addEventListener('DOMContentLoaded', () => {
-    // Executa a trava preventiva na loja
-    travarFormularioLoja();
+    carregarDadosSalvosLoja();
+    configurarPersistenciaLoja();
+    travarFormularioLoja(); // Só vai agir se for Guest!
 });
 
 function travarFormularioLoja() {
     const isGuest = localStorage.getItem('guestMode') === 'true';
-    if (!isGuest) return;
+    if (!isGuest) return; // Se estiver logado, mata a função e não bloqueia nada!
 
-    // Mostra a tarja superior e ativa a película protetora na tela
     document.getElementById('aviso-loja-guest').classList.remove('hidden');
     document.getElementById('pelicula-loja').classList.remove('hidden');
-    
-    // Deixa o formulário levemente opaco
     document.querySelector('.wrapper-conteudo-travado').style.opacity = '0.6';
 }
 
-/**
- * 1. GERENCIADOR DE SUBMENUS (Muda entre Cadastro e Personalização)
- */
+function configurarPersistenciaLoja() {
+    const btnCriarLoja = document.getElementById('btn-criar-loja');
+    const btnSalvarVisual = document.getElementById('btn-salvar-visual');
+
+    if (btnCriarLoja) {
+        btnCriarLoja.addEventListener('click', () => {
+            localStorage.setItem('loja_nome', document.getElementById('loja-nome').value);
+            localStorage.setItem('loja_slogan', document.getElementById('loja-slogan').value);
+            localStorage.setItem('loja_telefone', document.getElementById('loja-telefone').value);
+            localStorage.setItem('loja_horario', document.getElementById('loja-horario').value);
+            localStorage.setItem('loja_endereco', document.getElementById('loja-endereco').value);
+            localStorage.setItem('loja_taxa', document.getElementById('loja-taxa').value);
+            localStorage.setItem('loja_tempo', document.getElementById('loja-tempo').value);
+            localStorage.setItem('loja_status', document.getElementById('loja-status').value);
+            
+            alert('🏪 Loja Criada com Sucesso! Seu Cardápio agora está liberado para cadastro.');
+        });
+    }
+
+    if (btnSalvarVisual) {
+        btnSalvarVisual.addEventListener('click', () => {
+            localStorage.setItem('loja_cor_primaria', document.getElementById('color-primary').value);
+            localStorage.setItem('loja_cor_secundaria', document.getElementById('color-secondary').value);
+            localStorage.setItem('loja_cor_fundo', document.getElementById('color-bg').value);
+            alert('🎨 Identidade Visual aplicada com sucesso!');
+        });
+    }
+}
+
+function carregarDadosSalvosLoja() {
+    if (localStorage.getItem('loja_nome')) document.getElementById('loja-nome').value = localStorage.getItem('loja_nome');
+    if (localStorage.getItem('loja_slogan')) document.getElementById('loja-slogan').value = localStorage.getItem('loja_slogan');
+    if (localStorage.getItem('loja_telefone')) document.getElementById('loja-telefone').value = localStorage.getItem('loja_telefone');
+    if (localStorage.getItem('loja_horario')) document.getElementById('loja-horario').value = localStorage.getItem('loja_horario');
+    if (localStorage.getItem('loja_endereco')) document.getElementById('loja-endereco').value = localStorage.getItem('loja_endereco');
+    if (localStorage.getItem('loja_taxa')) document.getElementById('loja-taxa').value = localStorage.getItem('loja_taxa');
+    if (localStorage.getItem('loja_tempo')) document.getElementById('loja-tempo').value = localStorage.getItem('loja_tempo');
+    if (localStorage.getItem('loja_status')) document.getElementById('loja-status').value = localStorage.getItem('loja_status');
+    
+    if (localStorage.getItem('loja_cor_primaria')) document.getElementById('color-primary').value = localStorage.getItem('loja_cor_primaria');
+    if (localStorage.getItem('loja_cor_secundaria')) document.getElementById('color-secondary').value = localStorage.getItem('loja_cor_secundaria');
+    if (localStorage.getItem('loja_cor_fundo')) document.getElementById('color-bg').value = localStorage.getItem('loja_cor_fundo');
+}
+
 function inicializarNavegacaoAbas() {
     const botoesTabs = document.querySelectorAll('.tab-btn');
     const paineisConteudo = document.querySelectorAll('.tab-pane');
@@ -30,30 +66,22 @@ function inicializarNavegacaoAbas() {
     botoesTabs.forEach(btn => {
         btn.addEventListener('click', () => {
             const alvoID = btn.getAttribute('data-target');
-
-            // Remove a classe ativa de todos os botões e painéis
             botoesTabs.forEach(b => b.classList.remove('active'));
             paineisConteudo.forEach(p => p.classList.remove('active'));
-
-            // Aplica o estado ativo no submenu clicado
             btn.classList.add('active');
             document.getElementById(alvoID).classList.add('active');
         });
     });
 }
 
-/**
- * 2. MOTOR DE PREVIEW (Controla arquivos locais e mudanças de cores instantâneas)
- */
 function inicializarPreviewVisualMotor() {
     const inputBanner = document.getElementById('input-banner');
     const areaBannerPreview = document.getElementById('preview-banner');
-    const colorPickerBannerSólido = document.getElementById('banner-solid-color');
+    const colorPickerBannerSolido = document.getElementById('banner-solid-color');
     const inputLogo = document.getElementById('input-logo');
     const areaLogoPreview = document.getElementById('preview-logo');
     const botoesPosicao = document.querySelectorAll('.pos-btn');
 
-    // Escuta upload do arquivo de Banner do computador do gestor
     if (inputBanner) {
         inputBanner.addEventListener('change', (e) => {
             if (e.target.files && e.target.files[0]) {
@@ -66,16 +94,14 @@ function inicializarPreviewVisualMotor() {
         });
     }
 
-    // Altera o banner dinamicamente se o usuário escolher uma cor sólida
-    if (colorPickerBannerSólido) {
-        colorPickerBannerSólido.addEventListener('input', (e) => {
+    if (colorPickerBannerSolido) {
+        colorPickerBannerSolido.addEventListener('input', (e) => {
             areaBannerPreview.style.backgroundImage = 'none';
             areaBannerPreview.style.backgroundColor = e.target.value;
             areaBannerPreview.querySelector('.overlay-msg').style.display = 'none';
         });
     }
 
-    // Escuta upload do logotipo
     if (inputLogo) {
         inputLogo.addEventListener('change', (e) => {
             if (e.target.files && e.target.files[0]) {
@@ -85,7 +111,6 @@ function inicializarPreviewVisualMotor() {
         });
     }
 
-    // Gerencia a seleção visual dos botões de posicionamento da logo
     botoesPosicao.forEach(btn => {
         btn.addEventListener('click', () => {
             botoesPosicao.forEach(b => b.classList.remove('active'));

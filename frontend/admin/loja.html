@@ -18,6 +18,7 @@
         <div id="sidebar-container"></div>
 
         <main class="cardapio-main-content">
+            
             <div class="trava-aviso-topo hidden" id="aviso-loja-guest">
                 <div class="trava-aviso-conteudo">
                     <i class="fas fa-palette"></i>
@@ -28,7 +29,7 @@
                     <a href="../index.html" class="btn-trava-link btn-trava-cadastrar">Cadastrar</a>
                 </div>
             </div>
-            
+
             <header class="page-header">
                 <div class="header-text">
                     <h1>Configurações da Loja</h1>
@@ -41,119 +42,140 @@
                 <button class="tab-btn" data-target="secao-visual">Personalização Visual</button>
             </div>
 
-            <section class="tab-pane active" id="secao-cadastro">
-                <div class="settings-card">
-                    <div class="card-header">
-                        <h3><i class="fas fa-id-card"></i> Dados Institucionais</h3>
-                    </div>
-                    
-                    <form class="loja-form">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Nome do Restaurante</label>
-                                <input type="text" id="loja-nome" placeholder="Ex: Realce Burger Gourmet">
-                            </div>
-                            <div class="form-group">
-                                <label>Slogan ou Frase de Impacto</label>
-                                <input type="text" id="loja-slogan" placeholder="Ex: O sabor que realça o seu dia">
-                            </div>
+            <div class="wrapper-conteudo-travado">
+                <div class="pelicula-bloqueio hidden" id="pelicula-loja"></div>
+
+                <section class="tab-pane active" id="secao-cadastro">
+                    <div class="settings-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-id-card"></i> Dados Institucionais</h3>
                         </div>
-
-                        <div class="form-row mt-4">
-                            <div class="form-group">
-                                <label>Taxa de Entrega Padrão (R$)</label>
-                                <input type="number" id="loja-taxa" step="0.01" value="5.00">
-                            </div>
-                            <div class="form-group">
-                                <label>Tempo Médio de Entrega (min)</label>
-                                <input type="text" id="loja-tempo" placeholder="Ex: 30-45">
-                            </div>
-                            <div class="form-group">
-                                <label>Status da Loja</label>
-                                <select id="loja-status">
-                                    <option value="true">Aberto</option>
-                                    <option value="false">Fechado</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <button type="button" class="btn-primary-lg">Salvar Informações Cadastrais</button>
-                    </form>
-                </div>
-            </section>
-
-            <section class="tab-pane" id="secao-visual">
-                <div class="settings-card">
-                    <div class="card-header">
-                        <h3><i class="fas fa-palette"></i> Branding e Identidade</h3>
-                    </div>
-
-                    <div class="visual-builder-grid">
                         
-                        <div class="builder-col">
-                            <div class="input-visual-block">
-                                <label>Banner de Topo</label>
-                                <div class="banner-preview-area" id="preview-banner">
-                                    <input type="file" id="input-banner" accept="image/*">
-                                    <div class="overlay-msg">Clique para enviar imagem ou defina uma cor sólida abaixo</div>
+                        <form class="loja-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Nome do Restaurante</label>
+                                    <input type="text" id="loja-nome" placeholder="Ex: Realce Pizza & Burger">
                                 </div>
-                                <div class="banner-color-toggle">
-                                    <label>Usar Cor Sólida no Banner:</label>
-                                    <input type="color" id="banner-solid-color" value="#6B3FA0">
+                                <div class="form-group">
+                                    <label>Slogan ou Frase de Impacto</label>
+                                    <input type="text" id="loja-slogan" placeholder="Ex: O sabor que realça o seu dia">
+                                </div>
+                            </div>
+
+                            <div class="form-row mt-4">
+                                <div class="form-group">
+                                    <label>Telefone / WhatsApp</label>
+                                    <input type="tel" id="loja-telefone" placeholder="Ex: (11) 99999-8888">
+                                </div>
+                                <div class="form-group">
+                                    <label>Horário de Funcionamento</label>
+                                    <input type="text" id="loja-horario" placeholder="Ex: Terça a Domingo, das 18h às 23h30">
                                 </div>
                             </div>
 
-                            <div class="input-visual-block mt-4">
-                                <label>Logomarca e Posição</label>
-                                <div class="logo-position-control">
-                                    <div class="logo-upload-box" id="preview-logo">
-                                        <i class="fas fa-camera"></i>
-                                        <input type="file" id="input-logo" accept="image/*">
-                                    </div>
-                                    <div class="position-selector">
-                                        <button type="button" class="pos-btn active" data-pos="left" title="Esquerda"><i class="fas fa-align-left"></i></button>
-                                        <button type="button" class="pos-btn" data-pos="center" title="Centro"><i class="fas fa-align-center"></i></button>
-                                        <button type="button" class="pos-btn" data-pos="right" title="Direita"><i class="fas fa-align-right"></i></button>
-                                    </div>
+                            <div class="form-row mt-4">
+                                <div class="form-group" style="flex: 2;">
+                                    <label>Endereço do Estabelecimento</label>
+                                    <input type="text" id="loja-endereco" placeholder="Ex: Avenida Central, nº 1500 - Centro">
+                                </div>
+                                <div class="form-group" style="flex: 1;">
+                                    <label>Taxa de Entrega (R$)</label>
+                                    <input type="number" id="loja-taxa" step="0.01" value="5.00">
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="builder-col">
-                            <div class="palette-setup">
-                                <label>Paleta de Cores do Site</label>
-                                <p class="help-text">Configure os 3 tons principais que darão vida ao cardápio do cliente.</p>
-                                
-                                <div class="color-picker-item">
-                                    <div class="color-info">
-                                        <strong>Cor Primária</strong>
-                                        <span>Botões, acentuações e links</span>
-                                    </div>
-                                    <input type="color" id="color-primary" value="#FF6B00">
+                            <div class="form-row mt-4">
+                                <div class="form-group">
+                                    <label>Tempo Médio de Entrega (min)</label>
+                                    <input type="text" id="loja-tempo" placeholder="Ex: 30-45">
                                 </div>
-
-                                <div class="color-picker-item">
-                                    <div class="color-info">
-                                        <strong>Cor Secundária</strong>
-                                        <span>Destaques, badges e ícones</span>
-                                    </div>
-                                    <input type="color" id="color-secondary" value="#6B3FA0">
-                                </div>
-
-                                <div class="color-picker-item">
-                                    <div class="color-info">
-                                        <strong>Fundo do Cardápio</strong>
-                                        <span>Cor de plano de fundo geral</span>
-                                    </div>
-                                    <input type="color" id="color-bg" value="#f8fafc">
+                                <div class="form-group">
+                                    <label>Status da Loja</label>
+                                    <select id="loja-status">
+                                        <option value="true">Aberto</option>
+                                        <option value="false">Fechado</option>
+                                    </select>
                                 </div>
                             </div>
-                        </div>
+
+                            <button type="button" class="btn-primary-lg" id="btn-criar-loja" style="margin-top: 24px;">Criar Loja</button>
+                        </form>
                     </div>
+                </section>
 
-                    <button type="button" class="btn-primary-lg mt-4">Aplicar Identidade Visual</button>
-                </div>
-            </section>
+                <section class="tab-pane" id="secao-visual">
+                    <div class="settings-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-palette"></i> Branding e Identidade</h3>
+                        </div>
+
+                        <div class="visual-builder-grid">
+                            <div class="builder-col">
+                                <div class="input-visual-block">
+                                    <label>Banner de Topo</label>
+                                    <div class="banner-preview-area" id="preview-banner">
+                                        <input type="file" id="input-banner" accept="image/*">
+                                        <div class="overlay-msg">Clique para enviar imagem ou defina uma cor sólida abaixo</div>
+                                    </div>
+                                    <div class="banner-color-toggle">
+                                        <label>Usar Cor Sólida no Banner:</label>
+                                        <input type="color" id="banner-solid-color" value="#6B3FA0">
+                                    </div>
+                                </div>
+
+                                <div class="input-visual-block mt-4">
+                                    <label>Logomarca e Posição</label>
+                                    <div class="logo-position-control">
+                                        <div class="logo-upload-box" id="preview-logo">
+                                            <i class="fas fa-camera"></i>
+                                            <input type="file" id="input-logo" accept="image/*">
+                                        </div>
+                                        <div class="position-selector">
+                                            <button type="button" class="pos-btn active" data-pos="left" title="Esquerda"><i class="fas fa-align-left"></i></button>
+                                            <button type="button" class="pos-btn" data-pos="center" title="Centro"><i class="fas fa-align-center"></i></button>
+                                            <button type="button" class="pos-btn" data-pos="right" title="Direita"><i class="fas fa-align-right"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="builder-col">
+                                <div class="palette-setup">
+                                    <label>Paleta de Cores do Site</label>
+                                    <p class="help-text">Configure os 3 tons principais que darão vida ao cardápio do cliente.</p>
+                                    
+                                    <div class="color-picker-item">
+                                        <div class="color-info">
+                                            <strong>Cor Primária</strong>
+                                            <span>Botões, acentuações e links</span>
+                                        </div>
+                                        <input type="color" id="color-primary" value="#FF6B00">
+                                    </div>
+
+                                    <div class="color-picker-item">
+                                        <div class="color-info">
+                                            <strong>Cor Secundária</strong>
+                                            <span>Destaques, badges e ícones</span>
+                                        </div>
+                                        <input type="color" id="color-secondary" value="#6B3FA0">
+                                    </div>
+
+                                    <div class="color-picker-item">
+                                        <div class="color-info">
+                                            <strong>Fundo do Cardápio</strong>
+                                            <span>Cor de plano de fundo geral</span>
+                                        </div>
+                                        <input type="color" id="color-bg" value="#f8fafc">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn-primary-lg mt-4" id="btn-salvar-visual">Aplicar Identidade Visual</button>
+                    </div>
+                </section>
+            </div>
 
         </main>
     </div>
