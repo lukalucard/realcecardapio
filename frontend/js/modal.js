@@ -288,4 +288,20 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = 'admin/dashboard.html';
         });
     }
+
+    /* ==========================================================================
+       11. VERIFICAÇÃO DE MODAL EXPEDIDO PELO PAINEL ADMIN
+       ========================================================================== */
+    const pendingModal = localStorage.getItem('openModalTarget');
+
+    if (pendingModal) {
+        if (pendingModal === 'login' && loginModal) {
+            loginModal.classList.add("active");
+        } else if (pendingModal === 'register' && registerModal) {
+            registerModal.classList.add("active");
+        }
+        
+        // Consome o gatilho imediatamente para não reabrir em futuros F5
+        localStorage.removeItem('openModalTarget');
+    }
 });

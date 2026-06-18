@@ -156,6 +156,21 @@ document.addEventListener('DOMContentLoaded', () => {
         if (token && userData) {
             sincronizarDadosComServidor();
         }
+
+        /* ==========================================================================
+        INTERCEPTADOR DE MODAL DA SIDEBAR PARA A LANDING PAGE
+   ========================================================================== */
+        const modalTriggers = document.querySelectorAll('[data-trigger-modal]');
+
+        modalTriggers.forEach(trigger => {
+            trigger.addEventListener('click', (e) => {
+                // Pega o tipo do modal: 'login' ou 'register'
+                const modalType = trigger.getAttribute('data-trigger-modal');
+                
+                // Salva a instrução na memória para a Landing Page ler logo em seguida
+                localStorage.setItem('openModalTarget', modalType);
+            });
+        });
     }
 
     /* ==========================================================================
@@ -225,4 +240,5 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("Servidor em standby. Mantendo dados locais.");
         }
     }
+    
 });
