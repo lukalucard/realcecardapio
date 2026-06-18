@@ -17,6 +17,34 @@ document.addEventListener('DOMContentLoaded', () => {
     renderizarSelectCategorias();
 });
 
+document.addEventListener('DOMContentLoaded', () => {
+    // Executa a trava preventiva logo que a página carrega
+    travarFormularioCardapio();
+});
+
+function travarFormularioCardapio() {
+    const isGuest = localStorage.getItem('guestMode') === 'true';
+    if (!isGuest) return;
+
+    const formulario = document.querySelector('.cardapio-form-grid');
+    if (!formulario) return;
+
+    // Captura qualquer tentativa de clique ou foco nos campos do formulário
+    formulario.addEventListener('click', (e) => {
+        // Impede qualquer ação nativa no formulário
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Desfoca qualquer campo que tenha pego foco indesejado
+        if (document.activeElement) document.activeElement.blur();
+
+        mostrarAlertaVisitante(
+            '🔒 Cadastro Negado! Você está no Modo de Teste. Entre ou cadastre uma conta para montar o seu cardápio personalizado!', 
+            'fas fa-utensils'
+        );
+    }, true); // O 'true' garante que o clique seja pego logo na descida do evento
+}
+
 function salvarEstadoNoCache() {
     localStorage.setItem('realce_categorias', JSON.stringify(categoriasSalvas));
     localStorage.setItem('realce_produtos', JSON.stringify(produtosSalvos));
@@ -352,7 +380,7 @@ function inicializarConstrutorOpcionais() {
 }
 
 /* ==========================================================================
-   6. ENVIO E ARMAZENAMENTO DO FORMULÁRIO (COM TRAVA DE SEGURANÇA)
+   6. ENVIO E ARMAZENAMENTO DO FORMULÁRIO (CONVERSÃO BASE64 CONTROLADA)
    ========================================================================== */
 function inicializarEnvioFormulario() {
     const formulario = document.querySelector('.cardapio-form-grid');
@@ -361,18 +389,15 @@ function inicializarEnvioFormulario() {
     formulario.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        // TRAVA ATIVA: Impede o visitante de cadastrar novos itens na coleção
-        const isGuest = localStorage.getItem('guestMode') === 'true';
-        if (isGuest) {
-            alert('🔒 Cadastro Negado! Você está no Modo de Teste. Registre sua conta no RealceCardápio para montar o seu cardápio personalizado!');
-            return;
-        }
-
         const inputNome = document.getElementById('prod-nome');
         const inputPreco = document.getElementById('prod-preco');
         const selectCategoria = document.getElementById('prod-select-vinculo');
-        
-        // ... (resto do seu código original de salvar o produto continua aqui embaixo igualzinho)
+
+        if (!inputNome || !inputPreco || !selectCategoria) return;
+
+        const nome = inputNome.value.trim();
+        const preco = parseFloat(inputPreco.value || 0).toFixed(2);
+        const categoria = selectCategoria.value;
 
         if (!categoria || categoria === "") {
             alert("Por favor, crie e selecione uma categoria válida para o produto.");

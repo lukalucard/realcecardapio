@@ -241,4 +241,34 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
+    /**
+     * DISPARA UM MODAL DE ALERTA PERSONALIZADO PARA VISITANTES
+     * @param {string} mensagem - Texto que será exibido no modal
+     * @param {string} iconClass - Classe do Font Awesome (ex: 'fas fa-lock')
+     */
+    function mostrarAlertaVisitante(mensagem, iconClass = 'fas fa-lock') {
+        // Evita duplicar o modal caso já exista um aberto
+        if (document.querySelector('.custom-alert-overlay')) return;
+
+        const overlay = document.createElement('div');
+        overlay.className = 'custom-alert-overlay';
+
+        // Ajuste as URLs abaixo dependendo de onde sua página de login/cadastro está (ex: '../index.html')
+        const urlDestino = '../index.html'; 
+
+        overlay.innerHTML = `
+            <div class="custom-alert-box">
+                <div class="custom-alert-icon">
+                    <i class="${iconClass}"></i>
+                </div>
+                <div class="custom-alert-text">${mensagem}</div>
+                <div class="custom-alert-buttons">
+                    <a href="${urlDestino}" class="custom-alert-btn btn-alert-login">Já tenho conta</a>
+                    <a href="${urlDestino}" class="custom-alert-btn btn-alert-register">Cadastrar Grátis</a>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+    }
 });

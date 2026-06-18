@@ -400,3 +400,96 @@ body {
     padding: 24px 32px;
     transition: all 0.3s ease;
 }
+
+/* ==========================================================================
+   MODAL DE ALERTA DE SEGURANÇA (TRAVA GUEST)
+   ========================================================================== */
+.custom-alert-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    opacity: 0;
+    animation: fadeIn 0.3s forwards;
+}
+
+.custom-alert-box {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 30px;
+    max-width: 450px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    transform: scale(0.8);
+    animation: scaleUp 0.3s forwards;
+}
+
+.custom-alert-icon {
+    font-size: 48px;
+    color: #6B3FA0; /* Cor Secundária (Roxo) para combinar com a identidade */
+    margin-bottom: 20px;
+}
+
+.custom-alert-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    color: #334155;
+    line-height: 1.6;
+    margin-bottom: 25px;
+    font-weight: 500;
+}
+
+.custom-alert-buttons {
+    display: table;
+    width: 100%;
+    border-spacing: 10px 0;
+}
+
+.custom-alert-btn {
+    display: table-cell;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+/* Botão Entrar - Estilo Secundário/Outline */
+.btn-alert-login {
+    background: transparent;
+    border: 2px solid #6B3FA0;
+    color: #6B3FA0;
+}
+.btn-alert-login:hover {
+    background: #f3e8ff;
+}
+
+/* Botão Cadastrar - Estilo Primário (Laranja) */
+.btn-alert-register {
+    background: #FF6B00;
+    border: 2px solid #FF6B00;
+    color: #ffffff;
+}
+.btn-alert-register:hover {
+    background: #e05e00;
+}
+
+/* Animações */
+@keyframes fadeIn {
+    to { opacity: 1; }
+}
+@keyframes scaleUp {
+    to { transform: scale(1); }
+}
