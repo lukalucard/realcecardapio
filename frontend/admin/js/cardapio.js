@@ -352,7 +352,7 @@ function inicializarConstrutorOpcionais() {
 }
 
 /* ==========================================================================
-   6. ENVIO E ARMAZENAMENTO DO FORMULÁRIO (CONVERSÃO BASE64 CONTROLADA)
+   6. ENVIO E ARMAZENAMENTO DO FORMULÁRIO (COM TRAVA DE SEGURANÇA)
    ========================================================================== */
 function inicializarEnvioFormulario() {
     const formulario = document.querySelector('.cardapio-form-grid');
@@ -361,15 +361,18 @@ function inicializarEnvioFormulario() {
     formulario.addEventListener('submit', async (e) => {
         e.preventDefault();
 
+        // TRAVA ATIVA: Impede o visitante de cadastrar novos itens na coleção
+        const isGuest = localStorage.getItem('guestMode') === 'true';
+        if (isGuest) {
+            alert('🔒 Cadastro Negado! Você está no Modo de Teste. Registre sua conta no RealceCardápio para montar o seu cardápio personalizado!');
+            return;
+        }
+
         const inputNome = document.getElementById('prod-nome');
         const inputPreco = document.getElementById('prod-preco');
         const selectCategoria = document.getElementById('prod-select-vinculo');
-
-        if (!inputNome || !inputPreco || !selectCategoria) return;
-
-        const nome = inputNome.value.trim();
-        const preco = parseFloat(inputPreco.value || 0).toFixed(2);
-        const categoria = selectCategoria.value;
+        
+        // ... (resto do seu código original de salvar o produto continua aqui embaixo igualzinho)
 
         if (!categoria || categoria === "") {
             alert("Por favor, crie e selecione uma categoria válida para o produto.");

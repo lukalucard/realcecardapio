@@ -93,12 +93,24 @@ function inicializarPreviewVisualMotor() {
 /**
  * 3. CONFIGURAR PERSISTÊNCIA DOS BOTÕES DE SALVAR
  */
+/**
+ * 3. CONFIGURAR PERSISTÊNCIA DOS BOTÕES DE SALVAR (COM TRAVA DE SEGURANÇA)
+ */
 function configurarPersistenciaLoja() {
     const btnSalvarCadastro = document.querySelector('#secao-cadastro .btn-primary-lg');
     const btnSalvarVisual = document.querySelector('#secao-visual .btn-primary-lg');
+    
+    // Puxa o passaporte de visitante direto do armazenamento
+    const isGuest = localStorage.getItem('guestMode') === 'true';
 
     if (btnSalvarCadastro) {
         btnSalvarCadastro.addEventListener('click', () => {
+            // TRAVA ATIVA: Impede o visitante de salvar dados institucionais
+            if (isGuest) {
+                alert('🔒 Funcionalidade Bloqueada! Entre ou cadastre uma conta gratuita para liberar!');
+                return;
+            }
+
             localStorage.setItem('loja_nome', document.getElementById('loja-nome').value);
             localStorage.setItem('loja_slogan', document.getElementById('loja-slogan').value);
             localStorage.setItem('loja_taxa', document.getElementById('loja-taxa').value);
@@ -110,6 +122,12 @@ function configurarPersistenciaLoja() {
 
     if (btnSalvarVisual) {
         btnSalvarVisual.addEventListener('click', () => {
+            // TRAVA ATIVA: Impede o visitante de alterar o branding do site
+            if (isGuest) {
+                alert('🔒 Branding Bloqueado! Para aplicar as cores e logomarca da sua açaiteria na vitrine real, entre ou cadastre uma conta gratuita para liberar.');
+                return;
+            }
+
             localStorage.setItem('loja_cor_primaria', document.getElementById('color-primary').value);
             localStorage.setItem('loja_cor_secundaria', document.getElementById('color-secondary').value);
             localStorage.setItem('loja_cor_fundo', document.getElementById('color-bg').value);
