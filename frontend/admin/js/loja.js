@@ -7,8 +7,22 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function travarFormularioLoja() {
-    const isGuest = localStorage.getItem('guestMode') === 'true';
-    if (!isGuest) return; // Se estiver logado, mata a função e não bloqueia nada!
+    let isGuest = false;
+    try {
+        isGuest = localStorage.getItem('guestMode') === 'true';
+    } catch (e) {
+        isGuest = false; // Se o navegador bloquear, não trava o desenvolvedor
+    }
+
+    if (!isGuest) {
+        // Garante que se NÃO for guest, as travas fiquem escondidas de verdade
+        const aviso = document.getElementById('aviso-loja-guest');
+        const pelicula = document.getElementById('pelicula-loja');
+        if (aviso) aviso.classList.add('hidden');
+        if (pelicula) pelicula.classList.add('hidden');
+        document.querySelector('.wrapper-conteudo-travado').style.opacity = '1';
+        return;
+    }
 
     document.getElementById('aviso-loja-guest').classList.remove('hidden');
     document.getElementById('pelicula-loja').classList.remove('hidden');
