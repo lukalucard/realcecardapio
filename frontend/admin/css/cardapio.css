@@ -1,43 +1,6 @@
-.menu-nav ul {
-    list-style: none;
-}
-
-.menu-nav li {
-    margin: 4px 12px;
-    border-radius: 8px;
-    transition: background 0.2s;
-}
-
-.menu-nav li a {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    color: #f0eef5;
-    text-decoration: none;
-    font-size: 0.95rem;
-    font-weight: 500;
-    border-radius: 8px;
-    transition: all 0.2s;
-}
-
-.menu-nav li a i {
-    width: 22px;
-    font-size: 1.1rem;
-    text-align: center;
-}
-
-.menu-nav li.active a {
-    background-color: rgba(255, 255, 255, 0.2);
-    border-left: 4px solid #FF9F4A;
-    color: white;
-}
-
-.menu-nav li:hover:not(:has(a.active)) {
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
-/* CONTEÚDO PRINCIPAL */
+/* ==========================================================================
+   CONTEÚDO PRINCIPAL E CABEÇALHO
+   ========================================================================== */
 .cardapio-main-content {
     flex: 1;
     overflow-y: auto;
@@ -64,7 +27,9 @@
     margin-top: 4px;
 }
 
-/* ABAS */
+/* ==========================================================================
+   ABAS DO PAINEL (TABS)
+   ========================================================================== */
 .panel-tabs {
     display: flex;
     gap: 20px;
@@ -98,6 +63,9 @@
     border-radius: 50px;
 }
 
+/* ==========================================================================
+   CARDS CONTEÚDOS E BOXES
+   ========================================================================== */
 .cardapio-card-box {
     background: white;
     border-radius: 20px;
@@ -126,7 +94,18 @@
     margin-right: 8px;
 }
 
-/* FORMULÁRIOS E INPUTS UNIVERSAIS */
+.badge-live {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+
+/* ==========================================================================
+   FORMULÁRIOS, CATEGORIAS E INPUTS UNIVERSAIS
+   ========================================================================== */
 .cardapio-form-grid {
     display: flex;
     flex-direction: column;
@@ -176,6 +155,7 @@
 
 input[type="text"],
 input[type="number"],
+input[type="color"],
 select,
 textarea {
     padding: 10px 12px;
@@ -227,6 +207,9 @@ textarea:focus {
     background: #e05e00;
 }
 
+/* ==========================================================================
+   SUGESTÕES DE CADASTROS E CHIPS
+   ========================================================================== */
 .category-suggestions {
     margin-top: 12px;
     margin-bottom: 24px;
@@ -259,7 +242,9 @@ textarea:focus {
     border-color: #6B3FA0;
 }
 
-/* TRAVA DE ALINHAMENTO EM LINHA DO SELECT E BOTÕES */
+/* ==========================================================================
+   LISTAGEM DE CATEGORIAS ATIVAS
+   ========================================================================== */
 .categories-list-preview {
     margin-top: 8px;
     width: 100%;
@@ -307,7 +292,7 @@ textarea:focus {
 }
 
 /* ==========================================================================
-   NOVA ARQUITETURA DE IMAGENS ESTILOSAS (GALERIA UP TO 5)
+   GALERIA DE IMAGENS ATÉ 5 UNIDADES
    ========================================================================== */
 .images-upload-wrapper {
     display: flex;
@@ -415,7 +400,9 @@ textarea:focus {
     color: white;
 }
 
-/* INGREDIENTES CHIPS */
+/* ==========================================================================
+   CHIPS DE INGREDIENTES
+   ========================================================================== */
 .ingredients-action-line {
     display: flex;
     gap: 10px;
@@ -457,7 +444,9 @@ textarea:focus {
     cursor: pointer;
 }
 
-/* OPCIONAIS BUILDER */
+/* ==========================================================================
+   CONSTRUTOR DE GRUPOS DE OPCIONAIS
+   ========================================================================== */
 .product-optionals-builder {
     background-color: #f9fafb;
     border: 1px dashed #d1d5db;
@@ -548,7 +537,9 @@ textarea:focus {
     cursor: pointer;
 }
 
-/* SIMULADOR PREVIEW */
+/* ==========================================================================
+   SIMULADOR DE PREVIEW LIVE DO CONSUMIDOR
+   ========================================================================== */
 .mock-client-menu-view {
     background-color: #f8fafc;
     border: 1px solid #e2e8f0;
@@ -598,6 +589,31 @@ textarea:focus {
     align-items: center;
     justify-content: center;
     color: #6B3FA0;
+}
+
+/* ==========================================================================
+   DESIGN SELECTOR
+   ========================================================================== */
+.layout-selector-options {
+    display: flex;
+    gap: 16px;
+    margin-top: 8px;
+}
+
+.layout-radio {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid #e2e8f0;
+    padding: 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.layout-radio input {
+    width: auto;
 }
 
 .layout-radio:has(input:checked) {

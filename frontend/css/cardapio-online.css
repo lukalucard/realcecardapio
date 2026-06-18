@@ -2,13 +2,15 @@
    CONFIGURAÇÕES GERAIS E CORES DO ECOSSISTEMA REALCE
    ========================================================================== */
 :root {
+    /* Deixamos as cores base mapeadas como fallback caso o cache esteja limpo */
     --primary-color: #FF6B00;
     --primary-hover: #e05e00;
     --secondary-color: #6B3FA0;
     --secondary-light: #4A2A6E;
+    --bg-light: #f8fafc;
+    
     --text-main: #1e293b;
     --text-muted: #64748b;
-    --bg-light: #f8fafc;
     --bg-card: #ffffff;
     --status-open: #2ed573;
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);

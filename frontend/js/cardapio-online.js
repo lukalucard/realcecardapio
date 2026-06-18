@@ -1,58 +1,26 @@
 /* ==========================================================================
-   MOCK DATA: Simulação exata dos dados do seu PostgreSQL (Neon)
+   CONEXÃO COM O ECOSSISTEMA: LEITURA EM TEMPO REAL DAS CONFIGURAÇÕES DO PAINEL
    ========================================================================== */
-const categoriasDoBanco = ["Burgers", "Bebidas", "Açaí"];
+const categoriasDoBanco = JSON.parse(localStorage.getItem('realce_categorias')) || [];
+const produtosDoBanco = JSON.parse(localStorage.getItem('realce_produtos')) || [];
 
-const produtosDoBanco = [
-    {
-        id: 101,
-        nome: "Realce Burger Duplo",
-        preco: 38.90,
-        categoria: "Burgers",
-        ingredientes: "Dois blends de carne artesanal de 150g, queijo cheddar derretido, bacon crocante e maionese da casa.",
-        imagens: ["https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=500"],
-        opcionais: [
-            {
-                nome_grupo: "Escolha o Ponto da Carne",
-                minimo: 1,
-                maximo: 1,
-                itens: [
-                    { nome_adicional: "Mal Passado", preco_adicional: "0.00" },
-                    { nome_adicional: "Ao Ponto", preco_adicional: "0.00" },
-                    { nome_adicional: "Bem Passado", preco_adicional: "0.00" }
-                ]
-            },
-            {
-                nome_grupo: "Adicionais Pagos",
-                minimo: 0,
-                maximo: 3,
-                itens: [
-                    { nome_adicional: "Bacon Extra", preco_adicional: "4.50" },
-                    { nome_adicional: "Queijo Cheddar", preco_adicional: "3.50" },
-                    { nome_adicional: "Ovo Frito", preco_adicional: "2.00" }
-                ]
-            }
-        ]
-    },
-    {
-        id: 102,
-        nome: "Classic Cheese",
-        preco: 28.90,
-        categoria: "Burgers",
-        ingredientes: "Blend artesanal de 150g, queijo prato, alface, tomate fresco e molho especial.",
-        imagens: [],
-        opcionais: []
-    },
-    {
-        id: 103,
-        nome: "Coca-Cola Lata",
-        preco: 6.00,
-        categoria: "Bebidas",
-        ingredientes: "Lata 350ml trincando de gelada.",
-        imagens: ["https://images.unsplash.com/photo-1622483767028-3f66f32aef97?q=80&w=500"],
-        opcionais: []
-    }
-];
+// Dados Institucionais e Visuais vindos da página Loja
+const configLoja = {
+    nome: localStorage.getItem('loja_nome') || 'Realce Cardápio',
+    slogan: localStorage.getItem('loja_slogan') || 'O sabor que realça o seu dia',
+    taxaEntrega: parseFloat(localStorage.getItem('loja_taxa') || 5.00),
+    tempoEntrega: localStorage.getItem('loja_tempo') || '30-45',
+    statusAberto: localStorage.getItem('loja_status') !== 'false', // Padrão true
+    
+    // Identidade Visual
+    corPrimaria: localStorage.getItem('loja_cor_primaria') || '#FF6B00',
+    corSecundaria: localStorage.getItem('loja_cor_secundaria') || '#6B3FA0',
+    corFundo: localStorage.getItem('loja_cor_fundo') || '#f8fafc',
+    bannerImg: localStorage.getItem('loja_banner_img') || '',
+    bannerCorSolida: localStorage.getItem('loja_banner_tipo_cor') || '',
+    logoImg: localStorage.getItem('loja_logo_img') || '',
+    logoPosicao: localStorage.getItem('loja_logo_posicao') || 'center'
+};
 
 /* ==========================================================================
    ESTADO GLOBAL DO APLICATIVO DO CLIENTE
@@ -60,10 +28,10 @@ const produtosDoBanco = [
 let carrinho = [];
 let produtoSelecionadoNoModal = null;
 let quantidadeItemModal = 1;
-const TAXA_ENTREGA = 5.00;
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Inicialização dinâmica baseada nos dados do banco
+    aplicarBrandingCustomizado();
+    renderizarDadosDoEstabelecimento();
     renderizarCategoriasCarrossel();
     renderizarVitrineProdutos();
     
@@ -72,7 +40,74 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ==========================================================================
-   1. RENDERIZADORES DINÂMICOS (CARROSSEL E VITRINE)
+   1. INJETOR DE BRANDING E APARÊNCIA DINÂMICA
+   ========================================================================== */
+function aplicarBrandingCustomizado() {
+    // Sobrescreve as variáveis do CSS em tempo real conforme a escolha do lojista
+    document.documentElement.style.setProperty('--primary-color', configLoja.corPrimaria);
+    document.documentElement.style.setProperty('--secondary-color', configLoja.corSecundaria);
+    document.documentElement.style.setProperty('--bg-light', configLoja.corFundo);
+    
+    // Calcula um tom de hover ligeiramente mais escuro para o botão principal
+    document.documentElement.style.setProperty('--primary-hover', configLoja.corPrimaria + 'dd');
+
+    // Injeta Banner de Topo (Seja imagem Base64 ou cor sólida)
+    const headerBanner = document.querySelector('.restaurant-header');
+    if (headerBanner) {
+        if (configLoja.bannerImg) {
+            headerBanner.style.backgroundImage = `url(${configLoja.bannerImg})`;
+        } else if (configLoja.bannerCorSolida) {
+            headerBanner.style.backgroundImage = 'none';
+            headerBanner.style.backgroundColor = configLoja.bannerCorSolida;
+        }
+    }
+
+    // Alinha a logo conforme o seletor de posição
+    const logoBox = document.querySelector('.restaurant-profile-img');
+    if (logoBox) {
+        if (configLoja.logoImg) {
+            logoBox.innerHTML = `<img src="${configLoja.logoImg}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+        }
+        
+        if (configLoja.logoPosicao === 'left') {
+            logoBox.style.left = '65px';
+            logoBox.style.transform = 'none';
+        } else if (configLoja.logoPosicao === 'right') {
+            logoBox.style.left = 'auto';
+            logoBox.style.right = '20px';
+            logoBox.style.transform = 'none';
+        }
+    }
+}
+
+function renderizarDadosDoEstabelecimento() {
+    const nomeTxt = document.querySelector('.restaurant-name');
+    const sloganTxt = document.querySelector('.restaurant-subtitle');
+    const badgeStatus = document.querySelector('.badge-status');
+    const badgeDelivery = document.querySelector('.badge-delivery');
+
+    if (nomeTxt) nomeTxt.innerHTML = `${configLoja.nome}`;
+    if (sloganTxt) sloganTxt.textContent = configLoja.slogan;
+    
+    if (badgeStatus) {
+        if (configLoja.statusAberto) {
+            badgeStatus.className = 'badge-status open';
+            badgeStatus.innerHTML = `<i class="fas fa-circle"></i> Aberto`;
+        } else {
+            badgeStatus.className = 'badge-status closed';
+            badgeStatus.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+            badgeStatus.style.color = '#ef4444';
+            badgeStatus.innerHTML = `<i class="fas fa-circle"></i> Fechado`;
+        }
+    }
+
+    if (badgeDelivery) {
+        badgeDelivery.innerHTML = `<i class="fas fa-motorcycle"></i> ${configLoja.tempoEntrega} min • R$ ${configLoja.taxaEntrega.toFixed(2).replace('.', ',')}`;
+    }
+}
+
+/* ==========================================================================
+   2. RENDERIZADORES DA VITRINE E CARROSSEL
    ========================================================================== */
 function renderizarCategoriasCarrossel() {
     const carrossel = document.getElementById('carousel-categorias');
@@ -80,17 +115,21 @@ function renderizarCategoriasCarrossel() {
 
     carrossel.innerHTML = "";
     
+    if (categoriasDoBanco.length === 0) {
+        carrossel.innerHTML = `<span style="color:var(--text-muted); font-size:0.85rem; padding:5px 10px;">Nenhuma categoria ativa</span>`;
+        return;
+    }
+    
     categoriasDoBanco.forEach((cat, index) => {
         const btn = document.createElement('button');
         btn.className = `category-btn ${index === 0 ? 'active' : ''}`;
         btn.textContent = cat;
         
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', () => {
             document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             
-            // Scroll suave até a seção correspondente
-            const secao = document.getElementById(`secao-vitrine-${cat}`);
+            const secao = document.getElementById(`secao-vitrine-${cat.replace(/\s+/g, '-')}`);
             if (secao) secao.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
         
@@ -104,18 +143,36 @@ function renderizarVitrineProdutos() {
 
     vitrine.innerHTML = "";
 
+    if (produtosDoBanco.length === 0) {
+        vitrine.innerHTML = `<p style="text-align:center; color:var(--text-muted); padding:60px 20px; font-style:italic;">Cardápio em manutenção. Volte mais tarde!</p>`;
+        return;
+    }
+
+    const layoutEstilo = localStorage.getItem('realce_design_layout') || 'lista';
+    if (layoutEstilo === 'grade') {
+        vitrine.style.display = 'grid';
+        vitrine.style.gridTemplateColumns = '1fr 1fr';
+        vitrine.style.gap = '12px';
+    } else {
+        vitrine.style.display = 'block';
+    }
+
     categoriasDoBanco.forEach(categoria => {
         const produtosFiltrados = produtosDoBanco.filter(p => p.categoria === categoria);
         
         if (produtosFiltrados.length > 0) {
             const secao = document.createElement('section');
             secao.className = 'menu-section';
-            secao.id = `secao-vitrine-${categoria}`;
-            secao.innerHTML = `<h2 class="section-title">${categoria}</h2>`;
+            secao.id = `secao-vitrine-${categoria.replace(/\s+/g, '-')}`;
+            secao.innerHTML = `<h2 class="section-title" style="grid-column: span 2;">${categoria}</h2>`;
             
             produtosFiltrados.forEach(prod => {
                 const card = document.createElement('div');
                 card.className = 'product-card';
+                if (layoutEstilo === 'grade') {
+                    card.style.flexDirection = 'column';
+                    card.style.height = '100%';
+                }
                 card.setAttribute('data-id', prod.id);
                 
                 const fotoDestaque = (prod.imagens && prod.imagens.length > 0)
@@ -126,9 +183,9 @@ function renderizarVitrineProdutos() {
                     <div class="product-details">
                         <h3>${prod.nome}</h3>
                         <p class="product-description">${prod.ingredientes || 'Sem descrição.'}</p>
-                        <span class="product-price">R$ ${prod.preco.toFixed(2).replace('.', ',')}</span>
+                        <span class="product-price">R$ ${parseFloat(prod.preco).toFixed(2).replace('.', ',')}</span>
                     </div>
-                    <div class="product-image-area">
+                    <div class="product-image-area" style="${layoutEstilo === 'grade' ? 'width:100%; height:130px; margin-top:10px;' : ''}">
                         <div class="img-placeholder">
                             ${fotoDestaque}
                         </div>
@@ -138,7 +195,6 @@ function renderizarVitrineProdutos() {
                     </div>
                 `;
                 
-                // Clicar no card inteiro ou no botão + abre o Modal de Opcionais
                 card.addEventListener('click', () => abrirModalOpcionaisProduto(prod.id));
                 secao.appendChild(card);
             });
@@ -149,7 +205,7 @@ function renderizarVitrineProdutos() {
 }
 
 /* ==========================================================================
-   2. NOVO: MOTOR DO MODAL DE DETALHES E OPCIONAIS DO PRODUTO
+   3. MOTOR DO MODAL DE DETALHES E COMPLEMENTOS
    ========================================================================== */
 function abrirModalOpcionaisProduto(idProduto) {
     const prod = produtosDoBanco.find(p => p.id === idProduto);
@@ -159,11 +215,10 @@ function abrirModalOpcionaisProduto(idProduto) {
     quantidadeItemModal = 1;
 
     document.getElementById('modal-produto-nome').textContent = prod.nome;
-    document.getElementById('modal-produto-preco').textContent = `R$ ${prod.preco.toFixed(2).replace('.', ',')}`;
+    document.getElementById('modal-produto-preco').textContent = `R$ ${parseFloat(prod.preco).toFixed(2).replace('.', ',')}`;
     document.getElementById('modal-produto-descricao').textContent = prod.ingredientes || '';
     document.getElementById('txt-modal-quantidade').textContent = quantidadeItemModal;
 
-    // Renderiza Galeria de Imagens (Até 5 fotos)
     const galeria = document.getElementById('modal-produto-galeria');
     galeria.innerHTML = "";
     if (prod.imagens && prod.imagens.length > 0) {
@@ -172,10 +227,9 @@ function abrirModalOpcionaisProduto(idProduto) {
         });
         galeria.style.display = "flex";
     } else {
-        galeria.style.display = "none"; // Se não tiver foto, oculta a galeria para economizar tela
+        galeria.style.display = "none";
     }
 
-    // Renderiza Grupos de Opcionais Relacionais
     const containerOpcionais = document.getElementById('modal-produto-opcionais-container');
     containerOpcionais.innerHTML = "";
 
@@ -192,15 +246,15 @@ function abrirModalOpcionaisProduto(idProduto) {
                 </div>
             `;
 
-            const inputType = grupo.maximo === 1 && grupo.minimo === 1 ? 'radio' : 'checkbox';
+            const inputType = parseInt(grupo.maximo) === 1 && parseInt(grupo.minimo) === 1 ? 'radio' : 'checkbox';
 
-            grupo.itens.forEach((item, idxItem) => {
+            grupo.itens.forEach((item) => {
                 const precoAdicionalNum = parseFloat(item.preco_adicional);
                 const tagPreco = precoAdicionalNum > 0 ? `+ R$ ${precoAdicionalNum.toFixed(2).replace('.', ',')}` : '';
                 
-                const linhaItem = document.createElement('div');
-                linhaItem.className = 'modal-option-item-row';
-                linhaItem.innerHTML = `
+                const sampleRow = document.createElement('div');
+                sampleRow.className = 'modal-option-item-row';
+                sampleRow.innerHTML = `
                     <label class="modal-opt-left">
                         <input type="${inputType}" name="grupo-modal-${idxGrupo}" data-preco="${item.preco_adicional}" value="${item.nome_adicional}">
                         <span>${item.nome_adicional}</span>
@@ -208,9 +262,8 @@ function abrirModalOpcionaisProduto(idProduto) {
                     <span class="modal-opt-price-tag">${tagPreco}</span>
                 `;
                 
-                // Monitora mudanças para recalcular o subtotal em tempo real
-                linhaItem.querySelector('input').addEventListener('change', calcularPrecoTotalModal);
-                grupoBox.appendChild(linhaItem);
+                sampleRow.querySelector('input').addEventListener('change', calcularPrecoTotalModal);
+                grupoBox.appendChild(sampleRow);
             });
 
             containerOpcionais.appendChild(grupoBox);
@@ -224,10 +277,9 @@ function abrirModalOpcionaisProduto(idProduto) {
 function calcularPrecoTotalModal() {
     if (!produtoSelecionadoNoModal) return;
 
-    let precoBase = produtoSelecionadoNoModal.preco;
+    let precoBase = parseFloat(produtoSelecionadoNoModal.preco);
     let precoAdicionais = 0;
 
-    // Coleta todos os inputs marcados dentro do modal
     const inputsMarcados = document.querySelectorAll('#modal-produto-opcionais-container input:checked');
     inputsMarcados.forEach(input => {
         precoAdicionais += parseFloat(input.getAttribute('data-preco') || 0);
@@ -241,7 +293,7 @@ function calcularPrecoTotalModal() {
 
 function inicializarEventosModalDetalhes() {
     const modal = document.getElementById('modal-detalhes-produto');
-    const btnFechar = document.getElementById('btn-fechar-details');
+    const btnFechar = document.getElementById('btn-fechar-detalhes');
     const btnMais = document.getElementById('btn-modal-mais');
     const btnMenos = document.getElementById('btn-modal-menos');
     const btnAdicionarSacola = document.getElementById('btn-modal-adicionar-sacola');
@@ -251,7 +303,6 @@ function inicializarEventosModalDetalhes() {
     if (btnMais) {
         btnMais.addEventListener('click', () => {
             quantidadeItemModal++;
-            document.getElementById('txt-modal-quantidade').textContent = quantityItemModal;
             document.getElementById('txt-modal-quantidade').textContent = quantidadeItemModal;
             calcularPrecoTotalModal();
         });
@@ -269,24 +320,22 @@ function inicializarEventosModalDetalhes() {
 
     if (btnAdicionarSacola) {
         btnAdicionarSacola.addEventListener('click', () => {
-            // VALIDAÇÃO DE REGRAS DE ADICIONAIS (MIN / MAX)
             if (produtoSelecionadoNoModal.opcionais) {
                 let validacaoOk = true;
                 produtoSelecionadoNoModal.opcionais.forEach((grupo, idxGrupo) => {
                     const marcados = document.querySelectorAll(`input[name="grupo-modal-${idxGrupo}"]:checked`).length;
-                    if (marcados < grupo.minimo) {
+                    if (marcados < parseInt(grupo.minimo)) {
                         alert(`Por favor, selecione no mínimo ${grupo.minimo} opções em: "${grupo.nome_grupo}"`);
                         validacaoOk = false;
                     }
-                    if (marcados > grupo.maximo) {
-                        alert(`Atenção: Você selecionou mais do que o limite de ${grupo.maximo} opções em: "${grupo.nome_grupo}"`);
+                    if (marcados > parseInt(grupo.maximo)) {
+                        alert(`Atenção: Você ultrapassou o limite de ${grupo.maximo} opções em: "${grupo.nome_grupo}"`);
                         validacaoOk = false;
                     }
                 });
-                if (!validacaoOk) return; // Trava a inclusão se quebrar a regra do gestor
+                if (!validacaoOk) return;
             }
 
-            // COALIZAÇÃO DAS ESCOLHAS DO CLIENTE
             const opcionaisEscolhidos = [];
             let precoComplementos = 0;
             const selecionados = document.querySelectorAll('#modal-produto-opcionais-container input:checked');
@@ -297,9 +346,8 @@ function inicializarEventosModalDetalhes() {
             });
 
             const nomeItemUnico = produtoSelecionadoNoModal.nome;
-            const precoItemFinal = produtoSelecionadoNoModal.preco + precoComplementos;
+            const precoItemFinal = parseFloat(produtoSelecionadoNoModal.preco) + precoComplementos;
 
-            // Insere ou soma na sacola principal
             const itemExistente = carrinho.find(item => item.nome === nomeItemUnico && item.detalhes === opcionaisEscolhidos.join(', '));
             
             if (itemExistente) {
@@ -320,11 +368,11 @@ function inicializarEventosModalDetalhes() {
 }
 
 /* ==========================================================================
-   3. GERENCIADOR DA SACOLA PERSISTENTE DO RODAPÉ
+   4. GERENCIADOR DA SACOLA DO RODAPÉ
    ========================================================================== */
 function mudarQuantidadeNaSacola(index, mudanca) {
     carrinho[index].quantidade += mudanca;
-    if (carrinho[index].quantidade <= 0) {
+    if (carrinho[index].whitespace || carrinho[index].quantidade <= 0) {
         carrinho.splice(index, 1);
     }
     renderizarSacolaNoRodape();
@@ -355,7 +403,7 @@ function renderizarSacolaNoRodape() {
         row.innerHTML = `
             <div class="item-info-side">
                 <h4>${item.nome}</h4>
-                <span style="font-size:0.78rem; color:#64748b; font-style:italic;">${item.detalhes || 'Sem adicionais.'}</span>
+                <span style="font-size:0.78rem; color:var(--text-muted); font-style:italic;">${item.detalhes || 'Sem adicionais.'}</span>
                 <span>R$ ${valorLinha.toFixed(2).replace('.', ',')}</span>
             </div>
             <div class="item-actions-side">
@@ -371,7 +419,6 @@ function renderizarSacolaNoRodape() {
         containerLista.appendChild(row);
     });
 
-    // Eventos dos botões de quantidade na sacola
     containerLista.querySelectorAll('.btn-sacola-menos').forEach(btn => {
         btn.addEventListener('click', () => mudarQuantidadeNaSacola(parseInt(btn.getAttribute('data-index')), -1));
     });
@@ -380,13 +427,13 @@ function renderizarSacolaNoRodape() {
     });
 
     if (txtTotalRodape) txtTotalRodape.textContent = `R$ ${subtotal.toFixed(2).replace('.', ',')}`;
-    if (txtTotalModal) txtTotalModal.textContent = `R$ ${(subtotal + TAXA_ENTREGA).toFixed(2).replace('.', ',')}`;
+    if (txtTotalModal) txtTotalModal.textContent = `R$ ${(subtotal + configLoja.taxaEntrega).toFixed(2).replace('.', ',')}`;
 
     containerSacola.classList.remove('hidden');
 }
 
 /* ==========================================================================
-   4. CHECKOUT E ENVIO DO PEDIDO VIA WHATSAPP (INTEGRADO ÀS SUAS MENSAGENS)
+   5. CHECKOUT E INTEGRAÇÃO DO WHATSAPP
    ========================================================================== */
 function inicializarEventosModalCheckout() {
     const modalDados = document.getElementById('modal-dados-entrega');
@@ -420,7 +467,6 @@ function inicializarEventosModalCheckout() {
                 return;
             }
 
-            // Alerta de sucesso local antes do disparo
             alert("Pedido validado com sucesso! Redirecionando para o WhatsApp do estabelecimento...");
             modalDados.classList.add('hidden');
         });

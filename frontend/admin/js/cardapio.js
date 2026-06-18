@@ -1,8 +1,8 @@
 /* ==========================================================================
-   ESTADO GLOBAL DO SISTEMA (Banco de Dados em Memória)
+   ESTADO GLOBAL DO SISTEMA (Carrega do cache local se existir)
    ========================================================================== */
-let categoriasSalvas = []; 
-let produtosSalvos = []; 
+let categoriasSalvas = JSON.parse(localStorage.getItem('realce_categorias')) || []; 
+let produtosSalvos = JSON.parse(localStorage.getItem('realce_produtos')) || []; 
 let categoriaEmEdicao = null; 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -10,11 +10,17 @@ document.addEventListener('DOMContentLoaded', () => {
     inicializarControleCategorias();
     inicializarGerenciadorIngredientes();
     inicializarConstrutorOpcionais();
-    inicializarMotorFotosGaleria(); // Nova engenharia de uploads estilosos
+    inicializarMotorFotosGaleria(); 
     inicializarEnvioFormulario();
+    inicializarControleDesignCardapio();
     
     renderizarSelectCategorias();
 });
+
+function salvarEstadoNoCache() {
+    localStorage.setItem('realce_categorias', JSON.stringify(categoriasSalvas));
+    localStorage.setItem('realce_produtos', JSON.stringify(produtosSalvos));
+}
 
 /* ==========================================================================
    1. GERENCIADOR DE ABAS
@@ -105,6 +111,7 @@ function inicializarControleCategorias() {
         }
 
         inputCategoria.value = "";
+        salvarEstadoNoCache();
         renderizarSelectCategorias();
     });
 
@@ -142,12 +149,14 @@ function inicializarControleCategorias() {
 
             if (confirm(`Deseja realmente remover a categoria "${valorSelecionado}"?`)) {
                 categoriasSalvas = categoriasSalvas.filter(cat => cat !== valorSelecionado);
+                produtosSalvos = produtosSalvos.filter(p => p.categoria !== valorSelecionado);
                 if (categoriaEmEdicao === valorSelecionado) {
                     categoriaEmEdicao = null;
                     btnConfirmar.textContent = "Confirmar";
                     document.getElementById('label-acao-categoria').textContent = "Criar categorias";
                     inputCategoria.value = "";
                 }
+                salvarEstadoNoCache();
                 renderizarSelectCategorias();
             }
         });
@@ -192,7 +201,7 @@ function renderizarSelectCategorias() {
 }
 
 /* ==========================================================================
-   3. NOVO MOTOR DE FOTOS DA GALERIA (MÁXIMO 5 SLOTS ESTILOSOS)
+   3. NOVO MOTOR DE FOTOS DA GALERIA
    ========================================================================== */
 function inicializarMotorFotosGaleria() {
     const container = document.getElementById('container-imagens-inputs');
@@ -200,7 +209,6 @@ function inicializarMotorFotosGaleria() {
 
     if (!container || !btnAddSlot) return;
 
-    // Escuta mudanças nos inputs de arquivos para gerar os previews reais
     container.addEventListener('change', (e) => {
         if (e.target.classList.contains('input-prod-foto')) {
             const input = e.target;
@@ -218,7 +226,6 @@ function inicializarMotorFotosGaleria() {
         }
     });
 
-    // Remove a foto do slot específico e limpa o input oculto
     container.addEventListener('click', (e) => {
         if (e.target.classList.contains('remove-photo-badge')) {
             e.preventDefault();
@@ -226,13 +233,12 @@ function inicializarMotorFotosGaleria() {
             const input = boxPai.querySelector('input[type="file"]');
             const previewSlot = boxPai.querySelector('.preview-slot');
 
-            input.value = ""; // Reseta o arquivo no Windows
+            input.value = ""; 
             previewSlot.innerHTML = "";
             previewSlot.classList.add('hidden');
         }
     });
 
-    // Cria um novo Slot estiloso de upload limitado ao teto de 5 unidades
     btnAddSlot.addEventListener('click', (e) => {
         e.preventDefault();
         const totalSlots = container.querySelectorAll('.image-upload-box').length;
@@ -346,13 +352,13 @@ function inicializarConstrutorOpcionais() {
 }
 
 /* ==========================================================================
-   6. ENVIO DO FORMULÁRIO (COLETA A ARRAY DE ATÉ 5 FOTOS SEM ERRO)
+   6. ENVIO E ARMAZENAMENTO DO FORMULÁRIO (CONVERSÃO BASE64 CONTROLADA)
    ========================================================================== */
 function inicializarEnvioFormulario() {
     const formulario = document.querySelector('.cardapio-form-grid');
     if (!formulario) return;
 
-    formulario.addEventListener('submit', (e) => {
+    formulario.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const inputNome = document.getElementById('prod-nome');
@@ -370,25 +376,23 @@ function inicializarEnvioFormulario() {
             return;
         }
 
-        // CAPTURA DE TODAS AS IMAGENS ENVIADAS NOS SLOTS ATIVOS
         const inputsFotos = formulario.querySelectorAll('.input-prod-foto');
         const listaImagensSalvas = [];
 
-        inputsFotos.forEach(input => {
+        // Converte as fotos para base64 para persistir no localstorage provisório
+        for (let input of inputsFotos) {
             if (input.files && input.files[0]) {
-                const urlBlob = URL.createObjectURL(input.files[0]);
-                listaImagensSalvas.push(urlBlob);
+                const base64 = await converterFileToBase64(input.files[0]);
+                listaImagensSalvas.push(base64);
             }
-        });
+        }
 
-        // Coleta os chips de ingredientes
         const chips = document.querySelectorAll('.ingredient-chip');
         const listaIngredientes = [];
         chips.forEach(chip => {
             listaIngredientes.push(chip.textContent.replace('×', '').trim());
         });
 
-        // Coleta a árvore estrutural de adicionais
         const gruposOpcionais = [];
         const cartoesGrupo = formulario.querySelectorAll('.optional-group-card');
 
@@ -420,25 +424,23 @@ function inicializarEnvioFormulario() {
             }
         });
 
-        // Consolida o objeto final sem repetições ou chaves quebradas
         const novoProduto = {
             id: Date.now(),
             nome: nome,
             preco: preco,
             categoria: categoria,
-            imagens: listaImagensSalvas, // Array com até 5 links temporários
+            imagens: listaImagensSalvas, 
             ingredientes: listaIngredientes.join(', '),
             opcionais: gruposOpcionais
         };
 
         produtosSalvos.push(novoProduto); 
+        salvarEstadoNoCache();
         alert(`Sucesso! "${nome}" adicionado com êxito ao seu cardápio.`);
 
-        // Reseta o formulário e limpa a área de chips visuais
         formulario.reset();
         document.getElementById('container-ingredientes-chips').innerHTML = "";
         
-        // Remove os previews e limpa a galeria para voltar a ter apenas 1 slot limpo
         const containerGaleria = document.getElementById('container-imagens-inputs');
         containerGaleria.innerHTML = `
             <div class="image-upload-box">
@@ -453,8 +455,17 @@ function inicializarEnvioFormulario() {
     });
 }
 
+function converterFileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+        reader.readAsDataURL(file);
+    });
+}
+
 /* ==========================================================================
-   7. RENDERIZAÇÃO DA VITRINE SIMULADA (EXIBE A FOTO PRINCIPAL CADASTRADA)
+   7. RENDERIZAÇÃO DA VITRINE SIMULADA LIVE
    ========================================================================== */
 function renderizarPreviewCardapioReal() {
     const containerVitrine = document.querySelector('.mock-client-menu-view');
@@ -483,7 +494,6 @@ function renderizarPreviewCardapioReal() {
                 const card = document.createElement('div');
                 card.className = 'mock-product-card';
 
-                // Pega a primeira imagem do array para ser o destaque principal na vitrine, senão puxa o ícone
                 const containerImagem = (produto.imagens && produto.imagens.length > 0)
                     ? `<img src="${produto.imagens[0]}" alt="${produto.nome}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">`
                     : `<i class="fas ${categoria.toLowerCase().includes('bebida') ? 'fa-glass-cheers' : 'fa-hamburger'}"></i>`;
@@ -505,4 +515,34 @@ function renderizarPreviewCardapioReal() {
             containerVitrine.appendChild(blocoCategoria);
         }
     });
+}
+
+/* ==========================================================================
+   8. ABA DE DESIGN E LAYOUT DO CARDÁPIO EXTERNO
+   ========================================================================== */
+function inicializarControleDesignCardapio() {
+    const secaoDesign = document.getElementById('content-design');
+    if (!secaoDesign) return;
+
+    const inputCorPrincipal = secaoDesign.querySelectorAll('input[type="color"]')[0];
+    const inputCorFundo = secaoDesign.querySelectorAll('input[type="color"]')[1];
+    const btnSalvarDesign = secaoDesign.querySelector('button[type="button"]');
+
+    // Carrega layout anterior do design do cache
+    if (localStorage.getItem('realce_design_principal')) inputCorPrincipal.value = localStorage.getItem('realce_design_principal');
+    if (localStorage.getItem('realce_design_fundo')) inputCorFundo.value = localStorage.getItem('realce_design_fundo');
+    
+    const estiloSalvo = localStorage.getItem('realce_design_layout') || 'lista';
+    const radios = secaoDesign.querySelectorAll('input[type="radio"]');
+    if (estiloSalvo === 'grade' && radios[1]) radios[1].checked = true;
+
+    if (btnSalvarDesign) {
+        btnSalvarDesign.addEventListener('click', () => {
+            const layoutSelecionado = radios[0].checked ? 'lista' : 'grade';
+            localStorage.setItem('realce_design_principal', inputCorPrincipal.value);
+            localStorage.setItem('realce_design_fundo', inputCorFundo.value);
+            localStorage.setItem('realce_design_layout', layoutSelecionado);
+            alert('🎨 Configurações de Design e Layout do cardápio salvas para o cliente!');
+        });
+    }
 }
