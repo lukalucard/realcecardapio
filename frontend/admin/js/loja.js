@@ -12,29 +12,22 @@ function travarFormularioLoja() {
     const isGuest = localStorage.getItem('guestMode') === 'true';
     if (!isGuest) return;
 
-    // Seleciona os dois containers das abas
-    const secaoCadastro = document.getElementById('secao-cadastro');
-    const secaoVisual = document.getElementById('secao-visual');
+    const principalContent = document.querySelector('.cardapio-main-content');
+    if (!principalContent) return;
 
-    const bloquearAcao = (e) => {
+    principalContent.addEventListener('click', (e) => {
+        // Ignora os cliques caso o usuário esteja apenas alternando entre as abas superiores
+        if (e.target.classList.contains('tab-btn')) return;
+
         e.preventDefault();
         e.stopPropagation();
-        
         if (document.activeElement) document.activeElement.blur();
 
         mostrarAlertaVisitante(
             '🎨 Branding Bloqueado! Para aplicar as cores e logomarca da sua açaiteria na vitrine real, entre ou cadastre uma conta gratuita para liberar.', 
             'fas fa-palette'
         );
-    };
-
-    if (secaoCadastro) {
-        secaoCadastro.addEventListener('click', bloquearAcao, true);
-    }
-
-    if (secaoVisual) {
-        secaoVisual.addEventListener('click', bloquearAcao, true);
-    }
+    }, true);
 }
 
 /**

@@ -24,25 +24,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function travarFormularioCardapio() {
     const isGuest = localStorage.getItem('guestMode') === 'true';
-    if (!isGuest) return;
+    const lojaCadastrada = localStorage.getItem('loja_nome'); // Verifica se salvou a loja no cache
+    
+    const principalContent = document.querySelector('.cardapio-main-content');
+    if (!principalContent) return;
 
-    const formulario = document.querySelector('.cardapio-form-grid');
-    if (!formulario) return;
+    // Interceptador geral no container principal para barrar antes de digitar
+    principalContent.addEventListener('click', (e) => {
+        // SCENARIO 1: Usuário é um visitante logado no modo de testes
+        if (isGuest) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (document.activeElement) document.activeElement.blur();
+            
+            mostrarAlertaVisitante(
+                '🔒 Cadastro Negado! Você está no Modo de Teste. Entre ou cadastre uma conta para montar o seu cardápio personalizado!', 
+                'fas fa-utensils'
+            );
+            return;
+        }
 
-    // Captura qualquer tentativa de clique ou foco nos campos do formulário
-    formulario.addEventListener('click', (e) => {
-        // Impede qualquer ação nativa no formulário
-        e.preventDefault();
-        e.stopPropagation();
-        
-        // Desfoca qualquer campo que tenha pego foco indesejado
-        if (document.activeElement) document.activeElement.blur();
+        // SCENARIO 2: Logado, mas tentando criar cardápio sem ter configurado a loja antes
+        if (!lojaCadastrada) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (document.activeElement) document.activeElement.blur();
 
-        mostrarAlertaVisitante(
-            '🔒 Cadastro Negado! Você está no Modo de Teste. Entre ou cadastre uma conta para montar o seu cardápio personalizado!', 
-            'fas fa-utensils'
-        );
-    }, true); // O 'true' garante que o clique seja pego logo na descida do evento
+            // Alerta personalizado seguindo o padrão visual do projeto
+            mostrarAlertaLojaPendente(
+                '🏪 Loja Não Encontrada! Você precisa salvar os dados institucionais na página "Gestão de Loja" antes de começar a criar o seu cardápio.',
+                'fas fa-store-slash'
+            );
+        }
+    }, true); // Captura o clique no topo antes que ele chegue nos inputs
 }
 
 function salvarEstadoNoCache() {

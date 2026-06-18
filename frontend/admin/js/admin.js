@@ -271,4 +271,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.body.appendChild(overlay);
     }
+
+    /**
+    * DISPARA UM MODAL ESTILIZADO SE O USUÁRIO TENTAR ENTRAR NO CARDÁPIO SEM CRIAR A LOJA
+    */
+    function mostrarAlertaLojaPendente(mensagem, iconClass = 'fas fa-store') {
+        if (document.querySelector('.custom-alert-overlay')) return;
+
+        const overlay = document.createElement('div');
+        overlay.className = 'custom-alert-overlay';
+
+        overlay.innerHTML = `
+            <div class="custom-alert-box">
+                <div class="custom-alert-icon" style="color: #FF6B00;">
+                    <i class="${iconClass}"></i>
+                </div>
+                <div class="custom-alert-text">${mensagem}</div>
+                <div class="custom-alert-buttons" style="display: block; text-align: center;">
+                    <a href="loja.html" class="custom-alert-btn btn-alert-register" style="display: inline-block; width: 100%;">Configurar Minha Loja Agora</a>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+    }
 });
