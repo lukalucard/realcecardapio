@@ -25,42 +25,18 @@ document.addEventListener('DOMContentLoaded', () => {
 function travarFormularioCardapio() {
     const isGuest = localStorage.getItem('guestMode') === 'true';
     const lojaCadastrada = localStorage.getItem('loja_nome'); 
-    const formulario = document.querySelector('.cardapio-form-grid');
-    
-    // SCENARIO 1: Usuário é um visitante (Modo de Teste)
+
     if (isGuest) {
-        if (formulario) formulario.style.opacity = '0.5'; // Deixa o fundo cinza/bloqueado
-        
-        // DISPARA O AVISO IMEDIATAMENTE AO ABRIR A TELA
-        mostrarAlertaVisitante(
-            '🔒 Cadastro Negado! Você está no Modo de Teste. Entre ou cadastre uma conta para montar o seu cardápio personalizado!', 
-            'fas fa-utensils'
-        );
-        
-        // Mantém o bloqueio de cliques caso ele tente fechar ou burlar
-        document.querySelector('.cardapio-main-content').addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            mostrarAlertaVisitante('🔒 Modo de Teste Ativo. Entre ou cadastre-se para liberar!', 'fas fa-utensils');
-        }, true);
+        document.getElementById('aviso-cardapio-guest').classList.remove('hidden');
+        document.getElementById('pelicula-cardapio').classList.remove('hidden');
+        document.querySelector('.wrapper-conteudo-travado').style.opacity = '0.6';
         return;
     }
 
-    // SCENARIO 2: Logado, mas não configurou a loja ainda
     if (!lojaCadastrada) {
-        if (formulario) formulario.style.opacity = '0.5';
-
-        // DISPARA O AVISO IMEDIATAMENTE AO ABRIR A TELA
-        mostrarAlertaLojaPendente(
-            '🏪 Loja Não Encontrada! Você precisa salvar os dados institucionais na página "Gestão de Loja" antes de começar a criar o seu cardápio.',
-            'fas fa-store-slash'
-        );
-
-        document.querySelector('.cardapio-main-content').addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            mostrarAlertaLojaPendente('🏪 Cadastre sua loja primeiro para liberar o cardápio.', 'fas fa-store-slash');
-        }, true);
+        document.getElementById('aviso-cardapio-loja-pendente').classList.remove('hidden');
+        document.getElementById('pelicula-cardapio').classList.remove('hidden');
+        document.querySelector('.wrapper-conteudo-travado').style.opacity = '0.6';
     }
 }
 
