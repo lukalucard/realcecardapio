@@ -63,8 +63,7 @@
                         <span class="suggestion-label">Categorias Ativas</span>
                         <div class="categories-list-preview" id="lista-categorias-container">
                             <div class="category-lits-item">
-                                <select id="prod-categoria">
-                                    </select>
+                                <select id="prod-categoria"></select>
                                 <div class="cat-actions">
                                     <button type="button" class="btn-icon edit" id="btn-edit-categoria" title="Configurar"><i class="fas fa-edit"></i></button>
                                     <button type="button" class="btn-icon delete" id="btn-delete-categoria" title="Deletar"><i class="fas fa-trash-alt"></i></button>
@@ -80,6 +79,11 @@
                     </div>
                     
                     <form class="cardapio-form-grid">
+                        <div class="form-input-group">
+                            <label style="color: #6B3FA0; font-weight: 700;">Gerenciar Cardápio da Unidade:</label>
+                            <select id="prod-loja-vinculo" style="border: 2px solid #6B3FA0; font-weight: 600;"></select>
+                        </div>
+
                         <div class="form-input-group">
                             <label>Nome do Produto</label>
                             <input type="text" id="prod-nome" placeholder="Ex: Realce Burger Triplo" required>
@@ -109,8 +113,7 @@
                             </div>
                             <div class="filter-group">
                                 <label>Categoria Pertencente</label>
-                                <select id="prod-select-vinculo">
-                                    </select>
+                                <select id="prod-select-vinculo"></select>
                             </div>
                         </div>
 
@@ -127,7 +130,7 @@
                             <h4>Grupos de Opcionais / Adicionais</h4>
                             <p class="help-text">Defina regras de escolha para o cliente (Ex: Ponto da carne, Adicionais pagos).</p>
                             
-                            <div class="optional-group-card">
+                            <div class="optional-group-card" id="card-inicial-opcionais">
                                 <div class="opt-group-header">
                                     <input type="text" class="input-inline" value="Adicionais Extra">
                                     <div class="opt-rules">
@@ -160,9 +163,7 @@
                         <h3><i class="fas fa-eye"></i> Visualização do Seu Cardápio Live</h3>
                         <span class="badge-live">Modo de Visualização</span>
                     </div>
-                    
-                    <div class="mock-client-menu-view">
-                        </div>
+                    <div class="mock-client-menu-view"></div>
                 </div>
             </section>
 

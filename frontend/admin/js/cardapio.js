@@ -1,11 +1,15 @@
 /* ==========================================================================
-   ESTADO GLOBAL DO SISTEMA (Carrega do cache local se existir)
+   ESTADO GLOBAL DO SISTEMA (Isolado por ID da loja gerenciada)
    ========================================================================== */
-let categoriasSalvas = JSON.parse(localStorage.getItem('realce_categorias')) || []; 
-let produtosSalvos = JSON.parse(localStorage.getItem('realce_produtos')) || []; 
+let lojasDisponiveis = JSON.parse(localStorage.getItem('realce_lista_lojas')) || [];
+let lojaSelecionadaId = null;
+
+let categoriasSalvas = []; 
+let produtosSalvos = []; 
 let categoriaEmEdicao = null; 
 
 document.addEventListener('DOMContentLoaded', () => {
+    inicializarSeletorLojasSaaS();
     inicializarAbasDoSistema();
     inicializarControleCategorias();
     inicializarGerenciadorIngredientes();
@@ -13,19 +17,53 @@ document.addEventListener('DOMContentLoaded', () => {
     inicializarMotorFotosGaleria(); 
     inicializarEnvioFormulario();
     inicializarControleDesignCardapio();
+});
+
+/* ==========================================================================
+   MOTOR MULTILOJAS - TROCA DINÂMICA DE BANCO DE DADOS
+   ========================================================================== */
+function inicializarSeletorLojasSaaS() {
+    const selectLojas = document.getElementById('prod-loja-vinculo');
+    if (!selectLojas) return;
+
+    if (lojasDisponiveis.length === 0) {
+        selectLojas.innerHTML = `<option value="">Crie uma loja primeiro no painel Gestão de Loja</option>`;
+        return;
+    }
+
+    selectLojas.innerHTML = "";
+    lojasDisponiveis.forEach(loja => {
+        const option = document.createElement('option');
+        option.value = loja.id;
+        option.textContent = loja.nome;
+        selectLojas.appendChild(option);
+    });
+
+    // Pega por padrão a primeira loja da lista
+    lojaSelecionadaId = selectLojas.value;
+    carregarDadosDaLojaEspecifica();
+
+    // Listener para carregar produtos e categorias da outra loja imediatamente ao trocar
+    selectLojas.addEventListener('change', (e) => {
+        lojaSelecionadaId = e.target.value;
+        carregarDadosDaLojaEspecifica();
+    });
+}
+
+function carregarDadosDaLojaEspecifica() {
+    if (!lojaSelecionadaId) return;
+    
+    // Carrega dados isolados daquela loja do storage
+    categoriasSalvas = JSON.parse(localStorage.getItem(`realce_categorias_${lojaSelecionadaId}`)) || [];
+    produtosSalvos = JSON.parse(localStorage.getItem(`realce_produtos_${lojaSelecionadaId}`)) || [];
     
     renderizarSelectCategorias();
-});
-
-document.addEventListener('DOMContentLoaded', () => {
-    // Executa a trava preventiva logo que a página carrega
-    travarFormularioCardapio();
-});
-
+}
 
 function salvarEstadoNoCache() {
-    localStorage.setItem('realce_categorias', JSON.stringify(categoriasSalvas));
-    localStorage.setItem('realce_produtos', JSON.stringify(produtosSalvos));
+    if (!lojaSelecionadaId) return;
+    localStorage.setItem(`realce_categorias_${lojaSelecionadaId}`, JSON.stringify(categoriasSalvas));
+    localStorage.setItem(`realce_produtos_${lojaSelecionadaId}`, JSON.stringify(produtosSalvos));
 }
 
 /* ==========================================================================
@@ -68,7 +106,7 @@ function inicializarAbasDoSistema() {
 }
 
 /* ==========================================================================
-   2. GERENCIADOR DE CATEGORIAS
+   2. GERENCIADOR DE CATEGORIAS + MÓDULO AUTO-TAMANHOS PIZZA
    ========================================================================== */
 function inicializarControleCategorias() {
     const holderSugestoes = document.querySelector('.suggestions-holder');
@@ -83,8 +121,14 @@ function inicializarControleCategorias() {
         const btnSugestao = e.target.closest('.badge-suggestion');
         if (btnSugestao) {
             e.preventDefault();
-            inputCategoria.value = btnSugestao.textContent.trim();
+            const valorSugestao = btnSugestao.textContent.trim();
+            inputCategoria.value = valorSugestao;
             inputCategoria.focus();
+
+            // MÓDULO INTELIGENTE: Se escolheu pizzas, monta automaticamente os tamanhos
+            if (valorSugestao.toLowerCase() === 'pizzas' || valorSugestao.toLowerCase() === 'pizza') {
+                autoInjetarTamanhosPizzaFormulario();
+            }
         }
     });
 
@@ -169,6 +213,38 @@ function inicializarControleCategorias() {
     }
 }
 
+function autoInjetarTamanhosPizzaFormulario() {
+    const builderContainer = document.querySelector('.product-optionals-builder');
+    if (!builderContainer) return;
+
+    // Remove qualquer grupo padrão solto para injetar a tabela de tamanhos estruturada
+    const gruposAntigos = builderContainer.querySelectorAll('.optional-group-card');
+    gruposAntigos.forEach(g => g.remove());
+
+    const novoGrupo = document.createElement('div');
+    novoGrupo.className = 'optional-group-card';
+    novoGrupo.innerHTML = `
+        <div class="opt-group-header">
+            <input type="text" class="input-inline" value="Escolha o Tamanho">
+            <div class="opt-rules"><label>Min:</label> <input type="number" value="1"><label>Max:</label> <input type="number" value="1"></div>
+        </div>
+        <div class="optional-items-table">
+            <div class="opt-item-row">
+                <input type="text" value="Pequena (4 fatias)"><input type="number" step="0.01" value="0.00"><button type="button" class="btn-text-delete"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="opt-item-row">
+                <input type="text" value="Média (6 fatias)"><input type="number" step="0.01" value="10.00"><button type="button" class="btn-text-delete"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="opt-item-row">
+                <input type="text" value="Grande (8 fatias)"><input type="number" step="0.01" value="20.00"><button type="button" class="btn-text-delete"><i class="fas fa-times"></i></button>
+            </div>
+            <button type="button" class="btn-secondary-sm"><i class="fas fa-plus"></i> Adicionar Item Extra</button>
+        </div>
+    `;
+    const btnNewGroup = builderContainer.querySelector('.btn-secondary');
+    builderContainer.insertBefore(novoGrupo, btnNewGroup);
+}
+
 function renderizarSelectCategorias() {
     const selectGerencia = document.querySelector('.category-lits-item select');
     const selectFormulario = document.getElementById('prod-select-vinculo');
@@ -207,7 +283,7 @@ function renderizarSelectCategorias() {
 }
 
 /* ==========================================================================
-   3. NOVO MOTOR DE FOTOS DA GALERIA
+   3. MOTOR DE FOTOS DA GALERIA
    ========================================================================== */
 function inicializarMotorFotosGaleria() {
     const container = document.getElementById('container-imagens-inputs');
@@ -358,7 +434,7 @@ function inicializarConstrutorOpcionais() {
 }
 
 /* ==========================================================================
-   6. ENVIO E ARMAZENAMENTO DO FORMULÁRIO (CONVERSÃO BASE64 CONTROLADA)
+   6. ENVIO E ARMAZENAMENTO DO FORMULÁRIO (ISOLADO MULTILOJA)
    ========================================================================== */
 function inicializarEnvioFormulario() {
     const formulario = document.querySelector('.cardapio-form-grid');
@@ -366,6 +442,11 @@ function inicializarEnvioFormulario() {
 
     formulario.addEventListener('submit', async (e) => {
         e.preventDefault();
+
+        if (!lojaSelecionadaId) {
+            alert("⚠️ Selecione uma loja no topo antes de cadastrar o produto.");
+            return;
+        }
 
         const inputNome = document.getElementById('prod-nome');
         const inputPreco = document.getElementById('prod-preco');
@@ -385,7 +466,6 @@ function inicializarEnvioFormulario() {
         const inputsFotos = formulario.querySelectorAll('.input-prod-foto');
         const listaImagensSalvas = [];
 
-        // Converte as fotos para base64 para persistir no localstorage provisório
         for (let input of inputsFotos) {
             if (input.files && input.files[0]) {
                 const base64 = await converterFileToBase64(input.files[0]);
@@ -408,9 +488,9 @@ function inicializarEnvioFormulario() {
             const max = cartao.querySelectorAll('.opt-rules input')[1].value;
 
             const itensDoGrupo = [];
-            const linhasItens = cartao.querySelectorAll('.opt-item-row');
+            const linesItens = cartao.querySelectorAll('.opt-item-row');
             
-            linhasItens.forEach((linha) => {
+            linesItens.forEach((linha) => {
                 const inputs = linha.querySelectorAll('input'); 
                 if (inputs[0] && inputs[0].value) {
                     itensDoGrupo.push({
@@ -442,7 +522,7 @@ function inicializarEnvioFormulario() {
 
         produtosSalvos.push(novoProduto); 
         salvarEstadoNoCache();
-        alert(`Sucesso! "${nome}" adicionado com êxito ao seu cardápio.`);
+        alert(`Sucesso! "${nome}" adicionado com êxito.`);
 
         formulario.reset();
         document.getElementById('container-ingredientes-chips').innerHTML = "";
@@ -480,7 +560,7 @@ function renderizarPreviewCardapioReal() {
     containerVitrine.innerHTML = "";
 
     if (produtosSalvos.length === 0) {
-        containerVitrine.innerHTML = `<p style="text-align: center; color: #9ca3af; padding: 40px 20px; font-style: italic;">Nenhum produto cadastrado na sua conta. Monte itens para vê-los aqui!</p>`;
+        containerVitrine.innerHTML = `<p style="text-align: center; color: #9ca3af; padding: 40px 20px; font-style: italic;">Nenhum produto cadastrado nesta loja. Monte itens para vê-los aqui!</p>`;
         return;
     }
 
@@ -490,6 +570,7 @@ function renderizarPreviewCardapioReal() {
         if (produtosDaCategoria.length > 0) {
             const blocoCategoria = document.createElement('div');
             blocoCategoria.className = 'mock-category-block';
+            blocoCategoria.style.transform = 'none';
             blocoCategoria.style.marginBottom = '24px';
             blocoCategoria.innerHTML = `<h4 class="mock-cat-title">${categoria}</h4>`;
 
@@ -524,7 +605,7 @@ function renderizarPreviewCardapioReal() {
 }
 
 /* ==========================================================================
-   8. ABA DE DESIGN E LAYOUT DO CARDÁPIO EXTERNO
+   8. ABA DE DESIGN E LAYOUT DO CARDÁPIO EXTERNO (ISOLADO POR LOJA)
    ========================================================================== */
 function inicializarControleDesignCardapio() {
     const secaoDesign = document.getElementById('content-design');
@@ -534,21 +615,20 @@ function inicializarControleDesignCardapio() {
     const inputCorFundo = secaoDesign.querySelectorAll('input[type="color"]')[1];
     const btnSalvarDesign = secaoDesign.querySelector('button[type="button"]');
 
-    // Carrega layout anterior do design do cache
-    if (localStorage.getItem('realce_design_principal')) inputCorPrincipal.value = localStorage.getItem('realce_design_principal');
-    if (localStorage.getItem('realce_design_fundo')) inputCorFundo.value = localStorage.getItem('realce_design_fundo');
+    if (localStorage.getItem(`realce_design_principal_${lojaSelecionadaId}`)) inputCorPrincipal.value = localStorage.getItem(`realce_design_principal_${lojaSelecionadaId}`);
+    if (localStorage.getItem(`realce_design_fundo_${lojaSelecionadaId}`)) inputCorFundo.value = localStorage.getItem(`realce_design_fundo_${lojaSelecionadaId}`);
     
-    const estiloSalvo = localStorage.getItem('realce_design_layout') || 'lista';
+    const estiloSalvo = localStorage.getItem(`realce_design_layout_${lojaSelecionadaId}`) || 'lista';
     const radios = secaoDesign.querySelectorAll('input[type="radio"]');
     if (estiloSalvo === 'grade' && radios[1]) radios[1].checked = true;
 
     if (btnSalvarDesign) {
         btnSalvarDesign.addEventListener('click', () => {
             const layoutSelecionado = radios[0].checked ? 'lista' : 'grade';
-            localStorage.setItem('realce_design_principal', inputCorPrincipal.value);
-            localStorage.setItem('realce_design_fundo', inputCorFundo.value);
-            localStorage.setItem('realce_design_layout', layoutSelecionado);
-            alert('🎨 Configurações de Design e Layout do cardápio salvas para o cliente!');
+            localStorage.setItem(`realce_design_principal_${lojaSelecionadaId}`, inputCorPrincipal.value);
+            localStorage.setItem(`realce_design_fundo_${lojaSelecionadaId}`, inputCorFundo.value);
+            localStorage.setItem(`realce_design_layout_${lojaSelecionadaId}`, layoutSelecionado);
+            alert('🎨 Configurações de Layout salvas com sucesso para esta loja!');
         });
     }
 }
