@@ -116,26 +116,25 @@ function aplicarIdentidadeVisual() {
    3. CARREGADOR DE PRODUTOS E FILTROS DE CATEGORIAS
    ========================================================================== */
 function carregarCategoriasEDinamismo() {
-    // Aqui no futuro vamos puxar a lista de produtos salvos vinculados a esta loja
-    // Por enquanto, renderiza uma estrutura de teste limpa na vitrine
     const vitrine = document.getElementById('vitrine-produtos');
     const carousel = document.getElementById('carousel-categorias');
     
+    // Como não há cardápio cadastrado, limpamos os botões fixos para não confundir
     if (carousel) {
         carousel.innerHTML = `
-            <button class="category-btn active">Todos</button>
-            <button class="category-btn">🍕 Pizzas</button>
-            <button class="category-btn">🍔 Hambúrgueres</button>
-            <button class="category-btn">🥤 Bebidas</button>
+            <span style="color: var(--text-muted); font-size: 0.85rem; font-style: italic; padding: 0 10px;">
+                Nenhuma categoria ativa
+            </span>
         `;
     }
 
     if (vitrine) {
         vitrine.innerHTML = `
-            <div class="menu-section">
-                <h2 class="section-title">Bem-vindo à nossa vitrine!</h2>
-                <p style="color: #64748b; font-size:0.9rem; padding: 10px 0;">
-                    Adicione seus produtos no menu administrativo para vê-los brilhar aqui com o seu novo visual personalizado.
+            <div class="menu-section" style="text-align: center; padding: 40px 20px;">
+                <i class="fas fa-utensils" style="font-size: 2.5rem; color: var(--text-muted); margin-bottom: 15px; display: block;"></i>
+                <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-main);">Cardápio em Construção</h3>
+                <p style="color: var(--text-muted); font-size:0.85rem; margin-top: 6px; line-height: 1.4;">
+                    Vá até o painel administrativo na página de "Configurações do Cardápio" para cadastrar seus primeiros produtos e categorias!
                 </p>
             </div>
         `;

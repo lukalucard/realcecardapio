@@ -72,6 +72,9 @@ body {
     box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.02);
 }
 
+/* ==========================================================================
+   RESTAURANTE PROFILE IMAGE (BLINDADO)
+   ========================================================================== */
 .restaurant-profile-img {
     position: absolute;
     top: -45px;
@@ -86,11 +89,20 @@ body {
     justify-content: center;
     align-items: center;
     box-shadow: var(--shadow-md);
+    overflow: hidden; /* Força qualquer imagem grande a ser cortada no círculo */
 }
 
 .restaurant-profile-img i {
     color: white;
     font-size: 2rem;
+}
+
+/* Garante que a foto do lojista preencha o círculo perfeitamente sem amassar */
+.restaurant-profile-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; 
+    border-radius: 50%;
 }
 
 .restaurant-name {
