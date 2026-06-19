@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RealceCardápio - Cardápio Online</title>
+    <title>Carregando Cardápio... - RealceCardápio</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
@@ -17,38 +17,37 @@
 
     <div class="cardapio-client-container">
         
-        <header class="restaurant-header">
+        <header class="restaurant-header" id="banner-topo-cliente">
             <div class="banner-overlay"></div>
             <div class="restaurant-info-box">
-                <div class="restaurant-profile-img">
-                    <i class="fas fa-store"></i>
+                <div class="restaurant-profile-img" id="container-logo-cliente">
+                    <i class="fas fa-store" id="logo-cliente-icon"></i>
+                    <img src="" id="logo-cliente-img" alt="Logo da loja" class="hidden">
                 </div>
-                <h1 class="restaurant-name">Realce<span>Cardápio</span></h1>
-                <p class="restaurant-subtitle">O sabor que realça o seu dia</p>
+                <h1 class="restaurant-name" id="nome-loja-header">Realce<span>Cardápio</span></h1>
+                <p class="restaurant-subtitle" id="slogan-loja">Carregando informações...</p>
+                
                 <div class="restaurant-badges">
-                    <span class="badge-status open">
+                    <span class="badge-status open" id="status-loja-badge">
                         <i class="fas fa-circle"></i> Aberto
                     </span>
-                    <span class="badge-delivery">
-                        <i class="fas fa-motorcycle"></i> 30-45 min • R$ 5,00
+                    <span class="badge-delivery" id="delivery-info-badge">
+                        <i class="fas fa-motorcycle"></i> -- min • R$ --
                     </span>
                 </div>
             </div>
         </header>
 
-        <nav class="categories-carousel" id="carousel-categorias">
-            </nav>
+        <nav class="categories-carousel" id="carousel-categorias"></nav>
 
-        <main class="menu-products" id="vitrine-produtos">
-            </main>
+        <main class="menu-products" id="vitrine-produtos"></main>
 
         <div class="persistent-cart-container hidden" id="persistent-cart">
             <div class="cart-title-area">
                 <h3>Sua Sacola</h3>
             </div>
             
-            <div class="cart-items-list" id="itens-sacola-direta">
-                </div>
+            <div class="cart-items-list" id="itens-sacola-direta"></div>
             
             <div class="cart-summary-footer">
                 <div class="cart-total-line">
@@ -68,8 +67,7 @@
                 </header>
                 
                 <div class="product-modal-body">
-                    <div class="product-gallery-slider" id="modal-produto-galeria">
-                        </div>
+                    <div class="product-gallery-slider" id="modal-produto-galeria"></div>
 
                     <div class="product-info-header">
                         <h2 id="modal-produto-nome">Nome do Produto</h2>
@@ -77,8 +75,7 @@
                         <p id="modal-produto-descricao">Descrição ou ingredientes base.</p>
                     </div>
 
-                    <div id="modal-produto-opcionais-container">
-                        </div>
+                    <div id="modal-produto-opcionais-container"></div>
                 </div>
 
                 <footer class="modal-product-footer">
@@ -128,7 +125,7 @@
 
                 <footer class="modal-footer">
                     <div class="modal-total-section">
-                        <span>Total Geral (com entrega R$ 5,00):</span>
+                        <span>Total Geral (<span id="txt-label-taxa-checkout">com entrega</span>):</span>
                         <strong id="modal-total-final-valor">R$ 0,00</strong>
                     </div>
                     <button type="button" class="btn-finalize-order" id="btn-enviar-pedido">

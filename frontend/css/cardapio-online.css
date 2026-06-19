@@ -2,13 +2,14 @@
    CONFIGURAÇÕES GERAIS E CORES DO ECOSSISTEMA REALCE
    ========================================================================== */
 :root {
-    /* Deixamos as cores base mapeadas como fallback caso o cache esteja limpo */
+    /* Atrelado dinamicamente via JS. Fallbacks mantidos caso venha limpo */
     --primary-color: #FF6B00;
     --primary-hover: #e05e00;
     --secondary-color: #6B3FA0;
     --secondary-light: #4A2A6E;
     --bg-light: #f8fafc;
     
+    /* Configurações padrão fixas */
     --text-main: #1e293b;
     --text-muted: #64748b;
     --bg-card: #ffffff;
@@ -46,7 +47,7 @@ body {
    ========================================================================== */
 .restaurant-header {
     position: relative;
-    background-image: url('https://images.unsplash.com/photo-1555396273-367ea4eb4db5?q=80&w=600&auto=format&fit=crop');
+    background-color: var(--secondary-color);
     background-size: cover;
     background-position: center;
     padding-top: 80px;
@@ -58,7 +59,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.7));
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.6));
 }
 
 .restaurant-info-box {
@@ -416,7 +417,7 @@ body {
 }
 
 /* ==========================================================================
-   NOVO: ESTILOS DO MODAL DE OPCIONAIS DO PRODUTO
+   MODAL DE OPCIONAIS DO PRODUTO
    ========================================================================== */
 .modal-header-product {
     padding: 16px 20px;
@@ -495,7 +496,6 @@ body {
     margin-top: 8px;
 }
 
-/* ESTILIZAÇÃO DOS GRUPOS DINÂMICOS DE COMPLEMENTOS */
 .modal-option-group-box {
     padding: 16px 20px;
     border-bottom: 8px solid #f1f5f9;
@@ -735,7 +735,6 @@ body {
     box-shadow: 0 4px 12px rgba(46, 213, 115, 0.2);
 }
 
-/* UTILITÁRIOS */
 .hidden {
     display: none !important;
 }
