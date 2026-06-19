@@ -306,3 +306,74 @@ input:focus {
 .mt-4 {
     margin-top: 1.5rem;
 }
+
+/* ==========================================================================
+   GRID DE MINIATURAS MULTILOJAS (DASHBOARD)
+   ========================================================================== */
+.lojas-grid-dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 15px;
+}
+
+.loja-card-miniatura {
+    background-color: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    position: relative;
+}
+
+.loja-card-miniatura:hover {
+    border-color: #FF6B00;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.loja-card-miniatura .icon-box-card {
+    width: 60px;
+    height: 60px;
+    background: #6B3FA0;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px auto;
+    font-size: 1.5rem;
+}
+
+.loja-card-miniatura h4 {
+    font-size: 1rem;
+    color: #1e293b;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.loja-card-miniatura p {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin-bottom: 12px;
+}
+
+.btn-abrir-vitrine-link {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #FF6B00;
+    text-decoration: none;
+    border-bottom: 1px dashed #FF6B00;
+}
+
+.msg-lista-vazia {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: #94a3b8;
+    padding: 40px 20px;
+    font-style: italic;
+    font-size: 0.95rem;
+}
