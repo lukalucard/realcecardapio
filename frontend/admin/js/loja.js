@@ -6,29 +6,6 @@ document.addEventListener('DOMContentLoaded', () => {
     travarFormularioLoja(); // Só vai agir se for Guest!
 });
 
-function travarFormularioLoja() {
-    let isGuest = false;
-    try {
-        isGuest = localStorage.getItem('guestMode') === 'true';
-    } catch (e) {
-        isGuest = false; // Se o navegador bloquear, não trava o desenvolvedor
-    }
-
-    if (!isGuest) {
-        // Garante que se NÃO for guest, as travas fiquem escondidas de verdade
-        const aviso = document.getElementById('aviso-loja-guest');
-        const pelicula = document.getElementById('pelicula-loja');
-        if (aviso) aviso.classList.add('hidden');
-        if (pelicula) pelicula.classList.add('hidden');
-        document.querySelector('.wrapper-conteudo-travado').style.opacity = '1';
-        return;
-    }
-
-    document.getElementById('aviso-loja-guest').classList.remove('hidden');
-    document.getElementById('pelicula-loja').classList.remove('hidden');
-    document.querySelector('.wrapper-conteudo-travado').style.opacity = '0.6';
-}
-
 function configurarPersistenciaLoja() {
     const btnCriarLoja = document.getElementById('btn-criar-loja');
     const btnSalvarVisual = document.getElementById('btn-salvar-visual');

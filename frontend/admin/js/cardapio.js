@@ -22,38 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
     travarFormularioCardapio();
 });
 
-function travarFormularioCardapio() {
-    let isGuest = false;
-    let lojaCadastrada = "";
-
-    try {
-        isGuest = localStorage.getItem('guestMode') === 'true';
-        lojaCadastrada = localStorage.getItem('loja_nome');
-    } catch (e) {
-        return; // Em caso de bloqueio de storage, libera a tela
-    }
-
-    if (isGuest) {
-        document.getElementById('aviso-cardapio-guest').classList.remove('hidden');
-        document.getElementById('pelicula-cardapio').classList.remove('hidden');
-        document.querySelector('.wrapper-conteudo-travado').style.opacity = '0.6';
-        return;
-    }
-
-    // Se chegou aqui, não é Guest. Garante a ocultação do aviso de visitante
-    const avisoGuest = document.getElementById('aviso-cardapio-guest');
-    if (avisoGuest) avisoGuest.classList.add('hidden');
-
-    if (!lojaCadastrada || lojaCadastrada.trim() === "") {
-        document.getElementById('aviso-cardapio-loja-pendente').classList.remove('hidden');
-        document.getElementById('pelicula-cardapio').classList.remove('hidden');
-        document.querySelector('.wrapper-conteudo-travado').style.opacity = '0.6';
-    } else {
-        document.getElementById('aviso-cardapio-loja-pendente').classList.add('hidden');
-        document.getElementById('pelicula-cardapio').classList.add('hidden');
-        document.querySelector('.wrapper-conteudo-travado').style.opacity = '1';
-    }
-}
 
 function salvarEstadoNoCache() {
     localStorage.setItem('realce_categorias', JSON.stringify(categoriasSalvas));
