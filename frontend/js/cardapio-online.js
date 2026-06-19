@@ -1,54 +1,59 @@
-// ==========================================================================
-// MOTOR DE INTEGRAÇÃO - LEITURA DA LOJA DINÂMICA
-// ==========================================================================
+/* ==========================================================================
+   ESTADO GLOBAL DO CARDÁPIO ONLINE
+   ========================================================================== */
 let lojaAtiva = null;
+let produtosDaLoja = []; // Receberá os produtos cadastrados no painel
+let sacolaItens = [];
 
 document.addEventListener('DOMContentLoaded', () => {
+    // 1. Inicializa a Integração Multilojas e Branding
     carregarDadosDaLojaUrl();
     aplicarIdentidadeVisual();
-    // Aqui você mantém as suas outras funções, como carregarProdutos(), inicializarCarrinho(), etc.
+    
+    // 2. Inicializa os motores nativos do cardápio
+    carregarCategoriasEDinamismo();
+    inicializarEventosInterface();
 });
 
+/* ==========================================================================
+   1. MOTOR DE INTEGRAÇÃO - LEITURA DA URL DINÂMICA
+   ========================================================================== */
 function carregarDadosDaLojaUrl() {
-    // 1. Pega o nome da loja que veio na URL (?loja=realce-pizza-burger)
     const params = new URLSearchParams(window.location.search);
     const lojaSlug = params.get('loja');
-
-    // 2. Busca a lista completa de lojas do localStorage
     const listaLojas = JSON.parse(localStorage.getItem('realce_lista_lojas')) || [];
 
     if (!lojaSlug || listaLojas.length === 0) {
-        alert('⚠️ Nenhuma loja encontrada ou link inválido!');
+        alert('⚠️ Nenhuma loja encontrada ou link de vitrine inválido!');
         return;
     }
 
-    // 3. Encontra a loja correspondente gerando o mesmo slug para comparar
+    // Busca o registro correspondente gerando o mesmo padrão de slug
     lojaAtiva = listaLojas.find(loja => encodeCalmSlug(loja.nome) === lojaSlug);
 
     if (!lojaAtiva) {
-        alert('⚠️ Loja não encontrada no sistema!');
+        alert('⚠️ Esta loja não foi encontrada no sistema!');
         return;
     }
 
-    // 4. INJETAR OS DADOS NO HTML (Substitua pelos IDs reais do seu cardapio-online)
-    if (document.getElementById('nome-loja-header')) {
-        document.getElementById('nome-loja-header').innerText = lojaAtiva.nome;
-    }
-    if (document.getElementById('slogan-loja')) {
-        document.getElementById('slogan-loja').innerText = lojaAtiva.slogan || '';
-    }
-    if (document.getElementById('info-endereco')) {
-        document.getElementById('info-endereco').innerText = lojaAtiva.endereco || '';
-    }
-    if (document.getElementById('info-horario')) {
-        document.getElementById('info-horario').innerText = lojaAtiva.horario || '';
-    }
+    // Injeta os dados nos IDs novos mapeados no cardapio-online.html
+    document.getElementById('nome-loja-header').innerHTML = `${lojaAtiva.nome}`;
+    document.getElementById('slogan-loja').innerText = lojaAtiva.slogan || 'O sabor que realça o seu dia';
     
-    // Altera o título da aba do navegador dinamicamente
+    // Injeta tempo e taxa no badge correspondente
+    const taxaFormatada = parseFloat(lojaAtiva.taxa || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    document.getElementById('delivery-info-badge').innerHTML = `
+        <i class="fas fa-motorcycle"></i> ${lojaAtiva.tempo || '30-45'} min • ${taxaFormatada}
+    `;
+
+    // Atualiza a frase da taxa na tela do checkout final
+    const labelTaxaCheckout = document.getElementById('txt-label-taxa-checkout');
+    if (labelTaxaCheckout) labelTaxaCheckout.innerText = `com entrega ${taxaFormatada}`;
+
+    // Altera o título da aba do navegador
     document.title = `${lojaAtiva.nome} - Cardápio Online`;
 }
 
-// Função auxiliar para bater o mesmo slug do loja.js
 function encodeCalmSlug(texto) {
     return texto.toString().toLowerCase().trim()
         .replace(/\s+/g, '-')
@@ -57,52 +62,103 @@ function encodeCalmSlug(texto) {
 }
 
 /* ==========================================================================
-   APLICADOR DE IDENTIDADE VISUAL DINÂMICA
+   2. APLICADOR DE BRANDING E CORES DINÂMICAS
    ========================================================================== */
 function aplicarIdentidadeVisual() {
     if (!lojaAtiva) return;
 
-    // 1. Aplica as cores usando Variáveis CSS (Root) para mudar tudo de uma vez
-    document.documentElement.style.setProperty('--cor-primaria', lojaAtiva.corPrimaria);
-    document.documentElement.style.setProperty('--cor-secundaria', lojaAtiva.corSecundaria);
-    document.documentElement.style.setProperty('--cor-fundo-geral', lojaAtiva.corFundo);
+    // Injeta as cores configuradas pelo lojista direto nas variáveis de CSS Root
+    document.documentElement.style.setProperty('--primary-color', lojaAtiva.corPrimaria || '#FF6B00');
+    document.documentElement.style.setProperty('--secondary-color', lojaAtiva.corSecundaria || '#6B3FA0');
+    document.documentElement.style.setProperty('--bg-light', lojaAtiva.corFundo || '#f8fafc');
+    document.documentElement.style.setProperty('--primary-hover', (lojaAtiva.corPrimaria || '#FF6B00') + 'dd');
 
-    // Também pode aplicar direto no body se preferir
-    document.body.style.backgroundColor = lojaAtiva.corFundo;
-
-    // 2. Aplica o Banner de Topo (Seja imagem em Base64 ou Cor Sólida)
+    // Aplica o Banner (Seja imagem Base64 ou Cor Sólida)
     const bannerElement = document.getElementById('banner-topo-cliente');
     if (bannerElement) {
         if (lojaAtiva.bannerImg) {
             bannerElement.style.backgroundImage = `url(${lojaAtiva.bannerImg})`;
-            bannerElement.style.backgroundSize = 'cover';
-            bannerElement.style.backgroundPosition = 'center';
         } else {
             bannerElement.style.backgroundImage = 'none';
             bannerElement.style.backgroundColor = lojaAtiva.bannerCorSolida || '#6B3FA0';
         }
     }
 
-    // 3. Aplica a Logomarca e a sua Posição
-    const logoImgElement = document.getElementById('logo-cliente-img');
-    const logoContainer = document.getElementById('container-logo-cliente'); // Div pai da logo
+    // Aplica a Logomarca e respeita o Alinhamento (Esquerda, Centro, Direita)
+    const logoImg = document.getElementById('logo-cliente-img');
+    const logoIcon = document.getElementById('logo-cliente-icon');
+    const containerLogo = document.getElementById('container-logo-cliente');
 
-    if (logoImgElement && lojaAtiva.logoImg) {
-        logoImgElement.src = lojaAtiva.logoImg;
-        logoImgElement.style.display = 'block';
+    if (lojaAtiva.logoImg) {
+        if (logoImg) {
+            logoImg.src = lojaAtiva.logoImg;
+            logoImg.classList.remove('hidden');
+        }
+        if (logoIcon) logoIcon.classList.add('hidden');
     }
 
-    if (logoContainer) {
-        // Alinha o container baseado na escolha do painel: left, center ou right
+    if (containerLogo) {
         if (lojaAtiva.logoPosicao === 'center') {
-            logoContainer.style.margin = '0 auto';
-            logoContainer.style.textAlign = 'center';
+            containerLogo.style.left = '50%';
+            containerLogo.style.transform = 'translateX(-50%)';
         } else if (lojaAtiva.logoPosicao === 'right') {
-            logoContainer.style.marginLeft = 'auto';
-            logoContainer.style.marginRight = '0';
+            containerLogo.style.left = 'auto';
+            containerLogo.style.right = '20px';
+            containerLogo.style.transform = 'none';
         } else {
-            logoContainer.style.marginLeft = '0';
-            logoContainer.style.marginRight = 'auto';
+            containerLogo.style.left = '20px';
+            containerLogo.style.transform = 'none';
         }
+    }
+}
+
+/* ==========================================================================
+   3. CARREGADOR DE PRODUTOS E FILTROS DE CATEGORIAS
+   ========================================================================== */
+function carregarCategoriasEDinamismo() {
+    // Aqui no futuro vamos puxar a lista de produtos salvos vinculados a esta loja
+    // Por enquanto, renderiza uma estrutura de teste limpa na vitrine
+    const vitrine = document.getElementById('vitrine-produtos');
+    const carousel = document.getElementById('carousel-categorias');
+    
+    if (carousel) {
+        carousel.innerHTML = `
+            <button class="category-btn active">Todos</button>
+            <button class="category-btn">🍕 Pizzas</button>
+            <button class="category-btn">🍔 Hambúrgueres</button>
+            <button class="category-btn">🥤 Bebidas</button>
+        `;
+    }
+
+    if (vitrine) {
+        vitrine.innerHTML = `
+            <div class="menu-section">
+                <h2 class="section-title">Bem-vindo à nossa vitrine!</h2>
+                <p style="color: #64748b; font-size:0.9rem; padding: 10px 0;">
+                    Adicione seus produtos no menu administrativo para vê-los brilhar aqui com o seu novo visual personalizado.
+                </p>
+            </div>
+        `;
+    }
+}
+
+/* ==========================================================================
+   4. CONTROLADOR DOS MODAIS E EVENTOS DE INTERFACE
+   ========================================================================== */
+function inicializarEventosInterface() {
+    const btnAbrirCheckout = document.getElementById('btn-abrir-checkout');
+    const btnFecharModalDados = document.getElementById('btn-fechar-modal-dados');
+    const modalDadosEntrega = document.getElementById('modal-dados-entrega');
+
+    if (btnAbrirCheckout && modalDadosEntrega) {
+        btnAbrirCheckout.addEventListener('click', () => {
+            modalDadosEntrega.classList.remove('hidden');
+        });
+    }
+
+    if (btnFecharModalDados && modalDadosEntrega) {
+        btnFecharModalDados.addEventListener('click', () => {
+            modalDadosEntrega.classList.add('hidden');
+        });
     }
 }
