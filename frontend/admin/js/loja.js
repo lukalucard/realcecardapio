@@ -3,7 +3,6 @@ document.addEventListener('DOMContentLoaded', () => {
     inicializarPreviewVisualMotor();
     carregarDadosSalvosLoja();
     configurarPersistenciaLoja();
-    travarFormularioLoja(); // Só vai agir se for Guest!
 });
 
 function configurarPersistenciaLoja() {
