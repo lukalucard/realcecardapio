@@ -232,7 +232,6 @@ function abrirModalDetalhesProduto(produto) {
     document.getElementById('modal-produto-preco').innerText = parseFloat(produto.preco).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     document.getElementById('txt-modal-quantidade').innerText = quantidadeModal;
 
-    // Renderiza a galeria de fotos no modal
     const galeria = document.getElementById('modal-produto-galeria');
     if (produto.imagens && produto.imagens.length > 0) {
         galeria.innerHTML = produto.imagens.map(img => `<img src="${img}">`).join('');
@@ -240,7 +239,6 @@ function abrirModalDetalhesProduto(produto) {
         galeria.innerHTML = `<div style="display:flex; align-items:center; justify-content:center; width:100%; height:100%; color:#94a3b8; font-size:3rem; background:#f1f5f9;"><i class="fas fa-hamburger"></i></div>`;
     }
 
-    // Renderiza os Grupos de Opcionais (Tamanhos ou Extras)
     const containerOpcionais = document.getElementById('modal-produto-opcionais-container');
     containerOpcionais.innerHTML = "";
 
@@ -249,35 +247,55 @@ function abrirModalDetalhesProduto(produto) {
             const grupoBox = document.createElement('div');
             grupoBox.className = 'modal-option-group-box';
 
-            // Determina se é escolha única (tipo radio se maximo for 1) ou múltipla (checkbox)
+            const nomeGrupoLower = grupo.nome_grupo.toLowerCase();
+            // Verifica se é um grupo de tamanho baseado no nome do grupo
+            const ehGrupoTamanho = nomeGrupoLower.includes('tamanho') || nomeGrupoLower.includes('tamanhos') || nomeGrupoLower.includes('escolha o tamanho');
             const tipoInput = parseInt(grupo.maximo) === 1 ? 'radio' : 'checkbox';
             const regraTexto = parseInt(grupo.minimo) > 0 ? `Obrigatório • Escolha ${grupo.maximo}` : `Opcional • Máx ${grupo.maximo}`;
+
+            // Se for grupo de tamanho, vamos checar se existe a opção "Grande" para deixá-la marcada
+            let temGrande = grupo.itens.some(item => item.nome_adicional.toLowerCase().includes('grande'));
 
             grupoBox.innerHTML = `
                 <div class="modal-group-header-title">
                     <h4>${grupo.nome_grupo}</h4>
                     <span class="modal-group-badge-rule">${regraTexto}</span>
                 </div>
-                <div class="modal-options-list-rows" data-min="${grupo.minimo}" data-max="${grupo.maximo}" data-nome-grupo="${grupo.nome_grupo}">
+                <div class="modal-options-list-rows" data-min="${grupo.minimo}" data-max="${grupo.maximo}" data-nome-grupo="${grupo.nome_grupo}" data-tipo-grupo="${ehGrupoTamanho ? 'tamanho' : 'adicional'}">
                     ${grupo.itens.map((item, itemIdx) => {
-                        const precoAdicional = parseFloat(item.preco_adicional) > 0 
-                            ? `+ ${parseFloat(item.preco_adicional).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}` 
-                            : 'Grátis';
+                        const nomeItemLower = item.nome_adicional.toLowerCase();
+                        
+                        // LÓGICA DE MARCAÇÃO PADRÃO:
+                        // Se houver "Grande", marca ele. Se não houver, marca o primeiro item caso seja obrigatório.
+                        let deveMarcar = false;
+                        if (ehGrupoTamanho) {
+                            if (temGrande && nomeItemLower.includes('grande')) {
+                                deveMarcar = true;
+                            } else if (!temGrande && itemIdx === 0 && parseInt(grupo.minimo) > 0) {
+                                deveMarcar = true;
+                            }
+                        } else if (tipoInput === 'radio' && itemIdx === 0 && parseInt(grupo.minimo) > 0) {
+                            deveMarcar = true;
+                        }
+
+                        // No formato A, mostramos o preço cheio do tamanho na label para o cliente ver o valor real
+                        const precoExibição = ehGrupoTamanho 
+                            ? parseFloat(item.preco_adicional).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+                            : `+ ${parseFloat(item.preco_adicional).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`;
                         
                         return `
                             <label class="modal-option-item-row">
                                 <div class="modal-opt-left">
-                                    <input type="${tipoInput}" name="grupo_opt_${grupoIdx}" data-nome="${item.nome_adicional}" data-preco="${item.preco_adicional}" ${tipoInput === 'radio' && itemIdx === 0 && parseInt(grupo.minimo) > 0 ? 'checked' : ''}>
+                                    <input type="${tipoInput}" name="grupo_opt_${grupoIdx}" data-nome="${item.nome_adicional}" data-preco="${item.preco_adicional}" ${deveMarcar ? 'checked' : ''}>
                                     <span>${item.nome_adicional}</span>
                                 </div>
-                                <span class="modal-opt-price-tag">${precoAdicional}</span>
+                                <span class="modal-opt-price-tag" style="${ehGrupoTamanho ? 'color: var(--text-main); font-weight:700;' : ''}">${parseFloat(item.preco_adicional) > 0 ? precoExibição : 'Grátis'}</span>
                             </label>
                         `;
                     }).join('')}
                 </div>
             `;
 
-            // Adiciona evento para recalcular o valor do modal sempre que um opcional for tocado
             grupoBox.querySelectorAll('input').forEach(input => {
                 input.addEventListener('change', () => validarRegrasELimitesSelecao(grupoBox, input, tipoInput));
             });
@@ -305,15 +323,32 @@ function validarRegrasELimitesSelecao(grupoBox, inputAlterado, tipoInput) {
 function recalcularSubtotalModal() {
     if (!produtoSelecionadoModal) return;
 
-    let valorAcumulado = parseFloat(produtoSelecionadoModal.preco);
+    let precoBase = parseFloat(produtoSelecionadoModal.preco);
+    let adicionaisExtras = 0;
+    let temTamanhoSelecionado = false;
+    let precoTamanhoSelecionado = 0;
 
-    // Soma os adicionais/tamanhos marcados nos inputs
+    // Varre todos os inputs marcados no modal
     const opcionaisMarcados = document.querySelectorAll('#modal-produto-opcionais-container input:checked');
+    
     opcionaisMarcados.forEach(opt => {
-        valorAcumulado += parseFloat(opt.getAttribute('data-preco') || 0);
+        const containerGrupo = opt.closest('.modal-options-list-rows');
+        const tipoGrupo = containerGrupo.getAttribute('data-tipo-grupo');
+
+        if (tipoGrupo === 'tamanho') {
+            temTamanhoSelecionado = true;
+            precoTamanhoSelecionado = parseFloat(opt.getAttribute('data-preco') || 0);
+        } else {
+            adicionaisExtras += parseFloat(opt.getAttribute('data-preco') || 0);
+        }
     });
 
-    const totalFinalModal = valorAcumulado * quantidadeModal;
+    // FORMATO A: Se escolheu um tamanho, o valor dele SUBSTITUI o preço base da vitrine
+    let valorUnitarioItem = temTamanhoSelecionado ? precoTamanhoSelecionado : precoBase;
+    
+    // Agora adiciona os complementos por fora (bacon, queijo, etc)
+    let totalFinalModal = (valorUnitarioItem + adicionaisExtras) * quantidadeModal;
+
     document.getElementById('txt-modal-botao-preco').innerText = totalFinalModal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
@@ -326,11 +361,14 @@ function adicionarProdutoSelecionadoASacola() {
     const gruposOpcionais = document.querySelectorAll('#modal-produto-opcionais-container .modal-options-list-rows');
     let opcionaisEscolhidos = [];
     let erroValidacao = false;
+    
+    let temTamanhoSelecionado = false;
+    let precoTamanhoSelecionado = 0;
 
-    // Valida se os grupos obrigatórios (minimo > 0) foram respeitados
     gruposOpcionais.forEach(grupo => {
         const minimo = parseInt(grupo.getAttribute('data-min'));
         const nomeGrupo = grupo.getAttribute('data-nome-grupo');
+        const tipoGrupo = grupo.getAttribute('data-tipo-grupo');
         const marcados = grupo.querySelectorAll('input:checked');
 
         if (marcados.length < minimo) {
@@ -340,29 +378,42 @@ function adicionarProdutoSelecionadoASacola() {
         }
 
         marcados.forEach(m => {
+            const precoOpcao = parseFloat(m.getAttribute('data-preco') || 0);
+            
+            if (tipoGrupo === 'tamanho') {
+                temTamanhoSelecionado = true;
+                precoTamanhoSelecionado = precoOpcao;
+            }
+
             opcionaisEscolhidos.push({
                 nome: m.getAttribute('data-nome'),
-                preco: parseFloat(m.getAttribute('data-preco') || 0)
+                preco: precoOpcao,
+                tipo: tipoGrupo // Passa se é tamanho ou adicional para a sacola calcular certo
             });
         });
     });
 
     if (erroValidacao) return;
 
-    // Monta o objeto item da sacola
+    // FORMATO A NO CARRINHO: Se houver tamanho, ele vira o novo preço base do item na sacola
+    let precoBaseCalculado = temTamanhoSelecionado ? precoTamanhoSelecionado : parseFloat(produtoSelecionadoModal.preco);
+
+    // Na lista de opcionais do objeto da sacola, deixamos apenas os adicionais para não duplicar o cálculo visual
+    let apenasAdicionaisExtras = opcionaisEscolhidos.filter(o => o.tipo !== 'tamanho');
+    let stringTamanhoLabel = opcionaisEscolhidos.find(o => o.tipo === 'tamanho');
+
     const itemSacola = {
         idUnico: Date.now() + Math.random().toString(36).substr(2, 5),
         idProduto: produtoSelecionadoModal.id,
-        nome: produtoSelecionadoModal.nome,
-        precoBase: parseFloat(produtoSelecionadoModal.preco),
+        nome: produtoSelecionadoModal.nome + (stringTamanhoLabel ? ` (${stringTamanhoLabel.nome})` : ''),
+        precoBase: precoBaseCalculado,
         quantidade: quantidadeModal,
-        opcionais: opcionaisEscolhidos
+        opcionais: apenasAdicionaisExtras
     };
 
     sacolaItens.push(itemSacola);
     atualizarRenderSacolaEFooter();
 
-    // Fecha o modal limpando os estados
     document.getElementById('modal-detalhes-produto').classList.add('hidden');
     produtoSelecionadoModal = null;
 }
