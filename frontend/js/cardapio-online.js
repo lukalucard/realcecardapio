@@ -4,17 +4,20 @@
 let lojaAtiva = null;
 let categoriasDaLoja = [];
 let produtosDaLoja = [];
+
 let sacolaItens = [];
+let produtoSelecionadoModal = null;
+let quantidadeModal = 1;
 
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Inicializa a Integração Multilojas e Branding
     carregarDadosDaLojaUrl();
     aplicarIdentidadeVisual();
     
-    // 2. Carrega o Banco de Dados Real da Loja
+    // 2. Carrega o Banco de Dados Real da Loja e renderiza as vitrines
     carregarBancoDeDadosProdutos();
 
-    // 3. Inicializa os motores de interface
+    // 3. Inicializa os motores de interface (Modais, cliques e formulários)
     inicializarEventosInterface();
 });
 
@@ -31,7 +34,6 @@ function carregarDadosDaLojaUrl() {
         return;
     }
 
-    // Busca o registro correspondente gerando o mesmo padrão de slug
     lojaAtiva = listaLojas.find(loja => encodeCalmSlug(loja.nome) === lojaSlug);
 
     if (!lojaAtiva) {
@@ -39,21 +41,17 @@ function carregarDadosDaLojaUrl() {
         return;
     }
 
-    // Injeta os dados nos IDs novos mapeados no cardapio-online.html
     document.getElementById('nome-loja-header').innerHTML = `${lojaAtiva.nome}`;
     document.getElementById('slogan-loja').innerText = lojaAtiva.slogan || 'O sabor que realça o seu dia';
     
-    // Injeta tempo e taxa no badge correspondente
     const taxaFormatada = parseFloat(lojaAtiva.taxa || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     document.getElementById('delivery-info-badge').innerHTML = `
         <i class="fas fa-motorcycle"></i> ${lojaAtiva.tempo || '30-45'} min • ${taxaFormatada}
     `;
 
-    // Atualiza a frase da taxa na tela do checkout final
     const labelTaxaCheckout = document.getElementById('txt-label-taxa-checkout');
     if (labelTaxaCheckout) labelTaxaCheckout.innerText = `com entrega ${taxaFormatada}`;
 
-    // Altera o título da aba do navegador
     document.title = `${lojaAtiva.nome} - Cardápio Online`;
 }
 
@@ -70,13 +68,11 @@ function encodeCalmSlug(texto) {
 function aplicarIdentidadeVisual() {
     if (!lojaAtiva) return;
 
-    // Injeta as cores configuradas pelo lojista direto nas variáveis de CSS Root
     document.documentElement.style.setProperty('--primary-color', lojaAtiva.corPrimaria || '#FF6B00');
     document.documentElement.style.setProperty('--secondary-color', lojaAtiva.corSecundaria || '#6B3FA0');
     document.documentElement.style.setProperty('--bg-light', lojaAtiva.corFundo || '#f8fafc');
     document.documentElement.style.setProperty('--primary-hover', (lojaAtiva.corPrimaria || '#FF6B00') + 'dd');
 
-    // Aplica o Banner (Seja imagem Base64 ou Cor Sólida)
     const bannerElement = document.getElementById('banner-topo-cliente');
     if (bannerElement) {
         if (lojaAtiva.bannerImg) {
@@ -87,7 +83,6 @@ function aplicarIdentidadeVisual() {
         }
     }
 
-    // Aplica a Logomarca e respeita o Alinhamento (Esquerda, Centro, Direita)
     const logoImg = document.getElementById('logo-cliente-img');
     const logoIcon = document.getElementById('logo-cliente-icon');
     const containerLogo = document.getElementById('container-logo-cliente');
@@ -116,17 +111,16 @@ function aplicarIdentidadeVisual() {
 }
 
 /* ==========================================================================
-   3. CARREGADOR DE PRODUTOS E CATEGORIAS REAIS DO LOCALSTORAGE
+   3. CARREGADOR DE PRODUTOS E VITRINE
    ========================================================================== */
 function carregarBancoDeDadosProdutos() {
     if (!lojaAtiva) return;
 
-    // Busca os produtos e categorias salvos sob a chave única desta loja ativa
     categoriasDaLoja = JSON.parse(localStorage.getItem(`realce_categorias_${lojaAtiva.id}`)) || [];
     produtosDaLoja = JSON.parse(localStorage.getItem(`realce_produtos_${lojaAtiva.id}`)) || [];
 
     renderizarCarrosselCategoriasReais();
-    renderizarVitrineProdutosReais('Todos'); // Por padrão, exibe todos ao carregar
+    renderizarVitrineProdutosReais('Todos');
 }
 
 function renderizarCarrosselCategoriasReais() {
@@ -140,14 +134,12 @@ function renderizarCarrosselCategoriasReais() {
         return;
     }
 
-    // Cria o botão global "Todos"
     const btnTodos = document.createElement('button');
     btnTodos.className = 'category-btn active';
     btnTodos.textContent = 'Todos';
     btnTodos.addEventListener('click', () => filtrarVitrinePorCategoria('Todos', btnTodos));
     carousel.appendChild(btnTodos);
 
-    // Cria os botões das categorias cadastradas pelo lojista
     categoriasDaLoja.forEach(cat => {
         const btn = document.createElement('button');
         btn.className = 'category-btn';
@@ -158,12 +150,9 @@ function renderizarCarrosselCategoriasReais() {
 }
 
 function filtrarVitrinePorCategoria(categoriaNome, botaoClicado) {
-    // Atualiza estados dos botões ativos do carrossel
     const botoes = document.querySelectorAll('.category-btn');
     botoes.forEach(b => b.classList.remove('active'));
     botaoClicado.classList.add('active');
-
-    // Refaz a filtragem na tela
     renderizarVitrineProdutosReais(categoriaNome);
 }
 
@@ -183,13 +172,11 @@ function renderizarVitrineProdutosReais(categoriaFiltro) {
         return;
     }
 
-    // Define quais categorias exibir com base no filtro selecionado
     const categoriasParaRenderizar = (categoriaFiltro === 'Todos') ? categoriasDaLoja : [categoriaFiltro];
 
     categoriasParaRenderizar.forEach(cat => {
         const produtosFiltrados = produtosDaLoja.filter(p => p.categoria === cat);
 
-        // Se houver produtos nessa categoria, constrói a seção na tela
         if (produtosFiltrados.length > 0) {
             const secao = document.createElement('section');
             secao.className = 'menu-section';
@@ -201,7 +188,6 @@ function renderizarVitrineProdutosReais(categoriaFiltro) {
                 const card = document.createElement('div');
                 card.className = 'product-card';
                 
-                // Trata a foto do produto (se houver Base64 usa, senão coloca ícone neutro)
                 const containerImagem = (prod.imagens && prod.imagens.length > 0)
                     ? `<img src="${prod.imagens[0]}" alt="${prod.nome}">`
                     : `<i class="fas fa-hamburger" style="color:#94a3b8;"></i>`;
@@ -222,10 +208,8 @@ function renderizarVitrineProdutosReais(categoriaFiltro) {
                     </div>
                 `;
 
-                // Listener para abrir o modal do produto ao clicar no card
-                card.addEventListener('click', () => {
-                    alert(`Aqui abrirá o modal de opcionais para o item: ${prod.nome}`);
-                });
+                // Evento corrigido: Clique no card abre o modal dinâmico de opcionais
+                card.addEventListener('click', () => abrirModalDetalhesProduto(prod));
 
                 listaCards.appendChild(card);
             });
@@ -237,12 +221,248 @@ function renderizarVitrineProdutosReais(categoriaFiltro) {
 }
 
 /* ==========================================================================
-   4. CONTROLADOR DOS MODAIS E EVENTOS DE INTERFACE
+   4. MOTOR DO MODAL DE DETALHES E OPCIONAIS (TAMANHOS)
+   ========================================================================== */
+function abrirModalDetalhesProduto(produto) {
+    produtoSelecionadoModal = produto;
+    quantidadeModal = 1;
+
+    document.getElementById('modal-produto-nome').innerText = produto.nome;
+    document.getElementById('modal-produto-descricao').innerText = produto.ingredientes || 'Sem ingredientes descritos.';
+    document.getElementById('modal-produto-preco').innerText = parseFloat(produto.preco).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    document.getElementById('txt-modal-quantidade').innerText = quantidadeModal;
+
+    // Renderiza a galeria de fotos no modal
+    const galeria = document.getElementById('modal-produto-galeria');
+    if (produto.imagens && produto.imagens.length > 0) {
+        galeria.innerHTML = produto.imagens.map(img => `<img src="${img}">`).join('');
+    } else {
+        galeria.innerHTML = `<div style="display:flex; align-items:center; justify-content:center; width:100%; height:100%; color:#94a3b8; font-size:3rem; background:#f1f5f9;"><i class="fas fa-hamburger"></i></div>`;
+    }
+
+    // Renderiza os Grupos de Opcionais (Tamanhos ou Extras)
+    const containerOpcionais = document.getElementById('modal-produto-opcionais-container');
+    containerOpcionais.innerHTML = "";
+
+    if (produto.opcionais && produto.opcionais.length > 0) {
+        produto.opcionais.forEach((grupo, grupoIdx) => {
+            const grupoBox = document.createElement('div');
+            grupoBox.className = 'modal-option-group-box';
+
+            // Determina se é escolha única (tipo radio se maximo for 1) ou múltipla (checkbox)
+            const tipoInput = parseInt(grupo.maximo) === 1 ? 'radio' : 'checkbox';
+            const regraTexto = parseInt(grupo.minimo) > 0 ? `Obrigatório • Escolha ${grupo.maximo}` : `Opcional • Máx ${grupo.maximo}`;
+
+            grupoBox.innerHTML = `
+                <div class="modal-group-header-title">
+                    <h4>${grupo.nome_grupo}</h4>
+                    <span class="modal-group-badge-rule">${regraTexto}</span>
+                </div>
+                <div class="modal-options-list-rows" data-min="${grupo.minimo}" data-max="${grupo.maximo}" data-nome-grupo="${grupo.nome_grupo}">
+                    ${grupo.itens.map((item, itemIdx) => {
+                        const precoAdicional = parseFloat(item.preco_adicional) > 0 
+                            ? `+ ${parseFloat(item.preco_adicional).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}` 
+                            : 'Grátis';
+                        
+                        return `
+                            <label class="modal-option-item-row">
+                                <div class="modal-opt-left">
+                                    <input type="${tipoInput}" name="grupo_opt_${grupoIdx}" data-nome="${item.nome_adicional}" data-preco="${item.preco_adicional}" ${tipoInput === 'radio' && itemIdx === 0 && parseInt(grupo.minimo) > 0 ? 'checked' : ''}>
+                                    <span>${item.nome_adicional}</span>
+                                </div>
+                                <span class="modal-opt-price-tag">${precoAdicional}</span>
+                            </label>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+
+            // Adiciona evento para recalcular o valor do modal sempre que um opcional for tocado
+            grupoBox.querySelectorAll('input').forEach(input => {
+                input.addEventListener('change', () => validarRegrasELimitesSelecao(grupoBox, input, tipoInput));
+            });
+
+            containerOpcionais.appendChild(grupoBox);
+        });
+    }
+
+    recalcularSubtotalModal();
+    document.getElementById('modal-detalhes-produto').classList.remove('hidden');
+}
+
+function validarRegrasELimitesSelecao(grupoBox, inputAlterado, tipoInput) {
+    const containerLista = grupoBox.querySelector('.modal-options-list-rows');
+    const maximo = parseInt(containerLista.getAttribute('data-max'));
+    const selecionados = containerLista.querySelectorAll('input:checked');
+
+    if (tipoInput === 'checkbox' && selecionados.length > maximo) {
+        inputAlterado.checked = false; // Barra o clique se estourar o limite máximo do grupo
+        alert(`⚠️ Você pode escolher no máximo ${maximo} opções para este grupo.`);
+    }
+    recalcularSubtotalModal();
+}
+
+function recalcularSubtotalModal() {
+    if (!produtoSelecionadoModal) return;
+
+    let valorAcumulado = parseFloat(produtoSelecionadoModal.preco);
+
+    // Soma os adicionais/tamanhos marcados nos inputs
+    const opcionaisMarcados = document.querySelectorAll('#modal-produto-opcionais-container input:checked');
+    opcionaisMarcados.forEach(opt => {
+        valorAcumulado += parseFloat(opt.getAttribute('data-preco') || 0);
+    });
+
+    const totalFinalModal = valorAcumulado * quantidadeModal;
+    document.getElementById('txt-modal-botao-preco').innerText = totalFinalModal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+/* ==========================================================================
+   5. GERENCIADOR DA SACOLA (CARRINHO DINÂMICO)
+   ========================================================================== */
+function adicionarProdutoSelecionadoASacola() {
+    if (!produtoSelecionadoModal) return;
+
+    const gruposOpcionais = document.querySelectorAll('#modal-produto-opcionais-container .modal-options-list-rows');
+    let opcionaisEscolhidos = [];
+    let erroValidacao = false;
+
+    // Valida se os grupos obrigatórios (minimo > 0) foram respeitados
+    gruposOpcionais.forEach(grupo => {
+        const minimo = parseInt(grupo.getAttribute('data-min'));
+        const nomeGrupo = grupo.getAttribute('data-nome-grupo');
+        const marcados = grupo.querySelectorAll('input:checked');
+
+        if (marcados.length < minimo) {
+            alert(`⚠️ O grupo "${nomeGrupo}" é obrigatório. Escolha pelo menos uma opção.`);
+            erroValidacao = true;
+            return;
+        }
+
+        marcados.forEach(m => {
+            opcionaisEscolhidos.push({
+                nome: m.getAttribute('data-nome'),
+                preco: parseFloat(m.getAttribute('data-preco') || 0)
+            });
+        });
+    });
+
+    if (erroValidacao) return;
+
+    // Monta o objeto item da sacola
+    const itemSacola = {
+        idUnico: Date.now() + Math.random().toString(36).substr(2, 5),
+        idProduto: produtoSelecionadoModal.id,
+        nome: produtoSelecionadoModal.nome,
+        precoBase: parseFloat(produtoSelecionadoModal.preco),
+        quantidade: quantidadeModal,
+        opcionais: opcionaisEscolhidos
+    };
+
+    sacolaItens.push(itemSacola);
+    atualizarRenderSacolaEFooter();
+
+    // Fecha o modal limpando os estados
+    document.getElementById('modal-detalhes-produto').classList.add('hidden');
+    produtoSelecionadoModal = null;
+}
+
+function atualizarRenderSacolaEFooter() {
+    const containerLista = document.getElementById('itens-sacola-direta');
+    const persistentCart = document.getElementById('persistent-cart');
+    
+    if (!containerLista || !persistentCart) return;
+
+    containerLista.innerHTML = "";
+
+    if (sacolaItens.length === 0) {
+        persistentCart.classList.add('hidden');
+        return;
+    }
+
+    let valorTotalSacolaItens = 0;
+
+    sacolaItens.forEach(item => {
+        let precoUnitarioTotal = item.precoBase;
+        item.opcionais.forEach(o => precoUnitarioTotal += o.preco);
+
+        const subtotalItem = precoUnitarioTotal * item.quantidade;
+        valorTotalSacolaItens += subtotalItem;
+
+        const stringOpcionais = item.opcionais.length > 0 ? item.opcionais.map(o => o.nome).join(', ') : '';
+
+        const linha = document.createElement('div');
+        linha.className = 'cart-item-row';
+        linha.innerHTML = `
+            <div class="item-info-side">
+                <h4>${item.nome}</h4>
+                ${stringOpcionais ? `<span>${stringOpcionais}</span>` : ''}
+                <span style="font-weight:700; color:var(--text-main); margin-top:4px;">${subtotalItem.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+            </div>
+            <div class="item-actions-side">
+                <button type="button" class="btn-qty-action remove-icon" onclick="alterarQuantidadeItemSacola('${item.idUnico}', -1)"><i class="fas fa-minus"></i></button>
+                <span class="qty-number">${item.quantidade}</span>
+                <button type="button" class="btn-qty-action" onclick="alterarQuantidadeItemSacola('${item.idUnico}', 1)"><i class="fas fa-plus"></i></button>
+            </div>
+        `;
+        containerLista.appendChild(linha);
+    });
+
+    // Injeta somatórios totais nos componentes de tela
+    document.getElementById('cart-valor-total-tela').innerText = valorTotalSacolaItens.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    
+    const taxaEntrega = parseFloat(lojaAtiva ? lojaAtiva.taxa : 0);
+    document.getElementById('modal-total-final-valor').innerText = (valorTotalSacolaItens + taxaEntrega).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+    persistentCart.classList.remove('hidden');
+}
+
+// Globalizadas para os cliques inline da sacola funcionarem perfeitamente
+window.alterarQuantidadeItemSacola = function(idUnico, modificador) {
+    const item = sacolaItens.find(i => i.idUnico === idUnico);
+    if (!item) return;
+
+    item.quantidade += modificador;
+
+    if (item.quantidade <= 0) {
+        sacolaItens = sacolaItens.filter(i => i.idUnico !== idUnico);
+    }
+
+    atualizarRenderSacolaEFooter();
+};
+
+/* ==========================================================================
+   6. CONTROLADOR DOS MODAIS E EVENTOS DE INTERFACE
    ========================================================================== */
 function inicializarEventosInterface() {
+    const btnFecharDetalhes = document.getElementById('btn-fechar-details') || document.getElementById('btn-fechar-detalhes');
     const btnAbrirCheckout = document.getElementById('btn-abrir-checkout');
     const btnFecharModalDados = document.getElementById('btn-fechar-modal-dados');
     const modalDadosEntrega = document.getElementById('modal-dados-entrega');
+
+    // Controle de quantidade INTERNA do modal de opcionais
+    document.getElementById('btn-modal-mais').addEventListener('click', () => {
+        quantidadeModal++;
+        document.getElementById('txt-modal-quantidade').innerText = quantidadeModal;
+        recalcularSubtotalModal();
+    });
+
+    document.getElementById('btn-modal-menos').addEventListener('click', () => {
+        if (quantidadeModal > 1) {
+            quantidadeModal--;
+            document.getElementById('txt-modal-quantidade').innerText = quantidadeModal;
+            recalcularSubtotalModal();
+        }
+    });
+
+    // Botão Adicionar a Sacola no Modal
+    document.getElementById('btn-modal-adicionar-sacola').addEventListener('click', adicionarProdutoSelecionadoASacola);
+
+    if (btnFecharDetalhes) {
+        btnFecharDetalhes.addEventListener('click', () => {
+            document.getElementById('modal-detalhes-produto').classList.add('hidden');
+        });
+    }
 
     if (btnAbrirCheckout && modalDadosEntrega) {
         btnAbrirCheckout.addEventListener('click', () => {
