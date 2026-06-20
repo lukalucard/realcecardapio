@@ -622,6 +622,39 @@ body {
 }
 
 /* ==========================================================================
+   CAMPO DE OBSERVAÇÃO DO MODAL
+   ========================================================================== */
+.modal-observation-group {
+    padding: 0 20px 20px 20px;
+}
+
+.modal-observation-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 6px;
+    display: block;
+}
+
+.modal-observation-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    resize: none;
+    outline: none;
+    background-color: white;
+    color: var(--text-main);
+}
+
+.modal-observation-group textarea:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 2px rgba(107, 63, 160, 0.1);
+}
+
+/* ==========================================================================
    MODAIS DE CHECKOUT GERAIS
    ========================================================================== */
 .modal-overlay {

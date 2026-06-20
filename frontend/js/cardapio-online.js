@@ -227,6 +227,10 @@ function abrirModalDetalhesProduto(produto) {
     produtoSelecionadoModal = produto;
     quantidadeModal = 1;
 
+    // Limpa o campo de observações sempre que abrir um novo produto
+    const campoObs = document.getElementById('modal-produto-observacao');
+    if(campoObs) campoObs.value = "";
+
     document.getElementById('modal-produto-nome').innerText = produto.nome;
     document.getElementById('modal-produto-descricao').innerText = produto.ingredientes || 'Sem ingredientes descritos.';
     document.getElementById('modal-produto-preco').innerText = parseFloat(produto.preco).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -248,12 +252,10 @@ function abrirModalDetalhesProduto(produto) {
             grupoBox.className = 'modal-option-group-box';
 
             const nomeGrupoLower = grupo.nome_grupo.toLowerCase();
-            // Verifica se é um grupo de tamanho baseado no nome do grupo
             const ehGrupoTamanho = nomeGrupoLower.includes('tamanho') || nomeGrupoLower.includes('tamanhos') || nomeGrupoLower.includes('escolha o tamanho');
             const tipoInput = parseInt(grupo.maximo) === 1 ? 'radio' : 'checkbox';
             const regraTexto = parseInt(grupo.minimo) > 0 ? `Obrigatório • Escolha ${grupo.maximo}` : `Opcional • Máx ${grupo.maximo}`;
 
-            // Se for grupo de tamanho, vamos checar se existe a opção "Grande" para deixá-la marcada
             let temGrande = grupo.itens.some(item => item.nome_adicional.toLowerCase().includes('grande'));
 
             grupoBox.innerHTML = `
@@ -265,8 +267,6 @@ function abrirModalDetalhesProduto(produto) {
                     ${grupo.itens.map((item, itemIdx) => {
                         const nomeItemLower = item.nome_adicional.toLowerCase();
                         
-                        // LÓGICA DE MARCAÇÃO PADRÃO:
-                        // Se houver "Grande", marca ele. Se não houver, marca o primeiro item caso seja obrigatório.
                         let deveMarcar = false;
                         if (ehGrupoTamanho) {
                             if (temGrande && nomeItemLower.includes('grande')) {
@@ -278,8 +278,7 @@ function abrirModalDetalhesProduto(produto) {
                             deveMarcar = true;
                         }
 
-                        // No formato A, mostramos o preço cheio do tamanho na label para o cliente ver o valor real
-                        const precoExibição = ehGrupoTamanho 
+                        const precoExibicao = ehGrupoTamanho 
                             ? parseFloat(item.preco_adicional).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
                             : `+ ${parseFloat(item.preco_adicional).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`;
                         
@@ -289,7 +288,7 @@ function abrirModalDetalhesProduto(produto) {
                                     <input type="${tipoInput}" name="grupo_opt_${grupoIdx}" data-nome="${item.nome_adicional}" data-preco="${item.preco_adicional}" ${deveMarcar ? 'checked' : ''}>
                                     <span>${item.nome_adicional}</span>
                                 </div>
-                                <span class="modal-opt-price-tag" style="${ehGrupoTamanho ? 'color: var(--text-main); font-weight:700;' : ''}">${parseFloat(item.preco_adicional) > 0 ? precoExibição : 'Grátis'}</span>
+                                <span class="modal-opt-price-tag" style="${ehGrupoTamanho ? 'color: var(--text-main); font-weight:700;' : ''}">${parseFloat(item.preco_adicional) > 0 ? precoExibicao : 'Grátis'}</span>
                             </label>
                         `;
                     }).join('')}
@@ -328,7 +327,6 @@ function recalcularSubtotalModal() {
     let temTamanhoSelecionado = false;
     let precoTamanhoSelecionado = 0;
 
-    // Varre todos os inputs marcados no modal
     const opcionaisMarcados = document.querySelectorAll('#modal-produto-opcionais-container input:checked');
     
     opcionaisMarcados.forEach(opt => {
@@ -343,12 +341,16 @@ function recalcularSubtotalModal() {
         }
     });
 
-    // FORMATO A: Se escolheu um tamanho, o valor dele SUBSTITUI o preço base da vitrine
+    // FORMATO A: O tamanho selecionado vira o novo preço unitário do item
     let valorUnitarioItem = temTamanhoSelecionado ? precoTamanhoSelecionado : precoBase;
     
-    // Agora adiciona os complementos por fora (bacon, queijo, etc)
+    // MUDANÇA AQUI: Atualiza o preço do TOPO do modal com o valor do tamanho selecionado (preço unitário)
+    document.getElementById('modal-produto-preco').innerText = valorUnitarioItem.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+    // Calcula o total final multiplicando pela quantidade de itens selecionada
     let totalFinalModal = (valorUnitarioItem + adicionaisExtras) * quantidadeModal;
 
+    // Atualiza o preço do BOTÃO de adicionar lá embaixo
     document.getElementById('txt-modal-botao-preco').innerText = totalFinalModal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
@@ -388,17 +390,19 @@ function adicionarProdutoSelecionadoASacola() {
             opcionaisEscolhidos.push({
                 nome: m.getAttribute('data-nome'),
                 preco: precoOpcao,
-                tipo: tipoGrupo // Passa se é tamanho ou adicional para a sacola calcular certo
+                tipo: tipoGrupo
             });
         });
     });
 
     if (erroValidacao) return;
 
-    // FORMATO A NO CARRINHO: Se houver tamanho, ele vira o novo preço base do item na sacola
+    // CAPTURA A OBSERVAÇÃO DO CLIENTE
+    const campoObs = document.getElementById('modal-produto-observacao');
+    const txtObservacao = campoObs ? campoObs.value.trim() : "";
+
     let precoBaseCalculado = temTamanhoSelecionado ? precoTamanhoSelecionado : parseFloat(produtoSelecionadoModal.preco);
 
-    // Na lista de opcionais do objeto da sacola, deixamos apenas os adicionais para não duplicar o cálculo visual
     let apenasAdicionaisExtras = opcionaisEscolhidos.filter(o => o.tipo !== 'tamanho');
     let stringTamanhoLabel = opcionaisEscolhidos.find(o => o.tipo === 'tamanho');
 
@@ -408,7 +412,8 @@ function adicionarProdutoSelecionadoASacola() {
         nome: produtoSelecionadoModal.nome + (stringTamanhoLabel ? ` (${stringTamanhoLabel.nome})` : ''),
         precoBase: precoBaseCalculado,
         quantidade: quantidadeModal,
-        opcionais: apenasAdicionaisExtras
+        opcionais: apenasAdicionaisExtras,
+        observacao: txtObservacao // SALVA A OBSERVAÇÃO AQUI
     };
 
     sacolaItens.push(itemSacola);
@@ -441,6 +446,8 @@ function atualizarRenderSacolaEFooter() {
         valorTotalSacolaItens += subtotalItem;
 
         const stringOpcionais = item.opcionais.length > 0 ? item.opcionais.map(o => o.nome).join(', ') : '';
+        // Mostra a observação em itálico na sacola se ela existir
+        const stringObs = item.observacao ? `<span style="color:#ef4444; font-style:italic; font-size: 0.8rem;">Obs: ${item.observacao}</span>` : '';
 
         const linha = document.createElement('div');
         linha.className = 'cart-item-row';
@@ -448,6 +455,7 @@ function atualizarRenderSacolaEFooter() {
             <div class="item-info-side">
                 <h4>${item.nome}</h4>
                 ${stringOpcionais ? `<span>${stringOpcionais}</span>` : ''}
+                ${stringObs}
                 <span style="font-weight:700; color:var(--text-main); margin-top:4px;">${subtotalItem.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
             </div>
             <div class="item-actions-side">
@@ -459,7 +467,6 @@ function atualizarRenderSacolaEFooter() {
         containerLista.appendChild(linha);
     });
 
-    // Injeta somatórios totais nos componentes de tela
     document.getElementById('cart-valor-total-tela').innerText = valorTotalSacolaItens.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     
     const taxaEntrega = parseFloat(lojaAtiva ? lojaAtiva.taxa : 0);
@@ -467,20 +474,6 @@ function atualizarRenderSacolaEFooter() {
 
     persistentCart.classList.remove('hidden');
 }
-
-// Globalizadas para os cliques inline da sacola funcionarem perfeitamente
-window.alterarQuantidadeItemSacola = function(idUnico, modificador) {
-    const item = sacolaItens.find(i => i.idUnico === idUnico);
-    if (!item) return;
-
-    item.quantidade += modificador;
-
-    if (item.quantidade <= 0) {
-        sacolaItens = sacolaItens.filter(i => i.idUnico !== idUnico);
-    }
-
-    atualizarRenderSacolaEFooter();
-};
 
 /* ==========================================================================
    6. CONTROLADOR DOS MODAIS E EVENTOS DE INTERFACE
