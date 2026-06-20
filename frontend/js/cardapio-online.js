@@ -1,8 +1,9 @@
 /* ==========================================================================
-   ESTADO GLOBAL DO CARDÁPIO ONLINE
+   ESTADO GLOBAL DO CARDÁPIO ONLINE (CLIENTE)
    ========================================================================== */
 let lojaAtiva = null;
-let produtosDaLoja = []; // Receberá os produtos cadastrados no painel
+let categoriasDaLoja = [];
+let produtosDaLoja = [];
 let sacolaItens = [];
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -10,8 +11,10 @@ document.addEventListener('DOMContentLoaded', () => {
     carregarDadosDaLojaUrl();
     aplicarIdentidadeVisual();
     
-    // 2. Inicializa os motores nativos do cardápio
-    carregarCategoriasEDinamismo();
+    // 2. Carrega o Banco de Dados Real da Loja
+    carregarBancoDeDadosProdutos();
+
+    // 3. Inicializa os motores de interface
     inicializarEventosInterface();
 });
 
@@ -113,32 +116,124 @@ function aplicarIdentidadeVisual() {
 }
 
 /* ==========================================================================
-   3. CARREGADOR DE PRODUTOS E FILTROS DE CATEGORIAS
+   3. CARREGADOR DE PRODUTOS E CATEGORIAS REAIS DO LOCALSTORAGE
    ========================================================================== */
-function carregarCategoriasEDinamismo() {
-    const vitrine = document.getElementById('vitrine-produtos');
+function carregarBancoDeDadosProdutos() {
+    if (!lojaAtiva) return;
+
+    // Busca os produtos e categorias salvos sob a chave única desta loja ativa
+    categoriasDaLoja = JSON.parse(localStorage.getItem(`realce_categorias_${lojaAtiva.id}`)) || [];
+    produtosDaLoja = JSON.parse(localStorage.getItem(`realce_produtos_${lojaAtiva.id}`)) || [];
+
+    renderizarCarrosselCategoriasReais();
+    renderizarVitrineProdutosReais('Todos'); // Por padrão, exibe todos ao carregar
+}
+
+function renderizarCarrosselCategoriasReais() {
     const carousel = document.getElementById('carousel-categorias');
-    
-    // Como não há cardápio cadastrado, limpamos os botões fixos para não confundir
-    if (carousel) {
-        carousel.innerHTML = `
-            <span style="color: var(--text-muted); font-size: 0.85rem; font-style: italic; padding: 0 10px;">
-                Nenhuma categoria ativa
-            </span>
-        `;
+    if (!carousel) return;
+
+    carousel.innerHTML = "";
+
+    if (categoriasDaLoja.length === 0) {
+        carousel.innerHTML = `<span style="color:#64748b; font-size:0.85rem; padding:5px 20px;">Nenhuma categoria criada</span>`;
+        return;
     }
 
-    if (vitrine) {
+    // Cria o botão global "Todos"
+    const btnTodos = document.createElement('button');
+    btnTodos.className = 'category-btn active';
+    btnTodos.textContent = 'Todos';
+    btnTodos.addEventListener('click', () => filtrarVitrinePorCategoria('Todos', btnTodos));
+    carousel.appendChild(btnTodos);
+
+    // Cria os botões das categorias cadastradas pelo lojista
+    categoriasDaLoja.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = 'category-btn';
+        btn.textContent = cat;
+        btn.addEventListener('click', () => filtrarVitrinePorCategoria(cat, btn));
+        carousel.appendChild(btn);
+    });
+}
+
+function filtrarVitrinePorCategoria(categoriaNome, botaoClicado) {
+    // Atualiza estados dos botões ativos do carrossel
+    const botoes = document.querySelectorAll('.category-btn');
+    botoes.forEach(b => b.classList.remove('active'));
+    botaoClicado.classList.add('active');
+
+    // Refaz a filtragem na tela
+    renderizarVitrineProdutosReais(categoriaNome);
+}
+
+function renderizarVitrineProdutosReais(categoriaFiltro) {
+    const vitrine = document.getElementById('vitrine-produtos');
+    if (!vitrine) return;
+
+    vitrine.innerHTML = "";
+
+    if (produtosDaLoja.length === 0) {
         vitrine.innerHTML = `
-            <div class="menu-section" style="text-align: center; padding: 40px 20px;">
-                <i class="fas fa-utensils" style="font-size: 2.5rem; color: var(--text-muted); margin-bottom: 15px; display: block;"></i>
-                <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-main);">Cardápio em Construção</h3>
-                <p style="color: var(--text-muted); font-size:0.85rem; margin-top: 6px; line-height: 1.4;">
-                    Vá até o painel administrativo na página de "Configurações do Cardápio" para cadastrar seus primeiros produtos e categorias!
-                </p>
+            <div class="menu-section" style="text-align:center; padding:40px 20px;">
+                <i class="fas fa-utensils" style="font-size:2rem; color:#cbd5e1; margin-bottom:10px; display:block;"></i>
+                <p style="color:#64748b; font-size:0.95rem;">Nenhum produto cadastrado nesta loja ainda.</p>
             </div>
         `;
+        return;
     }
+
+    // Define quais categorias exibir com base no filtro selecionado
+    const categoriasParaRenderizar = (categoriaFiltro === 'Todos') ? categoriasDaLoja : [categoriaFiltro];
+
+    categoriasParaRenderizar.forEach(cat => {
+        const produtosFiltrados = produtosDaLoja.filter(p => p.categoria === cat);
+
+        // Se houver produtos nessa categoria, constrói a seção na tela
+        if (produtosFiltrados.length > 0) {
+            const secao = document.createElement('section');
+            secao.className = 'menu-section';
+            secao.innerHTML = `<h2 class="section-title">${cat}</h2>`;
+
+            const listaCards = document.createElement('div');
+
+            produtosFiltrados.forEach(prod => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                
+                // Trata a foto do produto (se houver Base64 usa, senão coloca ícone neutro)
+                const containerImagem = (prod.imagens && prod.imagens.length > 0)
+                    ? `<img src="${prod.imagens[0]}" alt="${prod.nome}">`
+                    : `<i class="fas fa-hamburger" style="color:#94a3b8;"></i>`;
+
+                const precoFormatado = parseFloat(prod.preco).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+                card.innerHTML = `
+                    <div class="product-details">
+                        <h3>${prod.nome}</h3>
+                        <p class="product-description">${prod.ingredientes || 'Sem ingredientes descritos.'}</p>
+                        <span class="product-price">${precoFormatado}</span>
+                    </div>
+                    <div class="product-image-area">
+                        <div class="img-placeholder">
+                            ${containerImagem}
+                        </div>
+                        <button type="button" class="btn-add-item"><i class="fas fa-plus"></i></button>
+                    </div>
+                `;
+
+                // Listener para abrir o modal do produto ao clicar no card
+                card.addEventListener('click', () => {
+                    alert(`Aqui abrirá o modal de opcionais para o item: ${prod.nome}`);
+                });
+
+                listaCards.appendChild(card);
+            });
+
+            secao.appendChild(listaCards);
+            vitrine.appendChild(secao);
+        }
+    });
 }
 
 /* ==========================================================================
