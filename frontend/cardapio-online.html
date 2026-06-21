@@ -42,12 +42,19 @@
 
         <main class="menu-products" id="vitrine-produtos"></main>
 
+        <button id="btn-sacola-flutuante" class="hidden">
+            <span><i class="fas fa-shopping-bag"></i> <span id="txt-sacola-flutuante-qtd">0</span> itens</span>
+            <span id="txt-sacola-flutuante-valor">R$ 0,00</span>
+        </button>
+
         <div class="persistent-cart-container hidden" id="persistent-cart">
             <div class="cart-title-area">
                 <h3>Sua Sacola</h3>
+                <button id="btn-minimizar-sacola"><i class="fas fa-times"></i></button>
             </div>
             
-            <div class="cart-items-list" id="itens-sacola-direta"></div>
+            <div class="cart-items-list" id="itens-sacola-direta">
+                </div>
             
             <div class="cart-summary-footer">
                 <div class="cart-total-line">

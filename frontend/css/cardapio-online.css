@@ -784,3 +784,61 @@ body {
 .hidden {
     display: none !important;
 }
+
+/* ==========================================================================
+   BOTÃO FLUTUANTE E CABEÇALHO DA SACOLA
+   ========================================================================== */
+#btn-sacola-flutuante {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 450px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 14px 20px;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 90;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: transform 0.2s;
+}
+
+#btn-sacola-flutuante:hover {
+    transform: translateX(-50%) scale(1.02);
+}
+
+.cart-title-area {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.cart-title-area h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-main);
+}
+
+#btn-minimizar-sacola {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+#btn-minimizar-sacola:hover {
+    color: var(--primary-color);
+}

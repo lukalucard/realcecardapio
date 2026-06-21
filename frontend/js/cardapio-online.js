@@ -423,9 +423,13 @@ function adicionarProdutoSelecionadoASacola() {
     produtoSelecionadoModal = null;
 }
 
+/* ==========================================================================
+   FUNÇÕES DE RENDERIZAÇÃO E CÁLCULO DA SACOLA
+   ========================================================================== */
 function atualizarRenderSacolaEFooter() {
     const containerLista = document.getElementById('itens-sacola-direta');
     const persistentCart = document.getElementById('persistent-cart');
+    const btnFlutuante = document.getElementById('btn-sacola-flutuante');
     
     if (!containerLista || !persistentCart) return;
 
@@ -433,12 +437,15 @@ function atualizarRenderSacolaEFooter() {
 
     if (sacolaItens.length === 0) {
         persistentCart.classList.add('hidden');
+        if (btnFlutuante) btnFlutuante.classList.add('hidden');
         return;
     }
 
     let valorTotalSacolaItens = 0;
+    let quantidadeTotalItens = 0;
 
     sacolaItens.forEach(item => {
+        quantidadeTotalItens += item.quantidade;
         let precoUnitarioTotal = item.precoBase;
         item.opcionais.forEach(o => precoUnitarioTotal += o.preco);
 
@@ -446,7 +453,6 @@ function atualizarRenderSacolaEFooter() {
         valorTotalSacolaItens += subtotalItem;
 
         const stringOpcionais = item.opcionais.length > 0 ? item.opcionais.map(o => o.nome).join(', ') : '';
-        // Mostra a observação em itálico na sacola se ela existir
         const stringObs = item.observacao ? `<span style="color:#ef4444; font-style:italic; font-size: 0.8rem;">Obs: ${item.observacao}</span>` : '';
 
         const linha = document.createElement('div');
@@ -459,30 +465,85 @@ function atualizarRenderSacolaEFooter() {
                 <span style="font-weight:700; color:var(--text-main); margin-top:4px;">${subtotalItem.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
             </div>
             <div class="item-actions-side">
-                <button type="button" class="btn-qty-action remove-icon" onclick="alterarQuantidadeItemSacola('${item.idUnico}', -1)"><i class="fas fa-minus"></i></button>
+                <button type="button" class="btn-qty-action remove-icon btn-cart-minus" data-id="${item.idUnico}"><i class="fas fa-minus"></i></button>
                 <span class="qty-number">${item.quantidade}</span>
-                <button type="button" class="btn-qty-action" onclick="alterarQuantidadeItemSacola('${item.idUnico}', 1)"><i class="fas fa-plus"></i></button>
+                <button type="button" class="btn-qty-action btn-cart-plus" data-id="${item.idUnico}"><i class="fas fa-plus"></i></button>
             </div>
         `;
         containerLista.appendChild(linha);
     });
 
+    // Atualiza os valores na tela
     document.getElementById('cart-valor-total-tela').innerText = valorTotalSacolaItens.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     
     const taxaEntrega = parseFloat(lojaAtiva ? lojaAtiva.taxa : 0);
     document.getElementById('modal-total-final-valor').innerText = (valorTotalSacolaItens + taxaEntrega).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-    persistentCart.classList.remove('hidden');
+    // Atualiza o botão flutuante
+    if (btnFlutuante) {
+        document.getElementById('txt-sacola-flutuante-qtd').innerText = quantidadeTotalItens;
+        document.getElementById('txt-sacola-flutuante-valor').innerText = valorTotalSacolaItens.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    // Se o botão flutuante NÃO estiver visível (ou seja, a sacola não foi minimizada pelo usuário), mantém a sacola grande aberta
+    if (!btnFlutuante || btnFlutuante.classList.contains('hidden')) {
+        persistentCart.classList.remove('hidden');
+    }
 }
 
+function alterarQuantidadeItemSacolaSeguro(idUnico, modificador) {
+    const item = sacolaItens.find(i => i.idUnico === idUnico);
+    if (!item) return;
+
+    item.quantidade += modificador;
+
+    if (item.quantidade <= 0) {
+        sacolaItens = sacolaItens.filter(i => i.idUnico !== idUnico);
+    }
+
+    atualizarRenderSacolaEFooter();
+}
+
+
 /* ==========================================================================
-   6. CONTROLADOR DOS MODAIS E EVENTOS DE INTERFACE
+   ATUALIZE SUA FUNÇÃO inicializarEventosInterface PARA INCLUIR ESTES EVENTOS
    ========================================================================== */
 function inicializarEventosInterface() {
     const btnFecharDetalhes = document.getElementById('btn-fechar-details') || document.getElementById('btn-fechar-detalhes');
     const btnAbrirCheckout = document.getElementById('btn-abrir-checkout');
     const btnFecharModalDados = document.getElementById('btn-fechar-modal-dados');
     const modalDadosEntrega = document.getElementById('modal-dados-entrega');
+
+    // Módulo de Delegação de Eventos para os botões de + e - da Sacola (MÉTODO SEGURO)
+    const cartList = document.getElementById('itens-sacola-direta');
+    if (cartList) {
+        cartList.addEventListener('click', (e) => {
+            const btnMinus = e.target.closest('.btn-cart-minus');
+            const btnPlus = e.target.closest('.btn-cart-plus');
+
+            if (btnMinus) alterarQuantidadeItemSacolaSeguro(btnMinus.getAttribute('data-id'), -1);
+            if (btnPlus) alterarQuantidadeItemSacolaSeguro(btnPlus.getAttribute('data-id'), 1);
+        });
+    }
+
+    // Módulo de Ocultar/Mostrar Sacola
+    const btnMinimizar = document.getElementById('btn-minimizar-sacola');
+    const btnFlutuante = document.getElementById('btn-sacola-flutuante');
+    const cartContainer = document.getElementById('persistent-cart');
+
+    if (btnMinimizar && btnFlutuante && cartContainer) {
+        btnMinimizar.addEventListener('click', () => {
+            cartContainer.classList.add('hidden');
+            if (sacolaItens.length > 0) {
+                btnFlutuante.classList.remove('hidden');
+            }
+        });
+
+        btnFlutuante.addEventListener('click', () => {
+            btnFlutuante.classList.add('hidden');
+            cartContainer.classList.remove('hidden');
+        });
+    }
 
     // Controle de quantidade INTERNA do modal de opcionais
     document.getElementById('btn-modal-mais').addEventListener('click', () => {
@@ -499,8 +560,13 @@ function inicializarEventosInterface() {
         }
     });
 
-    // Botão Adicionar a Sacola no Modal
-    document.getElementById('btn-modal-adicionar-sacola').addEventListener('click', adicionarProdutoSelecionadoASacola);
+    document.getElementById('btn-modal-adicionar-sacola').addEventListener('click', () => {
+        // Ao adicionar um item, se a sacola estava fechada, nós escondemos o botão flutuante para ela forçar abertura
+        const btnFlutuante = document.getElementById('btn-sacola-flutuante');
+        if(btnFlutuante) btnFlutuante.classList.add('hidden');
+        
+        adicionarProdutoSelecionadoASacola();
+    });
 
     if (btnFecharDetalhes) {
         btnFecharDetalhes.addEventListener('click', () => {
