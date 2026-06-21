@@ -160,13 +160,13 @@ app.post('/api/pedidos', async (req, res) => {
     try {
         const result = await pool.query(
             `INSERT INTO pedidos 
-            (cliente_nome, cliente_telefone, cliente_endereco, itens, subtotal, taxa_entrega, valor_total, forma_pagamento) 
+            (cliente_nome, cliente_telefone, endereco_entrega, itens, subtotal, taxa_entrega, valor_total, forma_pagamento) 
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
             [cliente_nome, cliente_telefone, cliente_endereco, itens, subtotal, taxa_entrega, total, forma_pagamento]
         );
         res.status(201).json({ id: result.rows[0].id, message: 'Pedido recebido com sucesso!' });
     } catch (error) {
-        console.error("Erro interno ao salvar pedido:", error.message);
+        console.error("Erro interno ao salvar pedido no Neon:", error.message);
         res.status(500).json({ erro: 'Erro ao salvar o pedido no banco de dados.' });
     }
 });
