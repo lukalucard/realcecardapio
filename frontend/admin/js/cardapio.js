@@ -217,7 +217,6 @@ function autoInjetarTamanhosPizzaFormulario() {
     const builderContainer = document.querySelector('.product-optionals-builder');
     if (!builderContainer) return;
 
-    // Remove qualquer grupo padrão solto para injetar a tabela de tamanhos estruturada
     const gruposAntigos = builderContainer.querySelectorAll('.optional-group-card');
     gruposAntigos.forEach(g => g.remove());
 
@@ -230,13 +229,19 @@ function autoInjetarTamanhosPizzaFormulario() {
         </div>
         <div class="optional-items-table">
             <div class="opt-item-row">
-                <input type="text" value="Pequena (4 fatias)"><input type="number" step="0.01" value="0.00"><button type="button" class="btn-text-delete"><i class="fas fa-times"></i></button>
+                <input type="text" value="Pequena (4 fatias)"><input type="number" step="0.01" value="0.00">
+                <label class="radio-destaque-label" title="Destaque na Vitrine"><input type="radio" name="destaque_produto" class="radio-destaque"><i class="fas fa-star"></i></label>
+                <button type="button" class="btn-text-delete"><i class="fas fa-times"></i></button>
             </div>
             <div class="opt-item-row">
-                <input type="text" value="Média (6 fatias)"><input type="number" step="0.01" value="10.00"><button type="button" class="btn-text-delete"><i class="fas fa-times"></i></button>
+                <input type="text" value="Média (6 fatias)"><input type="number" step="0.01" value="10.00">
+                <label class="radio-destaque-label" title="Destaque na Vitrine"><input type="radio" name="destaque_produto" class="radio-destaque"><i class="fas fa-star"></i></label>
+                <button type="button" class="btn-text-delete"><i class="fas fa-times"></i></button>
             </div>
             <div class="opt-item-row">
-                <input type="text" value="Grande (8 fatias)"><input type="number" step="0.01" value="20.00"><button type="button" class="btn-text-delete"><i class="fas fa-times"></i></button>
+                <input type="text" value="Grande (8 fatias)"><input type="number" step="0.01" value="20.00">
+                <label class="radio-destaque-label" title="Destaque na Vitrine"><input type="radio" name="destaque_produto" class="radio-destaque" checked><i class="fas fa-star"></i></label>
+                <button type="button" class="btn-text-delete"><i class="fas fa-times"></i></button>
             </div>
             <button type="button" class="btn-secondary-sm"><i class="fas fa-plus"></i> Adicionar Item Extra</button>
         </div>
@@ -400,6 +405,7 @@ function inicializarConstrutorOpcionais() {
             novaLinha.innerHTML = `
                 <input type="text" placeholder="Ex: Queijo Extra">
                 <input type="number" step="0.01" placeholder="0.00">
+                <label class="radio-destaque-label" title="Destaque na Vitrine"><input type="radio" name="destaque_produto" class="radio-destaque"><i class="fas fa-star"></i></label>
                 <button type="button" class="btn-text-delete"><i class="fas fa-times"></i></button>
             `;
             tabelaItens.insertBefore(novaLinha, btnAddItem);
@@ -423,7 +429,9 @@ function inicializarConstrutorOpcionais() {
                 </div>
                 <div class="optional-items-table">
                     <div class="opt-item-row">
-                        <input type="text" placeholder="Opção 1"><input type="number" step="0.01" placeholder="0.00"><button type="button" class="btn-text-delete"><i class="fas fa-times"></i></button>
+                        <input type="text" placeholder="Opção 1"><input type="number" step="0.01" placeholder="0.00">
+                        <label class="radio-destaque-label" title="Destaque na Vitrine"><input type="radio" name="destaque_produto" class="radio-destaque"><i class="fas fa-star"></i></label>
+                        <button type="button" class="btn-text-delete"><i class="fas fa-times"></i></button>
                     </div>
                     <button type="button" class="btn-secondary-sm"><i class="fas fa-plus"></i> Adicionar Item Extra</button>
                 </div>
@@ -491,11 +499,15 @@ function inicializarEnvioFormulario() {
             const linesItens = cartao.querySelectorAll('.opt-item-row');
             
             linesItens.forEach((linha) => {
-                const inputs = linha.querySelectorAll('input'); 
-                if (inputs[0] && inputs[0].value) {
+                const inputNomeAdicional = linha.querySelector('input[type="text"]');
+                const inputPrecoAdicional = linha.querySelector('input[type="number"]');
+                const radioDestaque = linha.querySelector('.radio-destaque'); 
+                
+                if (inputNomeAdicional && inputNomeAdicional.value) {
                     itensDoGrupo.push({
-                        nome_adicional: inputs[0].value,
-                        preco_adicional: parseFloat(inputs[1].value || 0).toFixed(2)
+                        nome_adicional: inputNomeAdicional.value,
+                        preco_adicional: parseFloat(inputPrecoAdicional.value || 0).toFixed(2),
+                        destaque: radioDestaque ? radioDestaque.checked : false // SALVA SE ESTE É O DESTAQUE!
                     });
                 }
             });

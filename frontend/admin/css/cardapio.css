@@ -624,3 +624,34 @@ textarea:focus {
 .hidden {
     display: none !important;
 }
+
+/* ==========================================================================
+   BOTÃO "ESTRELA" DE DESTAQUE DO PRODUTO (VITRINE)
+   ========================================================================== */
+.radio-destaque-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #cbd5e1; /* Cor apagada quando não está selecionado */
+    transition: color 0.2s;
+    margin: 0 10px;
+}
+
+.radio-destaque-label input[type="radio"] {
+    display: none; /* Esconde a bolinha padrão do navegador */
+}
+
+.radio-destaque-label i {
+    font-size: 1.2rem;
+}
+
+/* Quando marcado, a estrela fica dourada */
+.radio-destaque-label input[type="radio"]:checked + i {
+    color: #f59e0b; 
+    transform: scale(1.1);
+}
+
+.radio-destaque-label:hover i {
+    color: #fbbf24;
+}
