@@ -655,3 +655,55 @@ textarea:focus {
 .radio-destaque-label:hover i {
     color: #fbbf24;
 }
+
+/* ==========================================================================
+   BOTÕES DE AÇÃO (EDITAR/EXCLUIR) NO PREVIEW DO CARDÁPIO
+   ========================================================================== */
+.mock-product-card {
+    position: relative; /* Garante que os botões fiquem presos ao card */
+}
+
+.mock-card-actions {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    gap: 6px;
+    z-index: 10;
+}
+
+.btn-action-preview {
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-action-preview:hover {
+    transform: scale(1.05);
+}
+
+.btn-action-preview.edit {
+    background-color: #ef4444; /* Vermelho padrão do seu tema */
+    color: white;
+}
+
+.btn-action-preview.edit:hover {
+    background-color: #dc2626;
+}
+
+.btn-action-preview.delete {
+    background-color: #64748b;
+    color: white;
+}
+
+.btn-action-preview.delete:hover {
+    background-color: #475569;
+}

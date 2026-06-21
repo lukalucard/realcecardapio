@@ -6,7 +6,8 @@ let lojaSelecionadaId = null;
 
 let categoriasSalvas = []; 
 let produtosSalvos = []; 
-let categoriaEmEdicao = null; 
+let categoriaEmEdicao = null;
+let produtoEmEdicaoId = null; // Controla se o formulário está criando ou editando um produto 
 
 document.addEventListener('DOMContentLoaded', () => {
     inicializarSeletorLojasSaaS();
@@ -490,7 +491,7 @@ function inicializarEnvioFormulario() {
         const gruposOpcionais = [];
         const cartoesGrupo = formulario.querySelectorAll('.optional-group-card');
 
-        cartoesGrupo.forEach((cartao) => {
+        cartoesGrupo.forEach((cartao, gIdx) => {
             const nomeGrupo = cartao.querySelector('.input-inline').value;
             const min = cartao.querySelectorAll('.opt-rules input')[0].value;
             const max = cartao.querySelectorAll('.opt-rules input')[1].value;
@@ -507,7 +508,7 @@ function inicializarEnvioFormulario() {
                     itensDoGrupo.push({
                         nome_adicional: inputNomeAdicional.value,
                         preco_adicional: parseFloat(inputPrecoAdicional.value || 0).toFixed(2),
-                        destaque: radioDestaque ? radioDestaque.checked : false // SALVA SE ESTE É O DESTAQUE!
+                        destaque: radioDestaque ? radioDestaque.checked : false
                     });
                 }
             });
@@ -522,20 +523,46 @@ function inicializarEnvioFormulario() {
             }
         });
 
-        const novoProduto = {
-            id: Date.now(),
-            nome: nome,
-            preco: preco,
-            categoria: categoria,
-            imagens: listaImagensSalvas, 
-            ingredientes: listaIngredientes.join(', '),
-            opcionais: gruposOpcionais
-        };
+        // INTELIGÊNCIA DE EDIÇÃO VS CADASTRO NOVO
+        if (produtoEmEdicaoId !== null) {
+            // Modo Edição: Localiza o produto antigo no array e atualiza os dados dele
+            const index = produtosSalvos.findIndex(p => p.id === produtoEmEdicaoId);
+            if (index !== -1) {
+                // Se o gestor não enviou fotos novas na edição, mantém as fotos antigas que já estavam salvas
+                const fotosFinais = listaImagensSalvas.length > 0 ? listaImagensSalvas : produtosSalvos[index].imagens;
 
-        produtosSalvos.push(novoProduto); 
+                produtosSalvos[index] = {
+                    id: produtoEmEdicaoId,
+                    nome: nome,
+                    preco: preco,
+                    categoria: categoria,
+                    imagens: fotosFinais, 
+                    ingredientes: listaIngredientes.join(', '),
+                    opcionais: gruposOpcionais
+                };
+                alert(`Sucesso! "${nome}" atualizado com êxito.`);
+            }
+            // Reseta o estado global de edição de volta para o padrão
+            produtoEmEdicaoId = null;
+            document.querySelector('.cardapio-card-box h3').innerHTML = `<i class="fas fa-hamburger"></i> Cadastro de Produto`;
+            document.querySelector('.btn-save-product').textContent = "Salvar Produto no Cardápio";
+        } else {
+            // Modo Cadastro Novo: Cria um novo objeto com id baseado no timestamp
+            const novoProduto = {
+                id: Date.now(),
+                nome: nome,
+                preco: preco,
+                categoria: categoria,
+                imagens: listaImagensSalvas, 
+                ingredientes: listaIngredientes.join(', '),
+                opcionais: gruposOpcionais
+            };
+            produtosSalvos.push(novoProduto); 
+            alert(`Sucesso! "${nome}" adicionado com êxito.`);
+        }
+
+        // Limpa o formulário e os componentes periféricos
         salvarEstadoNoCache();
-        alert(`Sucesso! "${nome}" adicionado com êxito.`);
-
         formulario.reset();
         document.getElementById('container-ingredientes-chips').innerHTML = "";
         
@@ -598,6 +625,11 @@ function renderizarPreviewCardapioReal() {
                     : `<i class="fas ${categoria.toLowerCase().includes('bebida') ? 'fa-glass-cheers' : 'fa-hamburger'}"></i>`;
 
                 card.innerHTML = `
+                    <div class="mock-card-actions">
+                        <button type="button" class="btn-action-preview edit btn-editar-prod-click" data-id="${produto.id}" title="Editar Produto"><i class="fas fa-edit"></i></button>
+                        <button type="button" class="btn-action-preview delete btn-deletar-prod-click" data-id="${produto.id}" title="Excluir Produto"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+
                     <div class="mock-card-details">
                         <h5>${produto.nome}</h5>
                         <p>${produto.ingredientes || 'Sem ingredientes base.'}</p>
@@ -607,6 +639,18 @@ function renderizarPreviewCardapioReal() {
                         ${containerImagem}
                     </div>
                 `;
+
+                // Escutadores de eventos para os botões de ação do card
+                card.querySelector('.btn-editar-prod-click').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    carregarProdutoParaEdicao(produto.id);
+                });
+
+                card.querySelector('.btn-deletar-prod-click').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deletarProdutoReal(produto.id);
+                });
+
                 listaCards.appendChild(card);
             });
 
@@ -616,8 +660,102 @@ function renderizarPreviewCardapioReal() {
     });
 }
 
+function carregarProdutoParaEdicao(id) {
+    const produto = produtosSalvos.find(p => p.id === id);
+    if (!produto) return;
+
+    produtoEmEdicaoId = produto.id;
+
+    // 1. Preenche os campos básicos
+    document.getElementById('prod-nome').value = produto.nome;
+    document.getElementById('prod-preco').value = produto.preco;
+    document.getElementById('prod-select-vinculo').value = produto.categoria;
+
+    // 2. Altera os textos visuais para modo edição
+    document.querySelector('.cardapio-card-box h3').innerHTML = `<i class="fas fa-edit"></i> Editando Produto: ${produto.nome}`;
+    document.querySelector('.btn-save-product').textContent = "Salvar Alterações do Produto";
+
+    // 3. Remonta os chips de ingredientes
+    const containerChips = document.getElementById('container-ingredientes-chips');
+    containerChips.innerHTML = "";
+    if (produto.ingredientes) {
+        const lista = produto.ingredientes.split(', ');
+        lista.forEach(texto => {
+            if (texto.trim() !== "") {
+                const chip = document.createElement('div');
+                chip.className = 'ingredient-chip';
+                chip.innerHTML = `${texto} <i class="fas fa-times-circle btn-remove-chip"></i>`;
+                containerChips.appendChild(chip);
+            }
+        });
+    }
+
+    // 4. Remonta a estrutura de grupos e opcionais com as estrelas salvas
+    const builderContainer = document.querySelector('.product-optionals-builder');
+    if (builderContainer) {
+        const gruposAntigos = builderContainer.querySelectorAll('.optional-group-card');
+        gruposAntigos.forEach(g => g.remove());
+
+        if (produto.opcionais && produto.opcionais.length > 0) {
+            produto.opcionais.forEach((grupo, grupoIdx) => {
+                const novoGrupo = document.createElement('div');
+                novoGrupo.className = 'optional-group-card';
+                novoGrupo.innerHTML = `
+                    <div class="opt-group-header">
+                        <input type="text" class="input-inline" value="${grupo.nome_grupo}">
+                        <div class="opt-rules">
+                            <label>Min:</label> <input type="number" value="${grupo.minimo}">
+                            <label>Max:</label> <input type="number" value="${grupo.maximo}">
+                        </div>
+                    </div>
+                    <div class="optional-items-table">
+                        ${grupo.itens.map(item => `
+                            <div class="opt-item-row">
+                                <input type="text" value="${item.nome_adicional}">
+                                <input type="number" step="0.01" value="${item.preco_adicional}">
+                                <label class="radio-destaque-label" title="Destaque na Vitrine">
+                                    <input type="radio" name="destaque_produto_${grupoIdx}" class="radio-destaque" ${item.destaque ? 'checked' : ''}>
+                                    <i class="fas fa-star"></i>
+                                </label>
+                                <button type="button" class="btn-text-delete"><i class="fas fa-times"></i></button>
+                            </div>
+                        `).join('')}
+                        <button type="button" class="btn-secondary-sm"><i class="fas fa-plus"></i> Adicionar Item Extra</button>
+                    </div>
+                `;
+                const btnNewGroup = builderContainer.querySelector('.btn-secondary');
+                builderContainer.insertBefore(novoGrupo, btnNewGroup);
+            });
+        }
+    }
+
+    // 5. Força o clique de troca de aba para o formulário de cadastro
+    document.getElementById('tab-menu').click();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function deletarProdutoReal(id) {
+    const produto = produtosSalvos.find(p => p.id === id);
+    if (!produto) return;
+
+    if (confirm(`⚠️ Deseja realmente remover o produto "${produto.nome}" do seu cardápio?`)) {
+        produtosSalvos = produtosSalvos.filter(p => p.id !== id);
+        
+        // Se o produto deletado era o que estava em edição, limpa o estado
+        if (produtoEmEdicaoId === id) {
+            produtoEmEdicaoId = null;
+            document.querySelector('.cardapio-card-box h3').innerHTML = `<i class="fas fa-hamburger"></i> Cadastro de Produto`;
+            document.querySelector('.btn-save-product').textContent = "Salvar Produto no Cardápio";
+        }
+
+        salvarEstadoNoCache();
+        renderizarPreviewCardapioReal(); // Atualiza a vitrine imediatamente
+        alert('Produto removido com sucesso!');
+    }
+}
+
 /* ==========================================================================
-   8. ABA DE DESIGN E LAYOUT DO CARDÁPIO EXTERNO (ISOLADO POR LOJA)
+   ABA DE DESIGN E LAYOUT DO CARDÁPIO EXTERNO (ISOLADO POR LOJA)
    ========================================================================== */
 function inicializarControleDesignCardapio() {
     const secaoDesign = document.getElementById('content-design');
