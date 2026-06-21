@@ -585,4 +585,106 @@ function inicializarEventosInterface() {
             modalDadosEntrega.classList.add('hidden');
         });
     }
+
+    const btnEnviarPedido = document.getElementById('btn-enviar-pedido');
+    if (btnEnviarPedido) {
+        btnEnviarPedido.addEventListener('click', enviarPedidoParaServidor);
+    }
+}
+
+/* ==========================================================================
+   INTEGRAÇÃO COM A API DO SERVIDOR (ENVIAR PEDIDO)
+   ========================================================================== */
+async function enviarPedidoParaServidor() {
+    // 1. Puxa os dados digitados pelo cliente
+    const nome = document.getElementById('checkout-nome').value.trim();
+    const whatsapp = document.getElementById('checkout-whatsapp').value.trim();
+    const endereco = document.getElementById('checkout-endereco').value.trim();
+    const pagamento = document.getElementById('checkout-pagamento').value;
+
+    // 2. Validação de segurança
+    if (!nome || !whatsapp || !endereco || !pagamento) {
+        alert("⚠️ Por favor, preencha todos os campos de entrega e pagamento.");
+        return;
+    }
+
+    if (sacolaItens.length === 0) {
+        alert("⚠️ Sua sacola está vazia!");
+        return;
+    }
+
+    // 3. Formata os itens para o painel do gestor ler facilmente
+    // Ex: "2x Pizza Grande (Calabresa) [Borda Recheada], 1x Coca-Cola"
+    const stringItensFormatada = sacolaItens.map(item => {
+        let descricao = `${item.quantidade}x ${item.nome}`;
+        if (item.opcionais && item.opcionais.length > 0) {
+            descricao += ` [${item.opcionais.map(o => o.nome).join(', ')}]`;
+        }
+        if (item.observacao) {
+            descricao += ` (Obs: ${item.observacao})`;
+        }
+        return descricao;
+    }).join(' | ');
+
+    // 4. Calcula os totais finais
+    let subtotal = 0;
+    sacolaItens.forEach(item => {
+        let precoUnitarioTotal = item.precoBase;
+        item.opcionais.forEach(o => precoUnitarioTotal += o.preco);
+        subtotal += precoUnitarioTotal * item.quantidade;
+    });
+
+    const taxaEntrega = parseFloat(lojaAtiva && lojaAtiva.taxa ? lojaAtiva.taxa : 0);
+    const totalFinal = subtotal + taxaEntrega;
+
+    // 5. Prepara o pacote de dados EXATAMENTE como o seu server.js espera
+    const payloadPedido = {
+        cliente_nome: nome,
+        cliente_telefone: whatsapp,
+        cliente_endereco: endereco,
+        itens: stringItensFormatada, 
+        subtotal: subtotal,
+        taxa_entrega: taxaEntrega,
+        total: totalFinal,
+        forma_pagamento: pagamento
+    };
+
+    // 6. Efeito visual no botão (Mostra para o cliente que está carregando)
+    const btnEnviar = document.getElementById('btn-enviar-pedido');
+    const textoOriginal = btnEnviar.innerHTML;
+    btnEnviar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
+    btnEnviar.disabled = true;
+
+    try {
+        // 7. Disparo real para a sua API no Render/Neon
+        const resposta = await fetch('/api/pedidos', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payloadPedido)
+        });
+
+        if (!resposta.ok) {
+            throw new Error("Falha de comunicação com o servidor.");
+        }
+
+        const dadosRetorno = await resposta.json();
+
+        // 8. Sucesso! Limpa tudo e avisa o cliente
+        alert(`✅ Sucesso! Seu pedido #${dadosRetorno.id} foi enviado para a cozinha!`);
+        
+        sacolaItens = [];
+        atualizarRenderSacolaEFooter();
+        document.getElementById('form-checkout').reset();
+        document.getElementById('modal-dados-entrega').classList.add('hidden');
+
+    } catch (erro) {
+        console.error("Erro ao enviar pedido:", erro);
+        alert("❌ Ocorreu um erro ao enviar seu pedido. Verifique sua conexão e tente novamente.");
+    } finally {
+        // Devolve o botão ao estado normal
+        btnEnviar.innerHTML = textoOriginal;
+        btnEnviar.disabled = false;
+    }
 }
