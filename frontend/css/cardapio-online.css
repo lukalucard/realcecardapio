@@ -436,7 +436,7 @@ body {
     position: absolute;
     top: 0;
     left: 0;
-    z-index: 10;
+    z-index: 50; /* Aumentei o z-index para garantir que fique acima da foto */
     width: 100%;
 }
 
@@ -680,6 +680,7 @@ body {
     display: flex;
     flex-direction: column;
     animation: slideUp 0.3s ease-out;
+    position: relative; /* AQUI ESTÁ O SEGREDO: Segura o botão dentro do modal */
 }
 
 @keyframes slideUp {
