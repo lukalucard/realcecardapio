@@ -18,7 +18,52 @@ document.addEventListener('DOMContentLoaded', () => {
     inicializarMotorFotosGaleria(); 
     inicializarEnvioFormulario();
     inicializarControleDesignCardapio();
+    inicializarSincronizadorPreco();
 });
+
+/* ==========================================================================
+   NOVO: SINCRONIZADOR DE PREÇO AUTOMÁTICO (ESTRELA -> PREÇO BASE)
+   ========================================================================== */
+function inicializarSincronizadorPreco() {
+    const builderContainer = document.querySelector('.product-optionals-builder');
+    const inputPrecoBase = document.getElementById('prod-preco');
+
+    if (!builderContainer || !inputPrecoBase) return;
+
+    // Escuta qualquer digitação ou clique dentro da área de opcionais
+    builderContainer.addEventListener('input', verificarPrecoDestaque);
+    builderContainer.addEventListener('change', verificarPrecoDestaque);
+
+    function verificarPrecoDestaque() {
+        const estrelaMarcada = document.querySelector('.radio-destaque:checked');
+        
+        if (estrelaMarcada) {
+            const linha = estrelaMarcada.closest('.opt-item-row');
+            const precoInput = linha.querySelector('input[type="number"]');
+            
+            // Copia o valor e trava o campo base
+            inputPrecoBase.value = parseFloat(precoInput.value || 0).toFixed(2);
+            inputPrecoBase.setAttribute('readonly', 'true');
+            inputPrecoBase.style.backgroundColor = '#f1f5f9';
+            inputPrecoBase.style.cursor = 'not-allowed';
+            
+            // Muda a label para o gestor entender o que aconteceu
+            const labelPreco = inputPrecoBase.previousElementSibling;
+            if(labelPreco) labelPreco.innerHTML = 'Preço Base <span style="font-size:0.75rem; color:#f59e0b; margin-left:8px;"><i class="fas fa-star"></i> Automático (Destaque)</span>';
+        } else {
+            // Destrava o campo se não tiver estrela marcada
+            inputPrecoBase.removeAttribute('readonly');
+            inputPrecoBase.style.backgroundColor = '';
+            inputPrecoBase.style.cursor = 'text';
+            
+            const labelPreco = inputPrecoBase.previousElementSibling;
+            if(labelPreco) labelPreco.innerHTML = 'Preço Base (R$)';
+        }
+    }
+
+    // Deixa a função disponível globalmente para usarmos na hora de editar
+    window.forcarSincronizacaoPreco = verificarPrecoDestaque;
+}
 
 /* ==========================================================================
    MOTOR MULTILOJAS - TROCA DINÂMICA DE BANCO DE DADOS
@@ -624,6 +669,20 @@ function renderizarPreviewCardapioReal() {
                     ? `<img src="${produto.imagens[0]}" alt="${produto.nome}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">`
                     : `<i class="fas ${categoria.toLowerCase().includes('bebida') ? 'fa-glass-cheers' : 'fa-hamburger'}"></i>`;
 
+                // NOVO: Busca se o produto tem algum tamanho marcado como destaque
+                let tagTamanho = '';
+                if (produto.opcionais) {
+                    produto.opcionais.forEach(grupo => {
+                        grupo.itens.forEach(item => {
+                            if (item.destaque) {
+                                // Pega só o primeiro nome (ex: de "Grande (8 fatias)" pega só "Grande")
+                                const nomeLimpo = item.nome_adicional.split('(')[0].trim();
+                                tagTamanho = `<span style="font-size: 0.75rem; color: #d97706; font-weight: 700; background: #fef3c7; padding: 2px 8px; border-radius: 12px; margin-left: 6px; display: inline-flex; align-items: center; gap: 4px; transform: translateY(-2px);"><i class="fas fa-star" style="font-size: 0.6rem;"></i> ${nomeLimpo}</span>`;
+                            }
+                        });
+                    });
+                }
+
                 card.innerHTML = `
                     <div class="mock-card-actions">
                         <button type="button" class="btn-action-preview edit btn-editar-prod-click" data-id="${produto.id}" title="Editar Produto"><i class="fas fa-edit"></i></button>
@@ -631,7 +690,7 @@ function renderizarPreviewCardapioReal() {
                     </div>
 
                     <div class="mock-card-details">
-                        <h5>${produto.nome}</h5>
+                        <h5 style="display: flex; align-items: center; flex-wrap: wrap;">${produto.nome} ${tagTamanho}</h5>
                         <p>${produto.ingredientes || 'Sem ingredientes base.'}</p>
                         <span class="mock-price">R$ ${produto.preco}</span>
                     </div>
@@ -640,7 +699,6 @@ function renderizarPreviewCardapioReal() {
                     </div>
                 `;
 
-                // Escutadores de eventos para os botões de ação do card
                 card.querySelector('.btn-editar-prod-click').addEventListener('click', (e) => {
                     e.stopPropagation();
                     carregarProdutoParaEdicao(produto.id);
@@ -732,6 +790,9 @@ function carregarProdutoParaEdicao(id) {
     // 5. Força o clique de troca de aba para o formulário de cadastro
     document.getElementById('tab-menu').click();
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // 6. NOVO: Aciona o sincronizador para travar o preço caso tenha estrela salva
+    if(window.forcarSincronizacaoPreco) window.forcarSincronizacaoPreco();
 }
 
 function deletarProdutoReal(id) {
