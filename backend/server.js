@@ -148,9 +148,11 @@ app.get('/me', authMiddleware, async (req, res) => {
 // -------------------- ROTAS DO CARDÁPIO & PEDIDOS --------------------
 
 // Criar um novo pedido (Cliente finaliza a compra no WhatsApp/Web)
+// Criar um novo pedido (Alinhado com o banco Neon e a nova Vitrine)
 app.post('/api/pedidos', async (req, res) => {
     const { cliente_nome, cliente_telefone, cliente_endereco, itens, subtotal, taxa_entrega, total, forma_pagamento } = req.body;
     
+    // Validação dos campos essenciais
     if (!cliente_nome || !itens || !total) {
         return res.status(400).json({ erro: 'Dados do pedido incompletos' });
     }
@@ -158,14 +160,14 @@ app.post('/api/pedidos', async (req, res) => {
     try {
         const result = await pool.query(
             `INSERT INTO pedidos 
-            (cliente_nome, cliente_telefone, cliente_endereco, itens, subtotal, taxa_entrega, total, forma_pagamento) 
+            (cliente_nome, cliente_telefone, cliente_endereco, itens, subtotal, taxa_entrega, valor_total, forma_pagamento) 
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
-            [cliente_nome, cliente_telefone, cliente_endereco, JSON.stringify(itens), subtotal, taxa_entrega, total, forma_pagamento]
+            [cliente_nome, cliente_telefone, cliente_endereco, itens, subtotal, taxa_entrega, total, forma_pagamento]
         );
-        res.status(201).json({ id: result.rows[0].id, message: 'Pedido received com sucesso!' });
+        res.status(201).json({ id: result.rows[0].id, message: 'Pedido recebido com sucesso!' });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ erro: 'Erro ao salvar o pedido' });
+        console.error("Erro interno ao salvar pedido:", error.message);
+        res.status(500).json({ erro: 'Erro ao salvar o pedido no banco de dados.' });
     }
 });
 
