@@ -1,9 +1,25 @@
+/* ==========================================================================
+   ESTADO GLOBAL DO PAINEL DE PEDIDOS
+   ========================================================================== */
 let pedidosAtivosGlobais = [];
+let quantidadeAnteriorDePedidos = 0; // Controla o aviso sonoro
 
 document.addEventListener('DOMContentLoaded', () => {
     configurarSubmenuSuperior();
+    
+    // Busca os pedidos na hora que a página abre
     buscarPedidosDoServidor();
+
+    // O RADAR: Fica buscando novos pedidos automaticamente a cada 10 segundos
+    setInterval(buscarPedidosDoServidor, 10000); 
 });
+
+// Som de notificação para a cozinha
+function tocarSomNovoPedido() {
+    // Um beep simples e agradável
+    const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+    audio.play().catch(e => console.log("O navegador bloqueou o som automático. O gestor precisa clicar na tela antes."));
+}
 
 function configurarSubmenuSuperior() {
     const botoesMenu = document.querySelectorAll('.tab-link');
@@ -39,7 +55,15 @@ async function buscarPedidosDoServidor() {
     try {
         const resposta = await fetch('/api/pedidos/ativos');
         if (!resposta.ok) throw new Error("Erro na comunicação");
+        
         pedidosAtivosGlobais = await resposta.json();
+
+        // LÓGICA DO AVISO SONORO: Se o número de pedidos atuais for maior que o anterior, toca o som!
+        const quantidadeAtual = pedidosAtivosGlobais.length;
+        if (quantidadeAtual > quantidadeAnteriorDePedidos && quantidadeAnteriorDePedidos !== 0) {
+            tocarSomNovoPedido();
+        }
+        quantidadeAnteriorDePedidos = quantidadeAtual;
 
         // Atualiza os contadores globais de ambas as abas antes de desenhar
         calcularEAtualizarContadores(pedidosAtivosGlobais);
