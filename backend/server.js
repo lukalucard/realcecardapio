@@ -147,10 +147,8 @@ app.get('/me', authMiddleware, async (req, res) => {
 
 // -------------------- ROTAS DO CARDÁPIO & PEDIDOS --------------------
 
-// Criar um novo pedido (Cliente finaliza a compra no WhatsApp/Web)
+
 // Criar um novo pedido (Alinhado com o banco Neon e a nova Vitrine)
-// CORREÇÃO: Alinhando o nome da coluna do telefone com o banco Neon
-// CORREÇÃO: Forçar status inicial 'novos' para o pedido aparecer no painel
 app.post('/api/pedidos', async (req, res) => {
     const { cliente_nome, cliente_telefone, cliente_endereco, itens, subtotal, taxa_entrega, total, forma_pagamento } = req.body;
     
@@ -170,6 +168,22 @@ app.post('/api/pedidos', async (req, res) => {
     } catch (error) {
         console.error("Erro interno ao salvar pedido no Neon:", error.message);
         res.status(500).json({ erro: 'Erro ao salvar o pedido no banco de dados.' });
+    }
+});
+
+// ROTA NOVA: Buscar histórico de pedidos (finalizados, entregues ou cancelados)
+app.get('/api/pedidos/historico', async (req, res) => {
+    try {
+        // Busca os pedidos que já saíram do fluxo ativo, limitando aos últimos 50 para não pesar
+        const result = await pool.query(
+            `SELECT * FROM pedidos 
+             WHERE status IN ('entregue', 'finalizado', 'cancelado') 
+             ORDER BY criado_em DESC LIMIT 50`
+        );
+        res.json(result.rows);
+    } catch (error) {
+        console.error("Erro ao buscar histórico:", error.message);
+        res.status(500).json({ erro: 'Erro ao buscar histórico de pedidos' });
     }
 });
 

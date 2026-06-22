@@ -71,8 +71,14 @@ async function buscarPedidosDoServidor() {
         const abaAtiva = document.querySelector('.tab-link.active');
         const tipoAba = abaAtiva ? abaAtiva.getAttribute('data-aba') : 'geral';
 
-        if (tipoAba === 'geral') renderizarModoGeralEsteira(pedidosAtivosGlobais);
-        else if (tipoAba === 'flutuantes') renderizarModoPedidosFlutuantes(pedidosAtivosGlobais);
+        // Trata a renderização correta dependendo de qual aba o gestor está olhando
+        if (tipoAba === 'geral') {
+            renderizarModoGeralEsteira(pedidosAtivosGlobais);
+        } else if (tipoAba === 'flutuantes') {
+            renderizarModoPedidosFlutuantes(pedidosAtivosGlobais);
+        } else if (tipoAba === 'historico') {
+            buscarHistoricoDePedidos();
+        }
     } catch (erro) {
         console.error("❌ Falha ao buscar pedidos ativos:", erro);
     }
@@ -303,4 +309,57 @@ async function executarAvancoDeEtapa(id, statusAtual, subStatusAtual) {
     } catch (erro) {
         console.error("❌ Erro ao avançar o pedido:", erro);
     }
+}
+
+/* ==========================================================================
+   LÓGICA DA ABA DE HISTÓRICO
+   ========================================================================== */
+async function buscarHistoricoDePedidos() {
+    try {
+        const resposta = await fetch('/api/pedidos/historico');
+        if (!resposta.ok) throw new Error("Erro na comunicação com o histórico");
+        
+        const historico = await resposta.json();
+        renderizarHistorico(historico);
+    } catch (erro) {
+        console.error("❌ Falha ao buscar histórico:", erro);
+    }
+}
+
+function renderizarHistorico(pedidos) {
+    const tbody = document.getElementById('lista-historico-hoje');
+    if (!tbody) return;
+
+    tbody.innerHTML = ''; // Limpa a tabela antes de preencher
+
+    // Se não houver pedidos finalizados
+    if (pedidos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">Nenhum pedido finalizado ainda.</td></tr>';
+        return;
+    }
+
+    // Desenha cada linha da tabela dinamicamente
+    pedidos.forEach(pedido => {
+        const tr = document.createElement('tr');
+        
+        // Pega a hora do pedido
+        const horaPedido = new Date(pedido.criado_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        
+        // Define a cor da etiqueta (verde para sucesso, vermelho para cancelado)
+        let corBadge = pedido.status === 'cancelado' ? 'background-color: #dc3545;' : 'background-color: #28a745;';
+
+        tr.innerHTML = `
+            <td>#${pedido.id}</td>
+            <td>Hoje, ${horaPedido}</td>
+            <td><strong>${pedido.cliente_nome}</strong></td>
+            <td><small>${pedido.itens}</small></td>
+            <td>R$ ${parseFloat(pedido.valor_total).toFixed(2).replace('.', ',')}</td>
+            <td>${pedido.forma_pagamento}</td>
+            <td><span style="padding: 5px 10px; border-radius: 5px; color: white; font-size: 0.85em; ${corBadge}">${pedido.status.toUpperCase()}</span></td>
+            <td style="text-align: center;">
+                <button class="btn btn-sm" style="border: 1px solid #ccc; background: transparent; cursor: pointer;" onclick="alert('Detalhes do pedido #${pedido.id} em breve!')">Ver</button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
 }
