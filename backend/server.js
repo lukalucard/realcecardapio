@@ -150,21 +150,20 @@ app.get('/me', authMiddleware, async (req, res) => {
 // Criar um novo pedido (Cliente finaliza a compra no WhatsApp/Web)
 // Criar um novo pedido (Alinhado com o banco Neon e a nova Vitrine)
 // CORREÇÃO: Alinhando o nome da coluna do telefone com o banco Neon
+// CORREÇÃO: Forçar status inicial 'novos' para o pedido aparecer no painel
 app.post('/api/pedidos', async (req, res) => {
-    // Mantemos a variável cliente_telefone que vem do frontend
     const { cliente_nome, cliente_telefone, cliente_endereco, itens, subtotal, taxa_entrega, total, forma_pagamento } = req.body;
     
-    // Validação dos campos essenciais
     if (!cliente_nome || !itens || !total) {
         return res.status(400).json({ erro: 'Dados do pedido incompletos' });
     }
 
     try {
-        // MUDANÇA AQUI: Trocamos "cliente_telefone" por "cliente_whatsapp" no INSERT do banco
+        // Adicionamos as colunas status e sub_status com os valores fixos 'novos' e 'aguardando'
         const result = await pool.query(
             `INSERT INTO pedidos 
-            (cliente_nome, cliente_whatsapp, endereco_entrega, itens, subtotal, taxa_entrega, valor_total, forma_pagamento) 
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
+            (cliente_nome, cliente_whatsapp, endereco_entrega, itens, subtotal, taxa_entrega, valor_total, forma_pagamento, status, sub_status) 
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'novos', 'aguardando') RETURNING id`,
             [cliente_nome, cliente_telefone, cliente_endereco, itens, subtotal, taxa_entrega, total, forma_pagamento]
         );
         res.status(201).json({ id: result.rows[0].id, message: 'Pedido recebido com sucesso!' });
