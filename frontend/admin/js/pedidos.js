@@ -2,8 +2,8 @@
    ESTADO GLOBAL DO PAINEL DE PEDIDOS
    ========================================================================== */
 let pedidosAtivosGlobais = [];
-let quantidadeAnteriorDePedidos = 0; // Controla o aviso sonoro
-let alertaSonoroAtivado = false; // Novo estado para o botão de som
+let quantidadeAnteriorDePedidos = 0;
+let alertaSonoroAtivado = false; // Estado para o botão de som
 
 document.addEventListener('DOMContentLoaded', () => {
     configurarSubmenuSuperior();
@@ -15,15 +15,9 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(buscarPedidosDoServidor, 10000); 
 });
 
-// Som de notificação para a cozinha
 /* ==========================================================================
-   ESTADO GLOBAL DO PAINEL DE PEDIDOS
+   SISTEMA DE ALERTA SONORO
    ========================================================================== */
-let pedidosAtivosGlobais = [];
-let quantidadeAnteriorDePedidos = 0;
-let alertaSonoroAtivado = false; // Novo estado para o botão de som
-
-// Função que o botão HTML chama ao ser clicado
 function alternarSomNovoPedido() {
     alertaSonoroAtivado = !alertaSonoroAtivado;
     const btn = document.getElementById('btn-alerta-som');
@@ -41,14 +35,15 @@ function alternarSomNovoPedido() {
     }
 }
 
-// A função do radar agora respeita o botão
 function tocarSomNovoPedido() {
     if (!alertaSonoroAtivado) return; // Se estiver mudo, não faz nada
-    
     const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
     audio.play().catch(e => console.log("Erro ao tocar som"));
 }
 
+/* ==========================================================================
+   CONTROLE DE ABAS (MENU SUPERIOR)
+   ========================================================================== */
 function configurarSubmenuSuperior() {
     const botoesMenu = document.querySelectorAll('.tab-link');
     const painelGeral = document.getElementById('painel-geral');
@@ -79,6 +74,9 @@ function configurarSubmenuSuperior() {
     });
 }
 
+/* ==========================================================================
+   BUSCA E RENDERIZAÇÃO DE PEDIDOS ATIVOS
+   ========================================================================== */
 async function buscarPedidosDoServidor() {
     try {
         const resposta = await fetch('/api/pedidos/ativos');
@@ -86,20 +84,19 @@ async function buscarPedidosDoServidor() {
         
         pedidosAtivosGlobais = await resposta.json();
 
-        // LÓGICA DO AVISO SONORO: Se o número de pedidos atuais for maior que o anterior, toca o som!
+        // LÓGICA DO AVISO SONORO
         const quantidadeAtual = pedidosAtivosGlobais.length;
         if (quantidadeAtual > quantidadeAnteriorDePedidos && quantidadeAnteriorDePedidos !== 0) {
             tocarSomNovoPedido();
         }
         quantidadeAnteriorDePedidos = quantidadeAtual;
 
-        // Atualiza os contadores globais de ambas as abas antes de desenhar
+        // Atualiza os contadores globais
         calcularEAtualizarContadores(pedidosAtivosGlobais);
 
         const abaAtiva = document.querySelector('.tab-link.active');
         const tipoAba = abaAtiva ? abaAtiva.getAttribute('data-aba') : 'geral';
 
-        // Trata a renderização correta dependendo de qual aba o gestor está olhando
         if (tipoAba === 'geral') {
             renderizarModoGeralEsteira(pedidosAtivosGlobais);
         } else if (tipoAba === 'flutuantes') {
@@ -116,10 +113,8 @@ async function buscarPedidosDoServidor() {
    ATUALIZAÇÃO DOS CONTADORES (BADGES)
    ========================================================================== */
 function calcularEAtualizarContadores(pedidos) {
-    // 1. Inicia os contadores zerados
     const contadores = { pedidos: 0, pagamento: 0, preparo: 0, entrega: 0 };
     
-    // 2. Conta os pedidos com base nas palavras exatas do banco Neon
     pedidos.forEach(pedido => {
         let statusNormalizado = pedido.status === 'novos' ? 'pedidos' : pedido.status;
         if (contadores.hasOwnProperty(statusNormalizado)) {
@@ -127,7 +122,6 @@ function calcularEAtualizarContadores(pedidos) {
         }
     });
 
-    // 3. Atualiza os badges exclusivos da Esteira (Geral)
     const badgeEsteiraNovos = document.getElementById('esteira-badge-pedidos');
     if(badgeEsteiraNovos) badgeEsteiraNovos.innerText = contadores.pedidos;
     
@@ -140,7 +134,6 @@ function calcularEAtualizarContadores(pedidos) {
     const badgeEsteiraEntrega = document.getElementById('esteira-badge-entrega');
     if(badgeEsteiraEntrega) badgeEsteiraEntrega.innerText = contadores.entrega;
 
-    // 4. Atualiza os badges exclusivos do Kanban (Flutuantes)
     const badgeKanbanPagamento = document.getElementById('badge-pagamento');
     if(badgeKanbanPagamento) badgeKanbanPagamento.innerText = contadores.pagamento;
     
@@ -150,15 +143,11 @@ function calcularEAtualizarContadores(pedidos) {
     const badgeKanbanEntrega = document.getElementById('badge-entrega');
     if(badgeKanbanEntrega) badgeKanbanEntrega.innerText = contadores.entrega;
 
-    // 5. Inteligência para os IDs duplicados ('badge-pedidos' está no Menu e no Kanban)
     const badgesPedidos = document.querySelectorAll('#badge-pedidos');
     badgesPedidos.forEach(badge => {
-        // Se a bolinha estiver dentro do Menu Lateral (nav-item), mostra o TOTAL geral da loja
         if (badge.closest('a.nav-item')) {
             badge.innerText = pedidos.length; 
-        } 
-        // Se for a bolinha da primeira coluna do Kanban, mostra só os pedidos novos
-        else {
+        } else {
             badge.innerText = contadores.pedidos; 
         }
     });
@@ -185,7 +174,7 @@ function renderizarModoGeralEsteira(pedidos) {
             trocoHTML = `<span class="troco-destaque" style="display:block;margin-top:2px;">Troco: ${trocoFormatado}</span>`;
         }
 
-        // --- CÉLULA 1: PEDIDOS ---
+        // CÉLULA 1
         let htmlCel1 = '';
         if (statusReal === 'pedidos') {
             htmlCel1 = `
@@ -211,7 +200,7 @@ function renderizarModoGeralEsteira(pedidos) {
                 </div>`;
         }
 
-        // --- CÉLULA 2: PAGAMENTO ---
+        // CÉLULA 2
         let htmlCel2 = '';
         if (statusReal === 'pedidos') {
             htmlCel2 = `<div class="celula-esteira etapa-apagada"><h4>Aguardando</h4><p>Etapa financeira bloqueada.</p></div>`;
@@ -237,7 +226,7 @@ function renderizarModoGeralEsteira(pedidos) {
                 </div>`;
         }
 
-        // --- CÉLULA 3: EM PREPARO ---
+        // CÉLULA 3
         let htmlCel3 = '';
         if (statusReal === 'pedidos' || statusReal === 'pagamento') {
             htmlCel3 = `<div class="celula-esteira etapa-apagada"><h4>Cozinha</h4><p>Aguardando liberação.</p></div>`;
@@ -275,7 +264,7 @@ function renderizarModoGeralEsteira(pedidos) {
                 </div>`;
         }
 
-        // --- CÉLULA 4: SAIU PARA ENTREGA ---
+        // CÉLULA 4
         let htmlCel4 = '';
         if (statusReal !== 'entrega') {
             htmlCel4 = `<div class="celula-esteira etapa-apagada"><h4>Logística</h4><p>Aguardando produção.</p></div>`;
@@ -369,13 +358,12 @@ async function executarAvancoDeEtapa(id, statusAtual, subStatusAtual) {
 }
 
 /* ==========================================================================
-   LÓGICA DA ABA DE HISTÓRICO
+   LÓGICA DA ABA DE HISTÓRICO E FILTROS
    ========================================================================== */
-let filtroAtualHistorico = 'dia'; // O padrão ao abrir a tela é mostrar os de hoje
+let filtroAtualHistorico = 'dia'; 
 
 async function buscarHistoricoDePedidos() {
     try {
-        // Envia o filtro na URL para o servidor entender
         const resposta = await fetch(`/api/pedidos/historico?filtro=${filtroAtualHistorico}`);
         if (!resposta.ok) throw new Error("Erro na comunicação com o histórico");
         
@@ -386,37 +374,43 @@ async function buscarHistoricoDePedidos() {
     }
 }
 
-// Chame esta função nos cliques dos botões de filtro no seu HTML
-function aplicarFiltroHistorico(periodo) {
+// Lógica atualizada para trocar a cor do botão ativo
+function aplicarFiltroHistorico(periodo, botaoClicado) {
     filtroAtualHistorico = periodo;
-    buscarHistoricoDePedidos(); // Recarrega a tabela imediatamente com o novo filtro
+    buscarHistoricoDePedidos(); 
+
+    document.querySelectorAll('.btn-filtro').forEach(btn => {
+        btn.classList.remove('active');
+    });
+
+    if (botaoClicado) {
+        botaoClicado.classList.add('active');
+    }
 }
 
 function renderizarHistorico(pedidos) {
     const tbody = document.getElementById('lista-historico-hoje');
     if (!tbody) return;
 
-    tbody.innerHTML = ''; // Limpa a tabela antes de preencher
+    tbody.innerHTML = ''; 
 
-    // Se não houver pedidos finalizados
     if (pedidos.length === 0) {
         tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">Nenhum pedido finalizado ainda.</td></tr>';
         return;
     }
 
-    // Desenha cada linha da tabela dinamicamente
     pedidos.forEach(pedido => {
         const tr = document.createElement('tr');
         
-        // Pega a hora do pedido
-        const horaPedido = new Date(pedido.criado_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        const dataPedido = new Date(pedido.criado_em);
+        const dataFormatada = dataPedido.toLocaleDateString('pt-BR');
+        const horaFormatada = dataPedido.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
         
-        // Define a cor da etiqueta (verde para sucesso, vermelho para cancelado)
         let corBadge = pedido.status === 'cancelado' ? 'background-color: #dc3545;' : 'background-color: #28a745;';
 
         tr.innerHTML = `
             <td>#${pedido.id}</td>
-            <td>Hoje, ${horaPedido}</td>
+            <td>${dataFormatada} - ${horaFormatada}</td>
             <td><strong>${pedido.cliente_nome}</strong></td>
             <td><small>${pedido.itens}</small></td>
             <td>R$ ${parseFloat(pedido.valor_total).toFixed(2).replace('.', ',')}</td>
