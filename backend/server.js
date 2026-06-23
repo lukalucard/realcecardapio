@@ -171,19 +171,34 @@ app.post('/api/pedidos', async (req, res) => {
     }
 });
 
-// ROTA NOVA: Buscar histórico de pedidos (finalizados, entregues ou cancelados)
+// ROTA NOVA E MELHORADA: Buscar histórico de pedidos com filtros de data
 app.get('/api/pedidos/historico', async (req, res) => {
+    const { filtro } = req.query; // Pega a palavra 'dia', 'semana' ou 'mes'
+    let regraDeData = "";
+
+// Aplica a regra de data do PostgreSQL baseada no filtro
+    if (filtro === 'dia') {
+        regraDeData = "AND DATE(criado_em) = CURRENT_DATE";
+    } else if (filtro === 'semana') {
+        regraDeData = "AND criado_em >= CURRENT_DATE - INTERVAL '7 days'";
+    } else if (filtro === 'mes') {
+        regraDeData = "AND criado_em >= CURRENT_DATE - INTERVAL '30 days'";
+    } else if (filtro === 'ano') {
+        // Puxa tudo do ano atual
+        regraDeData = "AND EXTRACT(YEAR FROM criado_em) = EXTRACT(YEAR FROM CURRENT_DATE)"; 
+    }
+
     try {
-        // Busca os pedidos que já saíram do fluxo ativo, limitando aos últimos 50 para não pesar
         const result = await pool.query(
             `SELECT * FROM pedidos 
              WHERE status IN ('entregue', 'finalizado', 'cancelado') 
+             ${regraDeData}
              ORDER BY criado_em DESC LIMIT 50`
         );
         res.json(result.rows);
     } catch (error) {
-        console.error("Erro ao buscar histórico:", error.message);
-        res.status(500).json({ erro: 'Erro ao buscar histórico de pedidos' });
+        console.error("Erro ao buscar histórico filtrado:", error.message);
+        res.status(500).json({ erro: 'Erro ao buscar histórico' });
     }
 });
 

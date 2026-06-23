@@ -37,6 +37,10 @@
                     <button class="tab-link" data-aba="historico">
                         <i class="fas fa-history"></i> Histórico de Pedidos
                     </button>
+
+                    <button id="btn-alerta-som" class="btn-som-alerta mudo" onclick="alternarSomNovoPedido()">
+                        🔕 Som Desativado
+                    </button>
                 </nav>
             </header>
 
@@ -91,10 +95,18 @@
                         <div class="historico-header">
                             <h3>Histórico Geral de Pedidos</h3>
                             <div class="filtro-temporal">
-                                <button class="btn-filtro active" data-periodo="hoje"><i class="fas fa-calendar-day"></i> Hoje</button>
-                                <button class="btn-filtro" data-periodo="semana"><i class="fas fa-calendar-week"></i> Esta Semana</button>
-                                <button class="btn-filtro" data-periodo="mes"><i class="fas fa-calendar-alt"></i> Este Mês</button>
-                                <button class="btn-filtro" data-periodo="ano"><i class="fas fa-history"></i> Ano Corrente</button>
+                                <button class="btn-filtro active" data-periodo="hoje" onclick="aplicarFiltroHistorico('dia', this)">
+                                    <i class="fas fa-calendar-day"></i> Hoje
+                                </button>
+                                <button class="btn-filtro" data-periodo="semana" onclick="aplicarFiltroHistorico('semana', this)">
+                                    <i class="fas fa-calendar-week"></i> Esta Semana
+                                </button>
+                                <button class="btn-filtro" data-periodo="mes" onclick="aplicarFiltroHistorico('mes', this)">
+                                    <i class="fas fa-calendar-alt"></i> Este Mês
+                                </button>
+                                <button class="btn-filtro" data-periodo="ano" onclick="aplicarFiltroHistorico('ano', this)">
+                                    <i class="fas fa-history"></i> Ano Corrente
+                                </button>
                             </div>
                         </div>
 

@@ -3,6 +3,7 @@
    ========================================================================== */
 let pedidosAtivosGlobais = [];
 let quantidadeAnteriorDePedidos = 0; // Controla o aviso sonoro
+let alertaSonoroAtivado = false; // Novo estado para o botão de som
 
 document.addEventListener('DOMContentLoaded', () => {
     configurarSubmenuSuperior();
@@ -15,10 +16,37 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Som de notificação para a cozinha
+/* ==========================================================================
+   ESTADO GLOBAL DO PAINEL DE PEDIDOS
+   ========================================================================== */
+let pedidosAtivosGlobais = [];
+let quantidadeAnteriorDePedidos = 0;
+let alertaSonoroAtivado = false; // Novo estado para o botão de som
+
+// Função que o botão HTML chama ao ser clicado
+function alternarSomNovoPedido() {
+    alertaSonoroAtivado = !alertaSonoroAtivado;
+    const btn = document.getElementById('btn-alerta-som');
+    
+    if (alertaSonoroAtivado) {
+        btn.innerHTML = '🔔 Som Ativado';
+        btn.classList.remove('mudo');
+        btn.classList.add('ativo');
+        // Toca um beep de teste instantâneo para o gestor saber que ligou
+        new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg').play().catch(()=>{});
+    } else {
+        btn.innerHTML = '🔕 Som Desativado';
+        btn.classList.remove('ativo');
+        btn.classList.add('mudo');
+    }
+}
+
+// A função do radar agora respeita o botão
 function tocarSomNovoPedido() {
-    // Um beep simples e agradável
+    if (!alertaSonoroAtivado) return; // Se estiver mudo, não faz nada
+    
     const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
-    audio.play().catch(e => console.log("O navegador bloqueou o som automático. O gestor precisa clicar na tela antes."));
+    audio.play().catch(e => console.log("Erro ao tocar som"));
 }
 
 function configurarSubmenuSuperior() {
@@ -343,9 +371,12 @@ async function executarAvancoDeEtapa(id, statusAtual, subStatusAtual) {
 /* ==========================================================================
    LÓGICA DA ABA DE HISTÓRICO
    ========================================================================== */
+let filtroAtualHistorico = 'dia'; // O padrão ao abrir a tela é mostrar os de hoje
+
 async function buscarHistoricoDePedidos() {
     try {
-        const resposta = await fetch('/api/pedidos/historico');
+        // Envia o filtro na URL para o servidor entender
+        const resposta = await fetch(`/api/pedidos/historico?filtro=${filtroAtualHistorico}`);
         if (!resposta.ok) throw new Error("Erro na comunicação com o histórico");
         
         const historico = await resposta.json();
@@ -353,6 +384,12 @@ async function buscarHistoricoDePedidos() {
     } catch (erro) {
         console.error("❌ Falha ao buscar histórico:", erro);
     }
+}
+
+// Chame esta função nos cliques dos botões de filtro no seu HTML
+function aplicarFiltroHistorico(periodo) {
+    filtroAtualHistorico = periodo;
+    buscarHistoricoDePedidos(); // Recarrega a tabela imediatamente com o novo filtro
 }
 
 function renderizarHistorico(pedidos) {
