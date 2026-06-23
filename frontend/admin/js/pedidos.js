@@ -84,9 +84,14 @@ async function buscarPedidosDoServidor() {
     }
 }
 
+/* ==========================================================================
+   ATUALIZAÇÃO DOS CONTADORES (BADGES)
+   ========================================================================== */
 function calcularEAtualizarContadores(pedidos) {
+    // 1. Inicia os contadores zerados
     const contadores = { pedidos: 0, pagamento: 0, preparo: 0, entrega: 0 };
     
+    // 2. Conta os pedidos com base nas palavras exatas do banco Neon
     pedidos.forEach(pedido => {
         let statusNormalizado = pedido.status === 'novos' ? 'pedidos' : pedido.status;
         if (contadores.hasOwnProperty(statusNormalizado)) {
@@ -94,17 +99,41 @@ function calcularEAtualizarContadores(pedidos) {
         }
     });
 
-    // Atualiza os badges da aba Pedidos Flutuantes (Kanban)
-    if(document.getElementById('badge-pedidos')) document.getElementById('badge-pedidos').innerText = contadores.pedidos;
-    if(document.getElementById('badge-pagamento')) document.getElementById('badge-pagamento').innerText = contadores.pagamento;
-    if(document.getElementById('badge-preparo')) document.getElementById('badge-preparo').innerText = contadores.preparo;
-    if(document.getElementById('badge-entrega')) document.getElementById('badge-entrega').innerText = contadores.entrega;
+    // 3. Atualiza os badges exclusivos da Esteira (Geral)
+    const badgeEsteiraNovos = document.getElementById('esteira-badge-pedidos');
+    if(badgeEsteiraNovos) badgeEsteiraNovos.innerText = contadores.pedidos;
+    
+    const badgeEsteiraPagamento = document.getElementById('esteira-badge-pagamento');
+    if(badgeEsteiraPagamento) badgeEsteiraPagamento.innerText = contadores.pagamento;
+    
+    const badgeEsteiraPreparo = document.getElementById('esteira-badge-preparo');
+    if(badgeEsteiraPreparo) badgeEsteiraPreparo.innerText = contadores.preparo;
+    
+    const badgeEsteiraEntrega = document.getElementById('esteira-badge-entrega');
+    if(badgeEsteiraEntrega) badgeEsteiraEntrega.innerText = contadores.entrega;
 
-    // Atualiza os badges novos da aba Pedidos Geral (Esteira Horizontal)
-    if(document.getElementById('esteira-badge-pedidos')) document.getElementById('esteira-badge-pedidos').innerText = contadores.pedidos;
-    if(document.getElementById('esteira-badge-pagamento')) document.getElementById('esteira-badge-pagamento').innerText = contadores.pagamento;
-    if(document.getElementById('esteira-badge-preparo')) document.getElementById('esteira-badge-preparo').innerText = contadores.preparo;
-    if(document.getElementById('esteira-badge-entrega')) document.getElementById('esteira-badge-entrega').innerText = contadores.entrega;
+    // 4. Atualiza os badges exclusivos do Kanban (Flutuantes)
+    const badgeKanbanPagamento = document.getElementById('badge-pagamento');
+    if(badgeKanbanPagamento) badgeKanbanPagamento.innerText = contadores.pagamento;
+    
+    const badgeKanbanPreparo = document.getElementById('badge-preparo');
+    if(badgeKanbanPreparo) badgeKanbanPreparo.innerText = contadores.preparo;
+    
+    const badgeKanbanEntrega = document.getElementById('badge-entrega');
+    if(badgeKanbanEntrega) badgeKanbanEntrega.innerText = contadores.entrega;
+
+    // 5. Inteligência para os IDs duplicados ('badge-pedidos' está no Menu e no Kanban)
+    const badgesPedidos = document.querySelectorAll('#badge-pedidos');
+    badgesPedidos.forEach(badge => {
+        // Se a bolinha estiver dentro do Menu Lateral (nav-item), mostra o TOTAL geral da loja
+        if (badge.closest('a.nav-item')) {
+            badge.innerText = pedidos.length; 
+        } 
+        // Se for a bolinha da primeira coluna do Kanban, mostra só os pedidos novos
+        else {
+            badge.innerText = contadores.pedidos; 
+        }
+    });
 }
 
 function renderizarModoGeralEsteira(pedidos) {
