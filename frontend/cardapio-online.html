@@ -114,17 +114,62 @@
 
                 <form class="checkout-form" id="form-checkout">
                     <div class="form-group">
-                        <label for="checkout-nome">Seu Nome</label>
+                        <label for="checkout-nome">Seu Nome Completo</label>
                         <input type="text" id="checkout-nome" placeholder="Ex: Luiz Silva" required>
                     </div>
+                    
                     <div class="form-group">
                         <label for="checkout-whatsapp">Seu WhatsApp</label>
-                        <input type="tel" id="checkout-whatsapp" placeholder="Ex: 62999999999" required>
+                        <input type="tel" id="checkout-whatsapp" placeholder="(XX) 9XXXX-XXXX" maxlength="15" required>
                     </div>
+
+                    <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+                    <h4 style="margin-bottom: 15px; color: #4b5563;">Endereço de Entrega</h4>
+
                     <div class="form-group">
-                        <label for="checkout-endereco">Endereço de Entrega</label>
-                        <textarea id="checkout-endereco" rows="2" placeholder="Rua, Número, Bairro e Complemento" required></textarea>
+                        <label for="checkout-cep">CEP</label>
+                        <input type="text" id="checkout-cep" placeholder="Ex: 74000-000" maxlength="9" required>
+                        <small id="cep-status" style="color: #6b7280; font-size: 0.8rem;"></small>
                     </div>
+
+                    <div class="form-group">
+                        <label for="checkout-rua">Rua ou Avenida</label>
+                        <input type="text" id="checkout-rua" placeholder="Ex: Avenida G" required>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <div class="form-group" style="flex: 1;">
+                            <label for="checkout-numero">Número</label>
+                            <input type="text" id="checkout-numero" placeholder="Ex: 66">
+                            <label style="font-size: 0.85rem; display: flex; align-items: center; gap: 5px; margin-top: 5px; cursor: pointer;">
+                                <input type="checkbox" id="checkout-sem-numero"> Sem Número
+                            </label>
+                        </div>
+                        
+                        <div class="form-group" style="flex: 1;">
+                            <label for="checkout-quadra">Quadra</label>
+                            <input type="text" id="checkout-quadra" placeholder="Ex: 8">
+                        </div>
+                        
+                        <div class="form-group" style="flex: 1;">
+                            <label for="checkout-lote">Lote</label>
+                            <input type="text" id="checkout-lote" placeholder="Ex: 12">
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <div class="form-group" style="flex: 2;">
+                            <label for="checkout-bairro">Bairro / Setor</label>
+                            <input type="text" id="checkout-bairro" required>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label for="checkout-cidade">Cidade</label>
+                            <input type="text" id="checkout-cidade" readonly style="background-color: #f3f4f6;">
+                        </div>
+                    </div>
+
+                    <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+
                     <div class="form-group">
                         <label for="checkout-pagamento">Forma de Pagamento</label>
                         <select id="checkout-pagamento" required>
@@ -150,5 +195,6 @@
     </div>
 
     <script src="js/cardapio-online.js"></script>
+    <script src="js/checkout.js"></script>
 </body>
 </html>
