@@ -172,9 +172,9 @@ function renderizarVitrineProdutosReais(categoriaFiltro) {
         return;
     }
 
-    const categoriasParaRenderizar = (categoriaFiltro === 'Todos') ? categoriasDaLoja : [categoriaFiltro];
+    const categoriesParaRenderizar = (categoriaFiltro === 'Todos') ? categoriasDaLoja : [categoriaFiltro];
 
-    categoriasParaRenderizar.forEach(cat => {
+    categoriesParaRenderizar.forEach(cat => {
         const produtosFiltrados = produtosDaLoja.filter(p => p.categoria === cat);
 
         if (produtosFiltrados.length > 0) {
@@ -208,9 +208,7 @@ function renderizarVitrineProdutosReais(categoriaFiltro) {
                     </div>
                 `;
 
-                // Evento corrigido: Clique no card abre o modal dinâmico de opcionais
                 card.addEventListener('click', () => abrirModalDetalhesProduto(prod));
-
                 listaCards.appendChild(card);
             });
 
@@ -227,14 +225,13 @@ function abrirModalDetalhesProduto(produto) {
     produtoSelecionadoModal = produto;
     quantidadeModal = 1;
 
-    // Limpa o campo de observações sempre que abrir um novo produto
     const campoObs = document.getElementById('modal-produto-observacao');
     if(campoObs) campoObs.value = "";
 
     document.getElementById('modal-produto-nome').innerText = produto.nome;
     document.getElementById('modal-produto-descricao').innerText = produto.ingredientes || 'Sem ingredientes descritos.';
     document.getElementById('modal-produto-preco').innerText = parseFloat(produto.preco).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-    document.getElementById('txt-modal-quantidade').innerText = quantidadeModal;
+    document.getElementById('txt-modal-quantidade').innerText = quantityModal = quantidadeModal;
 
     const galeria = document.getElementById('modal-produto-galeria');
     if (produto.imagens && produto.imagens.length > 0) {
@@ -313,7 +310,7 @@ function validarRegrasELimitesSelecao(grupoBox, inputAlterado, tipoInput) {
     const selecionados = containerLista.querySelectorAll('input:checked');
 
     if (tipoInput === 'checkbox' && selecionados.length > maximo) {
-        inputAlterado.checked = false; // Barra o clique se estourar o limite máximo do grupo
+        inputAlterado.checked = false;
         alert(`⚠️ Você pode escolher no máximo ${maximo} opções para este grupo.`);
     }
     recalcularSubtotalModal();
@@ -341,16 +338,10 @@ function recalcularSubtotalModal() {
         }
     });
 
-    // FORMATO A: O tamanho selecionado vira o novo preço unitário do item
     let valorUnitarioItem = temTamanhoSelecionado ? precoTamanhoSelecionado : precoBase;
-    
-    // MUDANÇA AQUI: Atualiza o preço do TOPO do modal com o valor do tamanho selecionado (preço unitário)
     document.getElementById('modal-produto-preco').innerText = valorUnitarioItem.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-    // Calcula o total final multiplicando pela quantidade de itens selecionada
     let totalFinalModal = (valorUnitarioItem + adicionaisExtras) * quantidadeModal;
-
-    // Atualiza o preço do BOTÃO de adicionar lá embaixo
     document.getElementById('txt-modal-botao-preco').innerText = totalFinalModal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
@@ -369,7 +360,7 @@ function adicionarProdutoSelecionadoASacola() {
 
     gruposOpcionais.forEach(grupo => {
         const minimo = parseInt(grupo.getAttribute('data-min'));
-        const nomeGrupo = grupo.getAttribute('data-nome-grupo');
+        const nomeGrupo = group = grupo.getAttribute('data-nome-grupo');
         const tipoGrupo = grupo.getAttribute('data-tipo-grupo');
         const marcados = grupo.querySelectorAll('input:checked');
 
@@ -397,7 +388,6 @@ function adicionarProdutoSelecionadoASacola() {
 
     if (erroValidacao) return;
 
-    // CAPTURA A OBSERVAÇÃO DO CLIENTE
     const campoObs = document.getElementById('modal-produto-observacao');
     const txtObservacao = campoObs ? campoObs.value.trim() : "";
 
@@ -413,7 +403,7 @@ function adicionarProdutoSelecionadoASacola() {
         precoBase: precoBaseCalculado,
         quantidade: quantidadeModal,
         opcionais: apenasAdicionaisExtras,
-        observacao: txtObservacao // SALVA A OBSERVAÇÃO AQUI
+        observacao: txtObservacao
     };
 
     sacolaItens.push(itemSacola);
@@ -473,19 +463,16 @@ function atualizarRenderSacolaEFooter() {
         containerLista.appendChild(linha);
     });
 
-    // Atualiza os valores na tela
     document.getElementById('cart-valor-total-tela').innerText = valorTotalSacolaItens.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     
     const taxaEntrega = parseFloat(lojaAtiva ? lojaAtiva.taxa : 0);
     document.getElementById('modal-total-final-valor').innerText = (valorTotalSacolaItens + taxaEntrega).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-    // Atualiza o botão flutuante
     if (btnFlutuante) {
         document.getElementById('txt-sacola-flutuante-qtd').innerText = quantidadeTotalItens;
         document.getElementById('txt-sacola-flutuante-valor').innerText = valorTotalSacolaItens.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     }
 
-    // Se o botão flutuante NÃO estiver visível (ou seja, a sacola não foi minimizada pelo usuário), mantém a sacola grande aberta
     if (!btnFlutuante || btnFlutuante.classList.contains('hidden')) {
         persistentCart.classList.remove('hidden');
     }
@@ -504,9 +491,8 @@ function alterarQuantidadeItemSacolaSeguro(idUnico, modificador) {
     atualizarRenderSacolaEFooter();
 }
 
-
 /* ==========================================================================
-   ATUALIZE SUA FUNÇÃO inicializarEventosInterface PARA INCLUIR ESTES EVENTOS
+   6. INTERFACES, MÁSCARAS E EVENTOS DE FORMULÁRIO (NOME, WHATSAPP, CEP)
    ========================================================================== */
 function inicializarEventosInterface() {
     const btnFecharDetalhes = document.getElementById('btn-fechar-details') || document.getElementById('btn-fechar-detalhes');
@@ -514,7 +500,6 @@ function inicializarEventosInterface() {
     const btnFecharModalDados = document.getElementById('btn-fechar-modal-dados');
     const modalDadosEntrega = document.getElementById('modal-dados-entrega');
 
-    // Módulo de Delegação de Eventos para os botões de + e - da Sacola (MÉTODO SEGURO)
     const cartList = document.getElementById('itens-sacola-direta');
     if (cartList) {
         cartList.addEventListener('click', (e) => {
@@ -526,7 +511,6 @@ function inicializarEventosInterface() {
         });
     }
 
-    // Módulo de Ocultar/Mostrar Sacola
     const btnMinimizar = document.getElementById('btn-minimizar-sacola');
     const btnFlutuante = document.getElementById('btn-sacola-flutuante');
     const cartContainer = document.getElementById('persistent-cart');
@@ -545,7 +529,6 @@ function inicializarEventosInterface() {
         });
     }
 
-    // Controle de quantidade INTERNA do modal de opcionais
     document.getElementById('btn-modal-mais').addEventListener('click', () => {
         quantidadeModal++;
         document.getElementById('txt-modal-quantidade').innerText = quantidadeModal;
@@ -561,10 +544,8 @@ function inicializarEventosInterface() {
     });
 
     document.getElementById('btn-modal-adicionar-sacola').addEventListener('click', () => {
-        // Ao adicionar um item, se a sacola estava fechada, nós escondemos o botão flutuante para ela forçar abertura
         const btnFlutuante = document.getElementById('btn-sacola-flutuante');
         if(btnFlutuante) btnFlutuante.classList.add('hidden');
-        
         adicionarProdutoSelecionadoASacola();
     });
 
@@ -590,21 +571,131 @@ function inicializarEventosInterface() {
     if (btnEnviarPedido) {
         btnEnviarPedido.addEventListener('click', enviarPedidoParaServidor);
     }
+
+    /* ==========================================================================
+       7. INTEGRAÇÃO COMPLETA DAS MÁSCARAS E VALIDAÇÕES DO CHECKOUT
+       ========================================================================== */
+    const checkoutNome = document.getElementById('checkout-nome');
+    if (checkoutNome) {
+        checkoutNome.addEventListener('input', function() {
+            let valor = this.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '');
+            valor = valor.split(' ').map(palavra => {
+                if (palavra.length > 0) return palavra[0].toUpperCase() + palavra.slice(1).toLowerCase();
+                return '';
+            }).join(' ');
+            this.value = valor;
+        });
+    }
+
+    const checkoutWhatsapp = document.getElementById('checkout-whatsapp');
+    if (checkoutWhatsapp) {
+        checkoutWhatsapp.addEventListener('input', function() {
+            let numero = this.value.replace(/\D/g, '').substring(0, 11);
+            if (numero.length > 2 && numero[2] !== '9') {
+                numero = numero.substring(0, 2) + '9' + numero.substring(2);
+            }
+            let formatado = numero;
+            if (numero.length > 2) {
+                formatado = `(${numero.substring(0, 2)}) `;
+                if (numero.length > 7) formatado += `${numero.substring(2, 7)}-${numero.substring(7)}`;
+                else formatado += numero.substring(2);
+            }
+            this.value = formatado;
+        });
+    }
+
+    const checkoutCep = document.getElementById('checkout-cep');
+    if (checkoutCep) {
+        checkoutCep.addEventListener('input', function() {
+            let cep = this.value.replace(/\D/g, '').substring(0, 8);
+            if (cep.length > 5) cep = cep.replace(/^(\d{5})(\d)/, '$1-$2');
+            this.value = cep;
+        });
+
+        checkoutCep.addEventListener('blur', async function() {
+            const cepLimpo = this.value.replace(/\D/g, '');
+            const statusLabel = document.getElementById('cep-status');
+            if (cepLimpo.length === 8) {
+                if (statusLabel) {
+                    statusLabel.textContent = "🔍 Buscando endereço...";
+                    statusLabel.style.color = "#3b82f6";
+                }
+                try {
+                    const resposta = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
+                    const dados = await resposta.json();
+                    if (!dados.erro) {
+                        if(document.getElementById('checkout-rua')) document.getElementById('checkout-rua').value = dados.logradouro || '';
+                        if(document.getElementById('checkout-bairro')) document.getElementById('checkout-bairro').value = dados.bairro || '';
+                        if(document.getElementById('checkout-cidade')) document.getElementById('checkout-cidade').value = `${dados.localidade} - ${dados.uf}`;
+                        if (statusLabel) {
+                            statusLabel.textContent = "✅ Endereço preenchido!";
+                            statusLabel.style.color = "#10b981";
+                        }
+                        const numField = document.getElementById('checkout-numero');
+                        if (numField) numField.focus();
+                    } else {
+                        if (statusLabel) {
+                            statusLabel.textContent = "❌ CEP não encontrado. Digite o endereço.";
+                            statusLabel.style.color = "#ef4444";
+                        }
+                    }
+                } catch (erro) {
+                    if (statusLabel) statusLabel.textContent = "⚠️ Erro ao buscar. Digite manualmente.";
+                }
+            }
+        });
+    }
+
+    const checkSemNumero = document.getElementById('checkout-sem-numero');
+    const inputNumero = document.getElementById('checkout-numero');
+    const inputQuadra = document.getElementById('checkout-quadra');
+    if (checkSemNumero && inputNumero) {
+        checkSemNumero.addEventListener('change', function() {
+            if (this.checked) {
+                inputNumero.value = '';
+                inputNumero.disabled = true;
+                inputNumero.style.backgroundColor = '#f3f4f6';
+                if(inputQuadra) inputQuadra.focus();
+            } else {
+                inputNumero.disabled = false;
+                inputNumero.style.backgroundColor = '#fff';
+                inputNumero.focus();
+            }
+        });
+    }
 }
 
 /* ==========================================================================
-   INTEGRAÇÃO COM A API DO SERVIDOR (ENVIAR PEDIDO)
+   INTEGRAÇÃO COM A API DO SERVIDOR (ENVIAR PEDIDO REFORMATADO)
    ========================================================================== */
 async function enviarPedidoParaServidor() {
-    // 1. Puxa os dados digitados pelo cliente
+    // 1. Puxa os dados cadastrais
     const nome = document.getElementById('checkout-nome').value.trim();
     const whatsapp = document.getElementById('checkout-whatsapp').value.trim();
-    const endereco = document.getElementById('checkout-endereco').value.trim();
     const pagamento = document.getElementById('checkout-pagamento').value;
 
-    // 2. Validação de segurança
-    if (!nome || !whatsapp || !endereco || !pagamento) {
-        alert("⚠️ Por favor, preencha todos os campos de entrega e pagamento.");
+    // Puxa as caixas desmembradas do endereço estruturado
+    const cep = document.getElementById('checkout-cep').value.trim();
+    const rua = document.getElementById('checkout-rua').value.trim();
+    const numero = document.getElementById('checkout-numero').value.trim();
+    const quadra = document.getElementById('checkout-quadra').value.trim();
+    const lote = document.getElementById('checkout-lote').value.trim();
+    const bairro = document.getElementById('checkout-bairro').value.trim();
+    const cidade = document.getElementById('checkout-cidade').value.trim();
+    const semNumero = document.getElementById('checkout-sem-numero').checked;
+
+    // 2. Validação geral de segurança dos obrigatórios
+    if (!nome || !whatsapp || !cep || !rua || !bairro || !cidade || !pagamento) {
+        alert("⚠️ Por favor, preencha todos os campos obrigatórios de entrega e pagamento.");
+        return;
+    }
+
+    // A regra inteligente que você criou: se não tem número real, precisa de Quadra ou Lote
+    const temNumeroGarantido = numero !== '' || semNumero;
+    const temQuadraOuLote = quadra !== '' || lote !== '';
+
+    if (!temNumeroGarantido && !temQuadraOuLote) {
+        alert("⚠️ Por favor, informe o Número da residência ou preencha a Quadra/Lote (ou marque a opção 'Sem Número').");
         return;
     }
 
@@ -613,8 +704,18 @@ async function enviarPedidoParaServidor() {
         return;
     }
 
-    // 3. Formata os itens para o painel do gestor ler facilmente
-    // Ex: "2x Pizza Grande (Calabresa) [Borda Recheada], 1x Coca-Cola"
+    // MONTAGEM MÁGICA: Consolida todos os campos em um único texto estruturado para o backend
+    let enderecoConsolidado = `Rua: ${rua}`;
+    if (semNumero) {
+        enderecoConsolidado += `, S/N`;
+    } else if (numero) {
+        enderecoConsolidado += `, Nº ${numero}`;
+    }
+    if (quadra) enderecoConsolidado += `, Qd: ${quadra}`;
+    if (lote) enderecoConsolidado += `, Lt: ${lote}`;
+    enderecoConsolidado += `, Bairro: ${bairro}, ${cidade} - CEP: ${cep}`;
+
+    // 3. Formata os itens para a esteira/Kanban do gestor
     const stringItensFormatada = sacolaItens.map(item => {
         let descricao = `${item.quantidade}x ${item.nome}`;
         if (item.opcionais && item.opcionais.length > 0) {
@@ -626,7 +727,7 @@ async function enviarPedidoParaServidor() {
         return descricao;
     }).join(' | ');
 
-    // 4. Calcula os totais finais
+    // 4. Calcula os totais financeiros
     let subtotal = 0;
     sacolaItens.forEach(item => {
         let precoUnitarioTotal = item.precoBase;
@@ -637,11 +738,11 @@ async function enviarPedidoParaServidor() {
     const taxaEntrega = parseFloat(lojaAtiva && lojaAtiva.taxa ? lojaAtiva.taxa : 0);
     const totalFinal = subtotal + taxaEntrega;
 
-    // 5. Prepara o pacote de dados EXATAMENTE como o seu server.js espera
+    // 5. Envia o payload idêntico ao que o banco Neon espera
     const payloadPedido = {
         cliente_nome: nome,
         cliente_telefone: whatsapp,
-        cliente_endereco: endereco,
+        cliente_endereco: enderecoConsolidated = enderecoConsolidado, // Passa a string única compilada!
         itens: stringItensFormatada, 
         subtotal: subtotal,
         taxa_entrega: taxaEntrega,
@@ -649,14 +750,14 @@ async function enviarPedidoParaServidor() {
         forma_pagamento: pagamento
     };
 
-    // 6. Efeito visual no botão (Mostra para o cliente que está carregando)
+    // 6. Efeito visual de carregamento
     const btnEnviar = document.getElementById('btn-enviar-pedido');
     const textoOriginal = btnEnviar.innerHTML;
     btnEnviar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
     btnEnviar.disabled = true;
 
     try {
-        // 7. Disparo real para a sua API no Render/Neon
+        // 7. Envia para o servidor Render
         const resposta = await fetch('/api/pedidos', {
             method: 'POST',
             headers: {
@@ -671,19 +772,26 @@ async function enviarPedidoParaServidor() {
 
         const dadosRetorno = await resposta.json();
 
-        // 8. Sucesso! Limpa tudo e avisa o cliente
+        // 8. Sucesso! Limpa o carrinho e reseta os campos
         alert(`✅ Sucesso! Seu pedido #${dadosRetorno.id} foi enviado para a cozinha!`);
         
         sacolaItens = [];
         atualizarRenderSacolaEFooter();
         document.getElementById('form-checkout').reset();
+        
+        // Destrava o campo número caso estivesse desativado pelo checkbox
+        const inputNum = document.getElementById('checkout-numero');
+        if (inputNum) {
+            inputNum.disabled = false;
+            inputNum.style.backgroundColor = '#fff';
+        }
+
         document.getElementById('modal-dados-entrega').classList.add('hidden');
 
     } catch (erro) {
         console.error("Erro ao enviar pedido:", erro);
         alert("❌ Ocorreu um erro ao enviar seu pedido. Verifique sua conexão e tente novamente.");
     } finally {
-        // Devolve o botão ao estado normal
         btnEnviar.innerHTML = textoOriginal;
         btnEnviar.disabled = false;
     }
