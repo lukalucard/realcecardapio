@@ -250,32 +250,49 @@ waClient.on('disconnected', (reason) => {
 waClient.initialize();
 
 /* ==========================================================================
-   ROTAS DA API DO WHATSAPP (FRONTEND)
+   MOTOR DE INTEGRAÇÃO DO WHATSAPP
    ========================================================================== */
 
-// 1. Rota que o seu painel vai ficar chamando para saber se mudou o QR Code ou conectou
-app.get('/api/whatsapp/status', (req, res) => {
-    res.json({
-        status: waStatus,
-        qrCode: waQrCode
-    });
+let waStatus = 'desconectado';
+let waQrCode = null;
+let isInitializing = false; // ⬅️ CONTROLE PARA EVITAR DUPLA INICIALIZAÇÃO
+
+const waClient = new Client({
+    authStrategy: new LocalAuth(),
+    puppeteer: {
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+    }
 });
 
-// 2. Rota para o botão "Desconectar" do painel
-app.post('/api/whatsapp/disconnect', async (req, res) => {
-    try {
-        if (waStatus === 'conectado') {
-            await waClient.logout();
-            waStatus = 'desconectado';
-            waQrCode = null;
-            res.json({ success: true, message: 'Aparelho desconectado com sucesso.' });
-        } else {
-            res.json({ success: false, message: 'Nenhum aparelho conectado.' });
-        }
-    } catch (error) {
-        console.error("Erro ao desconectar:", error);
-        res.status(500).json({ error: 'Falha interna ao tentar desconectar.' });
-    }
+// Evento 1: Servidor pede o QR Code
+waClient.on('qr', async (qr) => {
+    waStatus = 'aguardando_qr';
+    waQrCode = await qrcode.toDataURL(qr);
+    console.log('📱 QR Code gerado! (primeiros 50 caracteres):', qr.substring(0, 50));
+});
+
+// Evento 2: Gestor leu o QR Code e conectou
+waClient.on('ready', () => {
+    waStatus = 'conectado';
+    waQrCode = null;
+    console.log('✅ WhatsApp conectado e pronto para operar!');
+    isInitializing = false;
+});
+
+// Evento 3: Celular do gestor desconectou
+waClient.on('disconnected', (reason) => {
+    waStatus = 'desconectado';
+    waQrCode = null;
+    console.log('❌ WhatsApp desconectado!', reason);
+    isInitializing = false;
+    // ⬇️ REMOVA esta linha para evitar loop:
+    // waClient.initialize(); 
+});
+
+// ⬇️ Inicializa APENAS UMA VEZ
+console.log('🔄 Iniciando cliente WhatsApp...');
+waClient.initialize().catch(err => {
+    console.error('❌ Erro ao inicializar WhatsApp:', err);
 });
 
 // -------- CRUD Categorias --------
