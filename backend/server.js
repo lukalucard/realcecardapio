@@ -21,9 +21,6 @@ app.use(helmet({
 app.use(cors()); 
 app.use(express.json());
 
-// Servir arquivos estáticos da raiz do Frontend
-app.use(express.static(path.join(__dirname, '..', 'frontend')));
-
 // ==========================================================================
 // [NOVO] MIDDLEWARE DE AUTENTICAÇÃO (BARREIRA PARA ROTAS PRIVADAS)
 // ==========================================================================
@@ -479,8 +476,10 @@ app.put('/api/whatsapp/config', async (req, res) => {
     }
 });
 
-// Servir arquivos estáticos da pasta administrativa (Executa se nenhuma API acima bater)
-app.use(express.style = express.static(path.join(__dirname, '../frontend/admin')));
+// ============================================================
+// SERVE ARQUIVOS ESTÁTICOS (DEVE SER A ÚLTIMA ROTA)
+// ============================================================
+app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
 const PORT = process.env.PORT || 3002;
 app.listen(PORT, () => {
