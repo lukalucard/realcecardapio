@@ -6,24 +6,19 @@ const path = require('path');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const helmet = require('helmet');
-const pool = require('./config/db'); // Mantém sua conexão modularizada do Neon
+const pool = require('./config/db');
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode');
 
-// Inicialização
 const app = express();
 
-// Middlewares Globais e de Segurança
-// Configuração do Helmet liberando o CSP para não travar imagens e requisições externas
-app.use(helmet({
-    contentSecurityPolicy: false,
-}));
-app.use(cors()); 
+app.use(helmet({ contentSecurityPolicy: false }));
+app.use(cors());
 app.use(express.json());
 
-// ==========================================================================
-// [NOVO] MIDDLEWARE DE AUTENTICAÇÃO (BARREIRA PARA ROTAS PRIVADAS)
-// ==========================================================================
+// ============================================================
+// MIDDLEWARE DE AUTENTICAÇÃO
+// ============================================================
 function authMiddleware(req, res, next) {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
@@ -34,23 +29,23 @@ function authMiddleware(req, res, next) {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secreto_temporario');
-        req.user = decoded; // Injeta os dados do lojista logado na requisição
+        req.user = decoded;
         next();
     } catch (err) {
         return res.status(403).json({ message: 'Token inválido ou expirado' });
     }
 }
 
-// Rota de teste operacional
+// ============================================================
+// ROTA DE TESTE
+// ============================================================
 app.get('/api/test', (req, res) => {
     res.json({ message: 'Servidor RealceCardápio funcionando perfeitamente! ✅' });
 });
 
-// ==========================================================================
-// [NOVO] ROTAS DE SISTEMA DE AUTENTICAÇÃO (MANTENDO PARIDADE COM SEU MODAL.JS)
-// ==========================================================================
-
-// Verificar disponibilidade do nome da loja no cadastro
+// ============================================================
+// ROTAS DE AUTENTICAÇÃO
+// ============================================================
 app.get('/check-perfil', async (req, res) => {
     const { perfil } = req.query;
     if (!perfil) return res.json({ available: false });
@@ -64,7 +59,6 @@ app.get('/check-perfil', async (req, res) => {
     }
 });
 
-// Registrar um novo gestor/estabelecimento
 app.post('/register', async (req, res) => {
     const { name, perfil, email, phone, password } = req.body;
 
@@ -99,7 +93,6 @@ app.post('/register', async (req, res) => {
     }
 });
 
-// Login do Gestor
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
@@ -121,10 +114,10 @@ app.post('/login', async (req, res) => {
             { expiresIn: '1d' }
         );
 
-        res.json({ 
-            message: 'Login realizado!', 
-            token, 
-            user: { id: user.id, name: user.name, perfil: user.perfil, email: user.email } 
+        res.json({
+            message: 'Login realizado!',
+            token,
+            user: { id: user.id, name: user.name, perfil: user.perfil, email: user.email }
         });
     } catch (error) {
         console.error('Erro no login:', error.message);
@@ -132,7 +125,6 @@ app.post('/login', async (req, res) => {
     }
 });
 
-// Buscar dados do usuário autenticado logado
 app.get('/me', authMiddleware, async (req, res) => {
     try {
         const result = await pool.query('SELECT id, name, perfil, email FROM users WHERE id = $1', [req.user.id]);
@@ -144,19 +136,17 @@ app.get('/me', authMiddleware, async (req, res) => {
     }
 });
 
-// -------------------- ROTAS DO CARDÁPIO & PEDIDOS --------------------
-
-
-// Criar um novo pedido (Alinhado com o banco Neon e a nova Vitrine)
+// ============================================================
+// ROTAS DE PEDIDOS
+// ============================================================
 app.post('/api/pedidos', async (req, res) => {
     const { cliente_nome, cliente_telefone, cliente_endereco, itens, subtotal, taxa_entrega, total, forma_pagamento } = req.body;
-    
+
     if (!cliente_nome || !itens || !total) {
         return res.status(400).json({ erro: 'Dados do pedido incompletos' });
     }
 
     try {
-        // Adicionamos as colunas status e sub_status com os valores fixos 'novos' e 'aguardando'
         const result = await pool.query(
             `INSERT INTO pedidos 
             (cliente_nome, cliente_whatsapp, endereco_entrega, itens, subtotal, taxa_entrega, valor_total, forma_pagamento, status, sub_status) 
@@ -170,12 +160,10 @@ app.post('/api/pedidos', async (req, res) => {
     }
 });
 
-// ROTA NOVA E MELHORADA: Buscar histórico de pedidos com filtros de data
 app.get('/api/pedidos/historico', async (req, res) => {
-    const { filtro } = req.query; // Pega a palavra 'dia', 'semana' ou 'mes'
+    const { filtro } = req.query;
     let regraDeData = "";
 
-// Aplica a regra de data do PostgreSQL baseada no filtro
     if (filtro === 'dia') {
         regraDeData = "AND DATE(criado_em) = CURRENT_DATE";
     } else if (filtro === 'semana') {
@@ -183,8 +171,7 @@ app.get('/api/pedidos/historico', async (req, res) => {
     } else if (filtro === 'mes') {
         regraDeData = "AND criado_em >= CURRENT_DATE - INTERVAL '30 days'";
     } else if (filtro === 'ano') {
-        // Puxa tudo do ano atual
-        regraDeData = "AND EXTRACT(YEAR FROM criado_em) = EXTRACT(YEAR FROM CURRENT_DATE)"; 
+        regraDeData = "AND EXTRACT(YEAR FROM criado_em) = EXTRACT(YEAR FROM CURRENT_DATE)";
     }
 
     try {
@@ -201,14 +188,128 @@ app.get('/api/pedidos/historico', async (req, res) => {
     }
 });
 
+app.get('/api/pedidos/ativos', async (req, res) => {
+    try {
+        const resultado = await pool.query(
+            "SELECT id, cliente_nome, itens, valor_total, forma_pagamento, troco, status, sub_status, endereco_entrega FROM pedidos WHERE status NOT IN ('entregue', 'cancelado') ORDER BY criado_em ASC"
+        );
+        res.json(resultado.rows);
+    } catch (erro) {
+        console.error("Erro ao buscar pedidos ativos:", erro.message);
+        res.status(500).json({ erro: "Erro interno ao buscar pedidos." });
+    }
+});
 
-/* ==========================================================================
-   MOTOR DE INTEGRAÇÃO DO WHATSAPP
-   ========================================================================== */
+app.put('/api/pedidos/:id/avancar', async (req, res) => {
+    const { id } = req.params;
+    const { status_atual, sub_status_atual } = req.body;
 
+    let novoStatus = status_atual;
+    let novoSubStatus = 'aguardando';
+
+    try {
+        if (status_atual === 'pedidos' || status_atual === 'novos') {
+            novoStatus = 'pagamento';
+            novoSubStatus = 'aguardando';
+        } else if (status_atual === 'pagamento') {
+            novoStatus = 'preparo';
+            novoSubStatus = 'aguardando';
+        } else if (status_atual === 'preparo') {
+            if (sub_status_atual === 'aguardando') {
+                novoSubStatus = 'preparando';
+            } else if (sub_status_atual === 'preparando') {
+                novoSubStatus = 'pronto';
+            } else if (sub_status_atual === 'pronto') {
+                novoStatus = 'entrega';
+                novoSubStatus = 'aguardando';
+            }
+        } else if (status_atual === 'entrega') {
+            if (sub_status_atual === 'aguardando') {
+                novoSubStatus = 'saiu_para_entrega';
+            } else if (sub_status_atual === 'saiu_para_entrega') {
+                novoStatus = 'entregue';
+            }
+        }
+
+        await pool.query(
+            "UPDATE pedidos SET status = $1, sub_status = $2 WHERE id = $3",
+            [novoStatus, novoSubStatus, id]
+        );
+
+        res.json({ mensagem: "Status atualizado com sucesso!", novoStatus, novoSubStatus });
+    } catch (erro) {
+        console.error("Erro ao atualizar status do pedido:", erro.message);
+        res.status(500).json({ erro: "Erro ao atualizar status no banco." });
+    }
+});
+
+// ============================================================
+// ⭐ ROTAS DO WHATSAPP (ADICIONADAS AQUI!)
+// ============================================================
+
+// 1. Rota de status - RETORNA QR CODE E STATUS
+app.get('/api/whatsapp/status', (req, res) => {
+    console.log('📡 Requisição de status recebida!'); // <-- LOG PARA DEBUG
+    res.json({
+        status: waStatus,
+        qrCode: waQrCode
+    });
+});
+
+// 2. Rota para desconectar
+app.post('/api/whatsapp/disconnect', async (req, res) => {
+    try {
+        if (waStatus === 'conectado') {
+            await waClient.logout();
+            waStatus = 'desconectado';
+            waQrCode = null;
+            res.json({ success: true, message: 'Aparelho desconectado com sucesso.' });
+        } else {
+            res.json({ success: false, message: 'Nenhum aparelho conectado.' });
+        }
+    } catch (error) {
+        console.error("Erro ao desconectar:", error);
+        res.status(500).json({ error: 'Falha interna ao tentar desconectar.' });
+    }
+});
+
+// 3. Rota para buscar mensagens salvas
+app.get('/api/whatsapp/config', async (req, res) => {
+    try {
+        const resultado = await pool.query('SELECT * FROM configuracoes_whatsapp WHERE id = 1');
+        if (resultado.rows.length === 0) {
+            return res.status(404).json({ erro: "Configuração não encontrada." });
+        }
+        res.json(resultado.rows[0]);
+    } catch (erro) {
+        console.error("❌ Erro ao buscar configurações do WhatsApp:", erro);
+        res.status(500).json({ erro: "Erro interno no servidor." });
+    }
+});
+
+// 4. Rota para salvar mensagens
+app.put('/api/whatsapp/config', async (req, res) => {
+    const { msg_novo, msg_preparo, msg_entrega } = req.body;
+    try {
+        await pool.query(
+            `UPDATE configuracoes_whatsapp 
+             SET msg_novo = $1, msg_preparo = $2, msg_entrega = $3 
+             WHERE id = 1`,
+            [msg_novo, msg_preparo, msg_entrega]
+        );
+        res.json({ mensagem: "Configurações do WhatsApp salvas com sucesso!" });
+    } catch (erro) {
+        console.error("❌ Erro ao salvar configurações do WhatsApp:", erro);
+        res.status(500).json({ erro: "Erro interno no servidor." });
+    }
+});
+
+// ============================================================
+// MOTOR DO WHATSAPP
+// ============================================================
 let waStatus = 'desconectado';
 let waQrCode = null;
-let isInitializing = false; // ⬅️ CONTROLE PARA EVITAR DUPLA INICIALIZAÇÃO
+let isInitializing = false;
 
 const waClient = new Client({
     authStrategy: new LocalAuth(),
@@ -217,38 +318,34 @@ const waClient = new Client({
     }
 });
 
-// Evento 1: Servidor pede o QR Code
 waClient.on('qr', async (qr) => {
     waStatus = 'aguardando_qr';
     waQrCode = await qrcode.toDataURL(qr);
-    console.log('📱 QR Code gerado! (primeiros 50 caracteres):', qr.substring(0, 50));
+    console.log('📱 QR Code gerado!');
 });
 
-// Evento 2: Gestor leu o QR Code e conectou
 waClient.on('ready', () => {
     waStatus = 'conectado';
     waQrCode = null;
-    console.log('✅ WhatsApp conectado e pronto para operar!');
+    console.log('✅ WhatsApp conectado!');
     isInitializing = false;
 });
 
-// Evento 3: Celular do gestor desconectou
 waClient.on('disconnected', (reason) => {
     waStatus = 'desconectado';
     waQrCode = null;
     console.log('❌ WhatsApp desconectado!', reason);
     isInitializing = false;
-    // ⬇️ REMOVA esta linha para evitar loop:
-    // waClient.initialize(); 
 });
 
-// ⬇️ Inicializa APENAS UMA VEZ
 console.log('🔄 Iniciando cliente WhatsApp...');
 waClient.initialize().catch(err => {
     console.error('❌ Erro ao inicializar WhatsApp:', err);
 });
 
-// -------- CRUD Categorias --------
+// ============================================================
+// CRUD CATEGORIAS
+// ============================================================
 app.get('/api/categorias', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM categorias ORDER BY ordem, id');
@@ -302,7 +399,9 @@ app.delete('/api/categorias/:id', async (req, res) => {
     }
 });
 
-// -------- CRUD Produtos --------
+// ============================================================
+// CRUD PRODUTOS
+// ============================================================
 app.get('/api/produtos', async (req, res) => {
     const { categoria_id, apenas_disponiveis } = req.query;
     try {
@@ -326,7 +425,7 @@ app.get('/api/produtos', async (req, res) => {
         }
 
         query += ` ORDER BY c.ordem, p.id`;
-        
+
         const result = await pool.query(query, params);
         res.json(result.rows);
     } catch (err) {
@@ -385,94 +484,6 @@ app.delete('/api/produtos/:id', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ erro: 'Erro ao excluir produto' });
-    }
-});
-
-// ROTA PARA BUSCAR PEDIDOS ATIVOS DA ESTEIRA GESTORA
-app.get('/api/pedidos/ativos', async (req, res) => {
-    try {
-        const resultado = await pool.query(
-            "SELECT id, cliente_nome, itens, valor_total, forma_pagamento, troco, status, sub_status, endereco_entrega FROM pedidos WHERE status NOT IN ('entregue', 'cancelado') ORDER BY criado_em ASC"
-        );
-        res.json(resultado.rows);
-    } catch (erro) {
-        console.error("Erro ao buscar pedidos ativos:", erro.message);
-        res.status(500).json({ erro: "Erro interno ao buscar pedidos." });
-    }
-});
-
-// ROTA PARA AVANÇAR O STATUS DO PEDIDO NO TRILHO
-app.put('/api/pedidos/:id/avancar', async (req, res) => {
-    const { id } = req.params;
-    const { status_atual, sub_status_atual } = req.body;
-    
-    let novoStatus = status_atual;
-    let novoSubStatus = 'aguardando';
-
-    try {
-        if (status_atual === 'pedidos' || status_atual === 'novos') {
-            novoStatus = 'pagamento';
-            novoSubStatus = 'aguardando';
-        } else if (status_atual === 'pagamento') {
-            novoStatus = 'preparo';
-            novoSubStatus = 'aguardando'; 
-        } else if (status_atual === 'preparo') {
-            if (sub_status_atual === 'aguardando') {
-                novoSubStatus = 'preparando'; 
-            } else if (sub_status_atual === 'preparando') {
-                novoSubStatus = 'pronto'; 
-            } else if (sub_status_atual === 'pronto') {
-                novoStatus = 'entrega'; 
-                novoSubStatus = 'aguardando';
-            }
-        } else if (status_atual === 'entrega') {
-            if (sub_status_atual === 'aguardando') {
-                novoSubStatus = 'saiu_para_entrega'; 
-            } else if (sub_status_atual === 'saiu_para_entrega') {
-                novoStatus = 'entregue'; 
-            }
-        }
-
-        await pool.query(
-            "UPDATE pedidos SET status = $1, sub_status = $2 WHERE id = $3",
-            [novoStatus, novoSubStatus, id]
-        );
-
-        res.json({ mensagem: "Status atualizado com sucesso!", novoStatus, novoSubStatus });
-    } catch (erro) {
-        console.error("Erro ao atualizar status do pedido:", erro.message);
-        res.status(500).json({ erro: "Erro ao atualizar status no banco." });
-    }
-});
-
-// ROTA PARA BUSCAR AS MENSAGENS SALVAS DO WHATSAPP
-app.get('/api/whatsapp/config', async (req, res) => {
-    try {
-        const resultado = await pool.query('SELECT * FROM configuracoes_whatsapp WHERE id = 1');
-        if (resultado.rows.length === 0) {
-            return res.status(404).json({ erro: "Configuração não encontrada." });
-        }
-        res.json(resultado.rows[0]);
-    } catch (erro) {
-        console.error("❌ Erro ao buscar configurações do WhatsApp:", erro);
-        res.status(500).json({ erro: "Erro interno no servidor." });
-    }
-});
-
-// ROTA PARA SALVAR AS ALTERAÇÕES DO GESTOR NO WHATSAPP
-app.put('/api/whatsapp/config', async (req, res) => {
-    const { msg_novo, msg_preparo, msg_entrega } = req.body;
-    try {
-        await pool.query(
-            `UPDATE configuracoes_whatsapp 
-             SET msg_novo = $1, msg_preparo = $2, msg_entrega = $3 
-             WHERE id = 1`,
-            [msg_novo, msg_preparo, msg_entrega]
-        );
-        res.json({ mensagem: "Configurações do WhatsApp salvas com sucesso!" });
-    } catch (erro) {
-        console.error("❌ Erro ao salvar configurações do WhatsApp:", erro);
-        res.status(500).json({ erro: "Erro interno no servidor." });
     }
 });
 
