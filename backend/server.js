@@ -204,50 +204,6 @@ app.get('/api/pedidos/historico', async (req, res) => {
     }
 });
 
-/* ==========================================================================
-   MOTOR DE INTEGRAÇÃO DO WHATSAPP
-   ========================================================================== */
-
-// Variáveis para guardar o estado atual da conexão para o Frontend ler
-let waStatus = 'desconectado';
-let waQrCode = null;
-
-// Inicializa o cliente do WhatsApp
-const waClient = new Client({
-    // LocalAuth salva a sessão. Assim, se o servidor reiniciar, ele reconecta sozinho!
-    authStrategy: new LocalAuth(),
-    puppeteer: {
-        // Esses argumentos são OBRIGATÓRIOS para a biblioteca funcionar dentro do Render
-        args: ['--no-sandbox', '--disable-setuid-sandbox'] 
-    }
-});
-
-// Evento 1: Servidor pede o QR Code
-waClient.on('qr', async (qr) => {
-    waStatus = 'aguardando_qr';
-    // Converte o código de texto em uma imagem Base64 perfeita para o HTML
-    waQrCode = await qrcode.toDataURL(qr); 
-    console.log('📱 Novo QR Code do WhatsApp gerado! Aguardando leitura...');
-});
-
-// Evento 2: Gestor leu o QR Code e conectou
-waClient.on('ready', () => {
-    waStatus = 'conectado';
-    waQrCode = null;
-    console.log('✅ WhatsApp conectado e pronto para operar!');
-});
-
-// Evento 3: Celular do gestor desconectou ou ficou sem internet
-waClient.on('disconnected', (reason) => {
-    waStatus = 'desconectado';
-    waQrCode = null;
-    console.log('❌ WhatsApp desconectado do servidor!', reason);
-    // Reinicia o cliente para gerar um novo QR Code automaticamente
-    waClient.initialize(); 
-});
-
-// Dá a partida no motor!
-waClient.initialize();
 
 /* ==========================================================================
    MOTOR DE INTEGRAÇÃO DO WHATSAPP
