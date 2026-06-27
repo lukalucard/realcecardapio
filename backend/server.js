@@ -17,7 +17,131 @@ app.use(cors());
 app.use(express.json());
 
 // ============================================================
-// MIDDLEWARE DE AUTENTICAÇÃO
+// 1. DEFINE AS VARIÁVEIS DO WHATSAPP
+// ============================================================
+let waStatus = 'desconectado';
+let waQrCode = null;
+let isInitializing = false;
+let ultimoErro = null;
+
+// ============================================================
+// 2. INICIALIZA O CLIENTE WHATSAPP
+// ============================================================
+const waClient = new Client({
+    authStrategy: new LocalAuth(),
+    puppeteer: {
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+    }
+});
+
+waClient.on('qr', async (qr) => {
+    waStatus = 'aguardando_qr';
+    try {
+        waQrCode = await qrcode.toDataURL(qr);
+        console.log('✅ QR Code gerado com sucesso!');
+        ultimoErro = null;
+    } catch (err) {
+        console.error('❌ Erro ao gerar QR Code:', err);
+        ultimoErro = err.message;
+    }
+});
+
+waClient.on('ready', () => {
+    waStatus = 'conectado';
+    waQrCode = null;
+    console.log('✅ WhatsApp conectado e pronto!');
+    isInitializing = false;
+    ultimoErro = null;
+});
+
+waClient.on('disconnected', (reason) => {
+    waStatus = 'desconectado';
+    waQrCode = null;
+    console.log('❌ WhatsApp desconectado:', reason);
+    isInitializing = false;
+});
+
+// Inicializa o cliente
+console.log('🔄 Iniciando cliente WhatsApp...');
+waClient.initialize().catch(err => {
+    console.error('❌ Erro ao inicializar WhatsApp:', err);
+    ultimoErro = err.message;
+});
+
+// ============================================================
+// 3. ROTA DE STATUS DO WHATSAPP (PRIMEIRO!)
+// ============================================================
+app.get('/api/whatsapp/status', (req, res) => {
+    console.log('📡 Requisição de status - waStatus:', waStatus);
+    console.log('📡 QR Code existe?', !!waQrCode);
+    
+    res.json({
+        status: waStatus,
+        qrCode: waQrCode,
+        erro: ultimoErro
+    });
+});
+
+// ============================================================
+// 4. ROTA PARA DESCONECTAR
+// ============================================================
+app.post('/api/whatsapp/disconnect', async (req, res) => {
+    try {
+        if (waStatus === 'conectado') {
+            await waClient.logout();
+            waStatus = 'desconectado';
+            waQrCode = null;
+            res.json({ success: true, message: 'Desconectado com sucesso.' });
+        } else {
+            res.json({ success: false, message: 'Nenhum aparelho conectado.' });
+        }
+    } catch (error) {
+        console.error("Erro ao desconectar:", error);
+        res.status(500).json({ error: 'Falha ao desconectar.' });
+    }
+});
+
+// ============================================================
+// 5. ROTA PARA CONFIGURAÇÕES DO WHATSAPP
+// ============================================================
+app.get('/api/whatsapp/config', async (req, res) => {
+    try {
+        const resultado = await pool.query('SELECT * FROM configuracoes_whatsapp WHERE id = 1');
+        if (resultado.rows.length === 0) {
+            return res.status(404).json({ erro: "Configuração não encontrada." });
+        }
+        res.json(resultado.rows[0]);
+    } catch (erro) {
+        console.error("❌ Erro ao buscar configurações:", erro);
+        res.status(500).json({ erro: "Erro interno no servidor." });
+    }
+});
+
+app.put('/api/whatsapp/config', async (req, res) => {
+    const { msg_novo, msg_preparo, msg_entrega } = req.body;
+    try {
+        await pool.query(
+            `UPDATE configuracoes_whatsapp 
+             SET msg_novo = $1, msg_preparo = $2, msg_entrega = $3 
+             WHERE id = 1`,
+            [msg_novo, msg_preparo, msg_entrega]
+        );
+        res.json({ mensagem: "Configurações salvas com sucesso!" });
+    } catch (erro) {
+        console.error("❌ Erro ao salvar configurações:", erro);
+        res.status(500).json({ erro: "Erro interno no servidor." });
+    }
+});
+
+// ============================================================
+// 6. ROTA DE TESTE
+// ============================================================
+app.get('/api/test', (req, res) => {
+    res.json({ message: 'Servidor RealceCardápio funcionando! ✅' });
+});
+
+// ============================================================
+// 7. ROTAS DE AUTENTICAÇÃO
 // ============================================================
 function authMiddleware(req, res, next) {
     const authHeader = req.headers['authorization'];
@@ -36,16 +160,6 @@ function authMiddleware(req, res, next) {
     }
 }
 
-// ============================================================
-// ROTA DE TESTE
-// ============================================================
-app.get('/api/test', (req, res) => {
-    res.json({ message: 'Servidor RealceCardápio funcionando perfeitamente! ✅' });
-});
-
-// ============================================================
-// ROTAS DE AUTENTICAÇÃO
-// ============================================================
 app.get('/check-perfil', async (req, res) => {
     const { perfil } = req.query;
     if (!perfil) return res.json({ available: false });
@@ -137,7 +251,7 @@ app.get('/me', authMiddleware, async (req, res) => {
 });
 
 // ============================================================
-// ROTAS DE PEDIDOS
+// 8. ROTAS DE PEDIDOS
 // ============================================================
 app.post('/api/pedidos', async (req, res) => {
     const { cliente_nome, cliente_telefone, cliente_endereco, itens, subtotal, taxa_entrega, total, forma_pagamento } = req.body;
@@ -155,8 +269,8 @@ app.post('/api/pedidos', async (req, res) => {
         );
         res.status(201).json({ id: result.rows[0].id, message: 'Pedido recebido com sucesso!' });
     } catch (error) {
-        console.error("Erro interno ao salvar pedido no Neon:", error.message);
-        res.status(500).json({ erro: 'Erro ao salvar o pedido no banco de dados.' });
+        console.error("Erro ao salvar pedido:", error.message);
+        res.status(500).json({ erro: 'Erro ao salvar o pedido.' });
     }
 });
 
@@ -183,7 +297,7 @@ app.get('/api/pedidos/historico', async (req, res) => {
         );
         res.json(result.rows);
     } catch (error) {
-        console.error("Erro ao buscar histórico filtrado:", error.message);
+        console.error("Erro ao buscar histórico:", error.message);
         res.status(500).json({ erro: 'Erro ao buscar histórico' });
     }
 });
@@ -238,113 +352,13 @@ app.put('/api/pedidos/:id/avancar', async (req, res) => {
 
         res.json({ mensagem: "Status atualizado com sucesso!", novoStatus, novoSubStatus });
     } catch (erro) {
-        console.error("Erro ao atualizar status do pedido:", erro.message);
+        console.error("Erro ao atualizar status:", erro.message);
         res.status(500).json({ erro: "Erro ao atualizar status no banco." });
     }
 });
 
 // ============================================================
-// ⭐ ROTAS DO WHATSAPP (ADICIONADAS AQUI!)
-// ============================================================
-
-// 1. Rota de status - RETORNA QR CODE E STATUS
-app.get('/api/whatsapp/status', (req, res) => {
-    console.log('📡 Requisição de status recebida!'); // <-- LOG PARA DEBUG
-    res.json({
-        status: waStatus,
-        qrCode: waQrCode
-    });
-});
-
-// 2. Rota para desconectar
-app.post('/api/whatsapp/disconnect', async (req, res) => {
-    try {
-        if (waStatus === 'conectado') {
-            await waClient.logout();
-            waStatus = 'desconectado';
-            waQrCode = null;
-            res.json({ success: true, message: 'Aparelho desconectado com sucesso.' });
-        } else {
-            res.json({ success: false, message: 'Nenhum aparelho conectado.' });
-        }
-    } catch (error) {
-        console.error("Erro ao desconectar:", error);
-        res.status(500).json({ error: 'Falha interna ao tentar desconectar.' });
-    }
-});
-
-// 3. Rota para buscar mensagens salvas
-app.get('/api/whatsapp/config', async (req, res) => {
-    try {
-        const resultado = await pool.query('SELECT * FROM configuracoes_whatsapp WHERE id = 1');
-        if (resultado.rows.length === 0) {
-            return res.status(404).json({ erro: "Configuração não encontrada." });
-        }
-        res.json(resultado.rows[0]);
-    } catch (erro) {
-        console.error("❌ Erro ao buscar configurações do WhatsApp:", erro);
-        res.status(500).json({ erro: "Erro interno no servidor." });
-    }
-});
-
-// 4. Rota para salvar mensagens
-app.put('/api/whatsapp/config', async (req, res) => {
-    const { msg_novo, msg_preparo, msg_entrega } = req.body;
-    try {
-        await pool.query(
-            `UPDATE configuracoes_whatsapp 
-             SET msg_novo = $1, msg_preparo = $2, msg_entrega = $3 
-             WHERE id = 1`,
-            [msg_novo, msg_preparo, msg_entrega]
-        );
-        res.json({ mensagem: "Configurações do WhatsApp salvas com sucesso!" });
-    } catch (erro) {
-        console.error("❌ Erro ao salvar configurações do WhatsApp:", erro);
-        res.status(500).json({ erro: "Erro interno no servidor." });
-    }
-});
-
-// ============================================================
-// MOTOR DO WHATSAPP
-// ============================================================
-let waStatus = 'desconectado';
-let waQrCode = null;
-let isInitializing = false;
-
-const waClient = new Client({
-    authStrategy: new LocalAuth(),
-    puppeteer: {
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
-    }
-});
-
-waClient.on('qr', async (qr) => {
-    waStatus = 'aguardando_qr';
-    waQrCode = await qrcode.toDataURL(qr);
-    console.log('📱 QR Code gerado!');
-});
-
-waClient.on('ready', () => {
-    waStatus = 'conectado';
-    waQrCode = null;
-    console.log('✅ WhatsApp conectado!');
-    isInitializing = false;
-});
-
-waClient.on('disconnected', (reason) => {
-    waStatus = 'desconectado';
-    waQrCode = null;
-    console.log('❌ WhatsApp desconectado!', reason);
-    isInitializing = false;
-});
-
-console.log('🔄 Iniciando cliente WhatsApp...');
-waClient.initialize().catch(err => {
-    console.error('❌ Erro ao inicializar WhatsApp:', err);
-});
-
-// ============================================================
-// CRUD CATEGORIAS
+// 9. CRUD CATEGORIAS
 // ============================================================
 app.get('/api/categorias', async (req, res) => {
     try {
@@ -400,7 +414,7 @@ app.delete('/api/categorias/:id', async (req, res) => {
 });
 
 // ============================================================
-// CRUD PRODUTOS
+// 10. CRUD PRODUTOS
 // ============================================================
 app.get('/api/produtos', async (req, res) => {
     const { categoria_id, apenas_disponiveis } = req.query;
@@ -488,7 +502,7 @@ app.delete('/api/produtos/:id', async (req, res) => {
 });
 
 // ============================================================
-// SERVE ARQUIVOS ESTÁTICOS (DEVE SER A ÚLTIMA ROTA)
+// 11. SERVE ARQUIVOS ESTÁTICOS (ÚLTIMA ROTA)
 // ============================================================
 app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
