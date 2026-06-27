@@ -2,6 +2,10 @@ document.addEventListener('DOMContentLoaded', () => {
     inicializarAbas();
     carregarMensagensDoBanco();
     configurarBotaoSalvar();
+    
+    // Inicia o Radar que vai monitorar o WhatsApp em tempo real
+    iniciarRadarWhatsApp();
+    configurarBotaoDesconectar();
 });
 
 /* ==========================================================================
@@ -13,15 +17,99 @@ function inicializarAbas() {
 
     botoesAba.forEach(botao => {
         botao.addEventListener('click', () => {
-            // Remove 'active' de todos os botões e oculta todos os conteúdos
             botoesAba.forEach(b => b.classList.remove('active'));
             conteudosAba.forEach(c => c.style.display = 'none');
 
-            // Adiciona 'active' no botão clicado e mostra o conteúdo dele
             botao.classList.add('active');
             const alvoId = botao.getAttribute('data-tab');
             document.getElementById(alvoId).style.display = 'block';
         });
+    });
+}
+
+/* ==========================================================================
+   RADAR DO WHATSAPP (MONITORAMENTO EM TEMPO REAL)
+   ========================================================================== */
+function iniciarRadarWhatsApp() {
+    const statusBadge = document.getElementById('whatsapp-status-global');
+    const qrcodeArea = document.getElementById('qrcode-area');
+    const btnDesconectar = document.getElementById('btn-desconectar');
+
+    // Função que faz a requisição para o backend
+    const checarStatus = async () => {
+        try {
+            const resposta = await fetch('/api/whatsapp/status');
+            const dados = await resposta.json();
+
+            // 1. Atualiza a Badge do Topo
+            if (dados.status === 'conectado') {
+                statusBadge.className = 'status-badge-conectado';
+                statusBadge.innerHTML = '<i class="fas fa-check-circle"></i> Sincronizado e Ativo';
+                btnDesconectar.disabled = false;
+                
+                qrcodeArea.innerHTML = `
+                    <div class="qrcode-placeholder" style="color: #10b981;">
+                        <i class="fas fa-mobile-alt"></i>
+                        <span style="font-weight: 600;">Aparelho Conectado!</span>
+                        <p style="font-size: 0.8rem; color: #64748b; margin-top: 5px;">Seu sistema já está pronto para enviar mensagens.</p>
+                    </div>
+                `;
+            } else {
+                statusBadge.className = 'status-badge-desconectado';
+                statusBadge.innerHTML = '<i class="fas fa-circle"></i> Aguardando Conexão';
+                btnDesconectar.disabled = true;
+
+                // 2. Mostra o QR Code se estiver aguardando leitura
+                if (dados.status === 'aguardando_qr' && dados.qrCode) {
+                    qrcodeArea.innerHTML = `<img src="${dados.qrCode}" alt="QR Code do WhatsApp">`;
+                } else {
+                    qrcodeArea.innerHTML = `
+                        <div class="qrcode-placeholder">
+                            <i class="fas fa-sync-alt fa-spin"></i>
+                            <span>Gerando código seguro...</span>
+                        </div>
+                    `;
+                }
+            }
+        } catch (erro) {
+            console.error("Erro ao checar status do WhatsApp:", erro);
+        }
+    };
+
+    // Roda a checagem na hora que entra na página e depois a cada 3 segundos
+    checarStatus();
+    setInterval(checarStatus, 3000);
+}
+
+/* ==========================================================================
+   BOTÃO DE DESCONECTAR O APARELHO
+   ========================================================================== */
+function configurarBotaoDesconectar() {
+    const btnDesconectar = document.getElementById('btn-desconectar');
+    if (!btnDesconectar) return;
+
+    btnDesconectar.addEventListener('click', async () => {
+        const confirmar = confirm("Tem certeza que deseja desconectar o WhatsApp do sistema?");
+        if (!confirmar) return;
+
+        const textoOriginal = btnDesconectar.innerHTML;
+        btnDesconectar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Desconectando...';
+        btnDesconectar.disabled = true;
+
+        try {
+            const resposta = await fetch('/api/whatsapp/disconnect', { method: 'POST' });
+            const dados = await resposta.json();
+            
+            if (dados.success) {
+                alert("Aparelho desconectado! O sistema vai gerar um novo QR Code.");
+            } else {
+                alert(dados.message);
+            }
+        } catch (erro) {
+            alert("Erro ao tentar desconectar.");
+        } finally {
+            btnDesconectar.innerHTML = textoOriginal;
+        }
     });
 }
 
