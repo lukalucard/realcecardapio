@@ -1,9 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ DOM do WhatsApp carregado!');
+    
     inicializarAbas();
     carregarMensagensDoBanco();
     configurarBotaoSalvar();
-    
-    // Inicia o Radar que vai monitorar o WhatsApp em tempo real
     iniciarRadarWhatsApp();
     configurarBotaoDesconectar();
 });
@@ -14,6 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
 function inicializarAbas() {
     const botoesAba = document.querySelectorAll('.tab-btn');
     const conteudosAba = document.querySelectorAll('.whatsapp-tab-content');
+
+    console.log('📌 Abas encontradas:', botoesAba.length);
 
     botoesAba.forEach(botao => {
         botao.addEventListener('click', () => {
@@ -35,48 +37,77 @@ function iniciarRadarWhatsApp() {
     const qrcodeArea = document.getElementById('qrcode-area');
     const btnDesconectar = document.getElementById('btn-desconectar');
 
-    // Função que faz a requisição para o backend
+    console.log('📡 Iniciando radar WhatsApp...');
+    console.log('📌 Elementos encontrados:', {
+        statusBadge: !!statusBadge,
+        qrcodeArea: !!qrcodeArea,
+        btnDesconectar: !!btnDesconectar
+    });
+
+    // Se os elementos não existirem, não continua
+    if (!statusBadge || !qrcodeArea) {
+        console.error('❌ Elementos do WhatsApp não encontrados no DOM!');
+        return;
+    }
+
     const checarStatus = async () => {
         try {
+            console.log('🔄 Buscando status do WhatsApp...');
             const resposta = await fetch('/api/whatsapp/status');
             const dados = await resposta.json();
+            
+            console.log('📡 Status recebido:', dados);
 
-            // 1. Atualiza a Badge do Topo
             if (dados.status === 'conectado') {
                 statusBadge.className = 'status-badge-conectado';
                 statusBadge.innerHTML = '<i class="fas fa-check-circle"></i> Sincronizado e Ativo';
-                btnDesconectar.disabled = false;
+                if (btnDesconectar) btnDesconectar.disabled = false;
                 
                 qrcodeArea.innerHTML = `
                     <div class="qrcode-placeholder" style="color: #10b981;">
-                        <i class="fas fa-mobile-alt"></i>
+                        <i class="fas fa-mobile-alt" style="font-size: 3rem;"></i>
                         <span style="font-weight: 600;">Aparelho Conectado!</span>
                         <p style="font-size: 0.8rem; color: #64748b; margin-top: 5px;">Seu sistema já está pronto para enviar mensagens.</p>
                     </div>
                 `;
+            } else if (dados.status === 'aguardando_qr' && dados.qrCode) {
+                statusBadge.className = 'status-badge-desconectado';
+                statusBadge.innerHTML = '<i class="fas fa-circle"></i> Aguardando Leitura do QR Code';
+                if (btnDesconectar) btnDesconectar.disabled = true;
+                
+                qrcodeArea.innerHTML = `
+                    <img src="${dados.qrCode}" alt="QR Code do WhatsApp" style="width: 100%; height: 100%; object-fit: contain;">
+                    <p style="text-align: center; margin-top: 10px; font-size: 0.9rem; color: #6b7280;">
+                        📱 Abra o WhatsApp no celular, vá em <strong>Aparelhos conectados</strong> e escaneie
+                    </p>
+                `;
             } else {
                 statusBadge.className = 'status-badge-desconectado';
                 statusBadge.innerHTML = '<i class="fas fa-circle"></i> Aguardando Conexão';
-                btnDesconectar.disabled = true;
+                if (btnDesconectar) btnDesconectar.disabled = true;
 
-                // 2. Mostra o QR Code se estiver aguardando leitura
-                if (dados.status === 'aguardando_qr' && dados.qrCode) {
-                    qrcodeArea.innerHTML = `<img src="${dados.qrCode}" alt="QR Code do WhatsApp">`;
-                } else {
-                    qrcodeArea.innerHTML = `
-                        <div class="qrcode-placeholder">
-                            <i class="fas fa-sync-alt fa-spin"></i>
-                            <span>Gerando código seguro...</span>
-                        </div>
-                    `;
-                }
+                qrcodeArea.innerHTML = `
+                    <div class="qrcode-placeholder">
+                        <i class="fas fa-sync-alt fa-spin" style="font-size: 2.5rem; color: #FF6B00;"></i>
+                        <span>Gerando código seguro...</span>
+                    </div>
+                `;
             }
         } catch (erro) {
-            console.error("Erro ao checar status do WhatsApp:", erro);
+            console.error("❌ Erro ao checar status do WhatsApp:", erro);
+            qrcodeArea.innerHTML = `
+                <div class="qrcode-placeholder" style="color: #ef4444;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 2.5rem;"></i>
+                    <span>⚠️ Erro de conexão com o servidor</span>
+                    <p style="font-size: 0.8rem; color: #64748b; margin-top: 5px;">
+                        Verifique se o backend está rodando em: 
+                        <a href="/api/test" target="_blank">/api/test</a>
+                    </p>
+                </div>
+            `;
         }
     };
 
-    // Roda a checagem na hora que entra na página e depois a cada 3 segundos
     checarStatus();
     setInterval(checarStatus, 3000);
 }
