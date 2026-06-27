@@ -7,9 +7,6 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="css/admin.css">
@@ -31,67 +28,79 @@
                 </div>
             </header>
 
-            <div class="whatsapp-grid-layout">
-                
-                <section class="whatsapp-card card-conexao">
-                    <div class="card-header-simple">
-                        <h3><i class="fas fa-qrcode"></i> Conexão com o Sistema</h3>
-                    </div>
-                    <div class="card-body-conexao">
-                        <p class="txt-ajuda">Abra o WhatsApp no seu celular, vá em <strong>Aparelhos conectados</strong> e escaneie o código abaixo:</p>
-                        
-                        <div class="container-qrcode" id="qrcode-area">
-                            <div class="qrcode-placeholder">
-                                <i class="fas fa-sync-alt fa-spin"></i>
-                                <span>Gerando código seguro...</span>
-                            </div>
-                        </div>
+            <div class="tabs-header">
+                <button class="tab-btn active" data-tab="tab-conexao">
+                    <i class="fas fa-qrcode"></i> Conexão Aparelho
+                </button>
+                <button class="tab-btn" data-tab="tab-mensagens">
+                    <i class="fas fa-robot"></i> Mensagens Automáticas
+                </button>
+            </div>
 
-                        <div class="acoes-conexao">
-                            <button class="btn-whatsapp-secundario" id="btn-desconectar" disabled>
-                                <i class="fas fa-unlink"></i> Desconectar Aparelho
-                            </button>
+            <div class="whatsapp-layout-content">
+                
+                <section class="whatsapp-tab-content active" id="tab-conexao">
+                    <div class="whatsapp-card card-conexao">
+                        <div class="card-header-simple">
+                            <h3><i class="fas fa-mobile-alt"></i> Sincronizar com o WhatsApp Web</h3>
+                        </div>
+                        <div class="card-body-conexao">
+                            <p class="txt-ajuda">Abra o WhatsApp no seu celular, vá em <strong>Aparelhos conectados</strong> e escaneie o código abaixo:</p>
+                            
+                            <div class="container-qrcode" id="qrcode-area">
+                                <div class="qrcode-placeholder">
+                                    <i class="fas fa-sync-alt fa-spin"></i>
+                                    <span>Gerando código seguro...</span>
+                                </div>
+                            </div>
+
+                            <div class="acoes-conexao">
+                                <button class="btn-whatsapp-secundario" id="btn-desconectar" disabled>
+                                    <i class="fas fa-unlink"></i> Desconectar Aparelho
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </section>
 
-                <section class="whatsapp-card card-templates">
-                    <div class="card-header-simple">
-                        <h3><i class="fas fa-comment-medical"></i> Mensagens Notificadoras</h3>
+                <section class="whatsapp-tab-content" id="tab-mensagens" style="display: none;">
+                    <div class="whatsapp-card card-templates">
+                        <div class="card-header-simple">
+                            <h3><i class="fas fa-comment-medical"></i> Configurar Mensagens do Robô</h3>
+                        </div>
+                        <form class="form-templates-whatsapp" id="form-whatsapp-config">
+                            
+                            <div class="bloco-input-mensagem">
+                                <label for="msg-novo">
+                                    <strong>Pedido Recebido / Novos</strong>
+                                    <span class="tag-variavel">Variáveis: {nome}, {pedido}, {total}</span>
+                                </label>
+                                <textarea id="msg-novo" rows="3" placeholder="Ex: Olá {nome}, recebemos o seu pedido {pedido} no valor de {total}!"></textarea>
+                            </div>
+
+                            <div class="bloco-input-mensagem">
+                                <label for="msg-preparo">
+                                    <strong>Em Preparo / Cozinha</strong>
+                                    <span class="tag-variavel">Variáveis: {nome}, {pedido}</span>
+                                </label>
+                                <textarea id="msg-preparo" rows="3" placeholder="Ex: Boa notícia {nome}! O seu pedido {pedido} já está na cozinha."></textarea>
+                            </div>
+
+                            <div class="bloco-input-mensagem">
+                                <label for="msg-entrega">
+                                    <strong>Saiu para Entrega / Rota</strong>
+                                    <span class="tag-variavel">Variáveis: {nome}, {pedido}</span>
+                                </label>
+                                <textarea id="msg-entrega" rows="3" placeholder="Ex: Seu pedido {pedido} saiu para entrega, {nome}! O motoboy está a caminho."></textarea>
+                            </div>
+
+                            <div class="form-footer-acoes">
+                                <button type="button" class="btn-whatsapp-principal" id="btn-salvar-mensagens">
+                                    <i class="fas fa-save"></i> Salvar Mensagens
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                    <form class="form-templates-whatsapp" id="form-whatsapp-config">
-                        
-                        <div class="bloco-input-mensagem">
-                            <label for="msg-novo">
-                                <strong>Pedido Recebido / Novos</strong>
-                                <span class="tag-variavel">Variáveis disponíveis: {nome}, {pedido}, {total}</span>
-                            </label>
-                            <textarea id="msg-novo" rows="3" placeholder="Ex: Olá {nome}, recebemos o seu pedido {pedido} no valor de {total}!"></textarea>
-                        </div>
-
-                        <div class="bloco-input-mensagem">
-                            <label for="msg-preparo">
-                                <strong>Em Preparo / Cozinha</strong>
-                                <span class="tag-variavel">Variáveis disponíveis: {nome}, {pedido}</span>
-                            </label>
-                            <textarea id="msg-preparo" rows="3" placeholder="Ex: Boa notícia {nome}! O seu pedido {pedido} já começou a ser preparado pela nossa equipe."></textarea>
-                        </div>
-
-                        <div class="bloco-input-mensagem">
-                            <label for="msg-entrega">
-                                <strong>Saiu para Entrega / Rota</strong>
-                                <span class="tag-variavel">Variáveis disponíveis: {nome}, {pedido}</span>
-                            </label>
-                            <textarea id="msg-entrega" rows="3" placeholder="Ex: Seu pedido {pedido} ficou pronto e já saiu para entrega, {nome}! O motoboy já está a caminho."></textarea>
-                        </div>
-
-                        <div class="form-footer-acoes">
-                            <button type="button" class="btn-whatsapp-principal" id="btn-salvar-mensagens">
-                                <i class="fas fa-save"></i> Salvar Mensagens
-                            </button>
-                        </div>
-
-                    </form>
                 </section>
 
             </div>
