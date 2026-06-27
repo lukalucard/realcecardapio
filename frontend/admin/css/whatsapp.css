@@ -1,0 +1,309 @@
+/* ==========================================================================
+   ESTILOS ESPECÍFICOS: INTEGRAÇÃO WHATSAPP (REALCE CARDÁPIO)
+   ========================================================================== */
+
+/* 1. Status Badges Dinâmicos do Cabeçalho */
+.status-badge-desconectado {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.status-badge-conectado {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ==========================================================================
+   2. SISTEMA DE ABAS (TABS)
+   ========================================================================== */
+.tabs-header {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 25px;
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 0;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    color: #6b7280;
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 12px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.3s ease;
+}
+
+.tab-btn:hover {
+    color: #FF6B00;
+}
+
+.tab-btn.active {
+    color: #FF6B00;
+    border-bottom-color: #FF6B00;
+}
+
+.whatsapp-tab-content {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================================================
+   3. ESTRUTURA DOS CARDS
+   ========================================================================== */
+.whatsapp-layout-content {
+    max-width: 900px;
+}
+
+.whatsapp-card {
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+}
+
+.card-header-simple {
+    padding: 20px 24px;
+    border-bottom: 1px solid #f3f4f6;
+    background-color: #fafafa;
+    border-radius: 12px 12px 0 0;
+}
+
+.card-header-simple h3 {
+    font-size: 1.1rem;
+    color: #1f2937;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.card-header-simple h3 i {
+    color: #FF6B00;
+}
+
+/* 4. CARD DA CONEXÃO (QR CODE) */
+.card-body-conexao {
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    align-items: center;
+}
+
+.txt-ajuda {
+    font-size: 0.95rem;
+    color: #4b5563;
+    text-align: center;
+    max-width: 400px;
+}
+
+.container-qrcode {
+    width: 260px;
+    height: 260px;
+    background-color: #ffffff;
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+}
+
+.container-qrcode img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.qrcode-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    color: #94a3b8;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.qrcode-placeholder i {
+    font-size: 2.5rem;
+    color: #FF6B00;
+}
+
+.acoes-conexao {
+    width: 100%;
+    max-width: 260px;
+}
+
+/* 5. CARD DE MENSAGENS */
+.form-templates-whatsapp {
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.bloco-input-mensagem {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.bloco-input-mensagem label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.95rem;
+    color: #111827;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tag-variavel {
+    font-size: 0.75rem;
+    color: #64748b;
+    background-color: #f1f5f9;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.bloco-input-mensagem textarea {
+    width: 100%;
+    padding: 15px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    color: #334155;
+    resize: vertical;
+    line-height: 1.5;
+    transition: all 0.2s ease;
+    min-height: 80px;
+}
+
+.bloco-input-mensagem textarea:focus {
+    outline: none;
+    border-color: #FF6B00;
+    box-shadow: 0 0 0 4px rgba(255, 107, 0, 0.1);
+}
+
+.form-footer-acoes {
+    display: flex;
+    justify-content: flex-end;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 20px;
+}
+
+/* 6. BOTÕES */
+.btn-whatsapp-principal {
+    background-color: #FF6B00;
+    border: 1px solid #FF6B00;
+    color: #ffffff;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-whatsapp-principal:hover {
+    background-color: #e05e00;
+}
+
+.btn-whatsapp-principal:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-whatsapp-secundario {
+    width: 100%;
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-whatsapp-secundario:hover:not(:disabled) {
+    background-color: #fee2e2;
+    border-color: #fca5a5;
+    color: #dc2626;
+}
+
+.btn-whatsapp-secundario:disabled {
+    background-color: #f8fafc;
+    border-color: #e2e8f0;
+    color: #94a3b8;
+    cursor: not-allowed;
+}
+
+/* ==========================================================================
+   RESPONSIVIDADE
+   ========================================================================== */
+@media (max-width: 768px) {
+    .tabs-header {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .tab-btn {
+        font-size: 0.85rem;
+        padding: 8px 12px;
+    }
+    
+    .card-body-conexao {
+        padding: 20px 15px;
+    }
+    
+    .container-qrcode {
+        width: 200px;
+        height: 200px;
+    }
+    
+    .form-templates-whatsapp {
+        padding: 15px;
+    }
+    
+    .bloco-input-mensagem label {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
