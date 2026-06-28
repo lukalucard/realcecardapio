@@ -12,44 +12,35 @@ const qrcode = require('qrcode');
 
 const app = express();
 
+// ============================================================
+// MIDDLEWARES
+// ============================================================
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors());
 app.use(express.json());
 
-// Otimiza o Puppeteer para usar menos memória
-const waClient = new Client({
-    authStrategy: new LocalAuth(),
-    puppeteer: {
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',      // ⬅️ NOVO
-            '--disable-accelerated-2d-canvas',
-            '--disable-gpu',
-            '--disable-software-rasterizer'
-        ],
-        headless: true,
-        // ⬇️ LIMITA O USO DE MEMÓRIA
-        dumpio: false,
-        handleSIGINT: false
-    }
-});
-
 // ============================================================
-// 1. DEFINE AS VARIÁVEIS DO WHATSAPP
+// WHATSAPP - CONFIGURAÇÃO ÚNICA (OTIMIZADA PARA MEMÓRIA)
 // ============================================================
 let waStatus = 'desconectado';
 let waQrCode = null;
 let isInitializing = false;
 let ultimoErro = null;
 
-// ============================================================
-// 2. INICIALIZA O CLIENTE WHATSAPP
-// ============================================================
 const waClient = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-accelerated-2d-canvas',
+            '--disable-gpu',
+            '--disable-software-rasterizer'
+        ],
+        headless: true,
+        dumpio: false,
+        handleSIGINT: false
     }
 });
 
@@ -80,7 +71,6 @@ waClient.on('disconnected', (reason) => {
     isInitializing = false;
 });
 
-// Inicializa o cliente
 console.log('🔄 Iniciando cliente WhatsApp...');
 waClient.initialize().catch(err => {
     console.error('❌ Erro ao inicializar WhatsApp:', err);
@@ -88,12 +78,9 @@ waClient.initialize().catch(err => {
 });
 
 // ============================================================
-// 3. ROTA DE STATUS DO WHATSAPP (PRIMEIRO!)
+// ROTAS DO WHATSAPP
 // ============================================================
 app.get('/api/whatsapp/status', (req, res) => {
-    console.log('📡 Requisição de status - waStatus:', waStatus);
-    console.log('📡 QR Code existe?', !!waQrCode);
-    
     res.json({
         status: waStatus,
         qrCode: waQrCode,
@@ -101,9 +88,6 @@ app.get('/api/whatsapp/status', (req, res) => {
     });
 });
 
-// ============================================================
-// 4. ROTA PARA DESCONECTAR
-// ============================================================
 app.post('/api/whatsapp/disconnect', async (req, res) => {
     try {
         if (waStatus === 'conectado') {
@@ -120,9 +104,6 @@ app.post('/api/whatsapp/disconnect', async (req, res) => {
     }
 });
 
-// ============================================================
-// 5. ROTA PARA CONFIGURAÇÕES DO WHATSAPP
-// ============================================================
 app.get('/api/whatsapp/config', async (req, res) => {
     try {
         const resultado = await pool.query('SELECT * FROM configuracoes_whatsapp WHERE id = 1');
@@ -153,14 +134,14 @@ app.put('/api/whatsapp/config', async (req, res) => {
 });
 
 // ============================================================
-// 6. ROTA DE TESTE
+// ROTA DE TESTE
 // ============================================================
 app.get('/api/test', (req, res) => {
     res.json({ message: 'Servidor RealceCardápio funcionando! ✅' });
 });
 
 // ============================================================
-// 7. ROTAS DE AUTENTICAÇÃO
+// MIDDLEWARE DE AUTENTICAÇÃO
 // ============================================================
 function authMiddleware(req, res, next) {
     const authHeader = req.headers['authorization'];
@@ -179,6 +160,9 @@ function authMiddleware(req, res, next) {
     }
 }
 
+// ============================================================
+// ROTAS DE AUTENTICAÇÃO
+// ============================================================
 app.get('/check-perfil', async (req, res) => {
     const { perfil } = req.query;
     if (!perfil) return res.json({ available: false });
@@ -270,7 +254,7 @@ app.get('/me', authMiddleware, async (req, res) => {
 });
 
 // ============================================================
-// 8. ROTAS DE PEDIDOS
+// ROTAS DE PEDIDOS
 // ============================================================
 app.post('/api/pedidos', async (req, res) => {
     const { cliente_nome, cliente_telefone, cliente_endereco, itens, subtotal, taxa_entrega, total, forma_pagamento } = req.body;
@@ -377,7 +361,7 @@ app.put('/api/pedidos/:id/avancar', async (req, res) => {
 });
 
 // ============================================================
-// 9. CRUD CATEGORIAS
+// CRUD CATEGORIAS
 // ============================================================
 app.get('/api/categorias', async (req, res) => {
     try {
@@ -433,7 +417,7 @@ app.delete('/api/categorias/:id', async (req, res) => {
 });
 
 // ============================================================
-// 10. CRUD PRODUTOS
+// CRUD PRODUTOS
 // ============================================================
 app.get('/api/produtos', async (req, res) => {
     const { categoria_id, apenas_disponiveis } = req.query;
@@ -521,7 +505,7 @@ app.delete('/api/produtos/:id', async (req, res) => {
 });
 
 // ============================================================
-// 11. SERVE ARQUIVOS ESTÁTICOS (ÚLTIMA ROTA)
+// SERVE ARQUIVOS ESTÁTICOS (ÚLTIMA ROTA - SEMPRE NO FINAL)
 // ============================================================
 app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
