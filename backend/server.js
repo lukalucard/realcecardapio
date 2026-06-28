@@ -16,6 +16,25 @@ app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors());
 app.use(express.json());
 
+// Otimiza o Puppeteer para usar menos memória
+const waClient = new Client({
+    authStrategy: new LocalAuth(),
+    puppeteer: {
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',      // ⬅️ NOVO
+            '--disable-accelerated-2d-canvas',
+            '--disable-gpu',
+            '--disable-software-rasterizer'
+        ],
+        headless: true,
+        // ⬇️ LIMITA O USO DE MEMÓRIA
+        dumpio: false,
+        handleSIGINT: false
+    }
+});
+
 // ============================================================
 // 1. DEFINE AS VARIÁVEIS DO WHATSAPP
 // ============================================================
