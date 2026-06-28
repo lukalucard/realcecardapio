@@ -132,12 +132,14 @@
     align-items: center;
     justify-content: center;
     padding: 15px;
+    overflow: hidden; /* ⬅️ GARANTE QUE O QR CODE NÃO VAZE */
 }
 
 .container-qrcode img {
     width: 100%;
     height: 100%;
     object-fit: contain;
+    display: block;
 }
 
 .qrcode-placeholder {

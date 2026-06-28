@@ -64,17 +64,14 @@ function iniciarRadarWhatsApp() {
                 return;
             }
 
-            // Se tem QR Code, exibe!
+            // ÁREA DO QR CODE 
             if (dados.qrCode) {
                 statusBadge.className = 'status-badge-desconectado';
                 statusBadge.innerHTML = '<i class="fas fa-circle"></i> Aguardando Leitura do QR Code';
                 if (btnDesconectar) btnDesconectar.disabled = true;
                 
                 qrcodeArea.innerHTML = `
-                    <img src="${dados.qrCode}" alt="QR Code do WhatsApp" style="width: 100%; height: 100%; object-fit: contain;">
-                    <p style="text-align: center; margin-top: 10px; font-size: 0.9rem; color: #6b7280;">
-                        📱 Abra o WhatsApp no celular, vá em <strong>Aparelhos conectados</strong> e escaneie
-                    </p>
+                    <img src="${dados.qrCode}" alt="QR Code do WhatsApp" style="width: 100%; height: 100%; object-fit: contain; display: block;">
                 `;
                 return;
             }
