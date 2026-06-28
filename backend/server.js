@@ -17,121 +17,70 @@ app.use(cors());
 app.use(express.json());
 
 // ============================================================
-// 1. DEFINE AS VARIÁVEIS DO WHATSAPP
+// WHATSAPP COM CHROME-AWS-LAMBDA (FUNCIONA NO RENDER)
 // ============================================================
+
+const chromium = require('chrome-aws-lambda');
+const { Client, LocalAuth } = require('whatsapp-web.js');
+
 let waStatus = 'desconectado';
 let waQrCode = null;
 let isInitializing = false;
 let ultimoErro = null;
 
-// ============================================================
-// 2. INICIALIZA O CLIENTE WHATSAPP
-// ============================================================
-const waClient = new Client({
-    authStrategy: new LocalAuth(),
-    puppeteer: {
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
-    }
-});
-
-waClient.on('qr', async (qr) => {
-    waStatus = 'aguardando_qr';
+(async () => {
     try {
-        waQrCode = await qrcode.toDataURL(qr);
-        console.log('✅ QR Code gerado com sucesso!');
-        ultimoErro = null;
-    } catch (err) {
-        console.error('❌ Erro ao gerar QR Code:', err);
-        ultimoErro = err.message;
-    }
-});
+        const executablePath = await chromium.executablePath;
+        console.log('✅ Chrome encontrado em:', executablePath);
+        
+        const waClient = new Client({
+            authStrategy: new LocalAuth(),
+            puppeteer: {
+                executablePath: executablePath,
+                args: chromium.args,
+                headless: chromium.headless,
+            }
+        });
 
-waClient.on('ready', () => {
-    waStatus = 'conectado';
-    waQrCode = null;
-    console.log('✅ WhatsApp conectado e pronto!');
-    isInitializing = false;
-    ultimoErro = null;
-});
+        waClient.on('qr', async (qr) => {
+            waStatus = 'aguardando_qr';
+            try {
+                waQrCode = await qrcode.toDataURL(qr);
+                console.log('✅ QR Code gerado com sucesso!');
+                ultimoErro = null;
+            } catch (err) {
+                console.error('❌ Erro ao gerar QR Code:', err);
+                ultimoErro = err.message;
+            }
+        });
 
-waClient.on('disconnected', (reason) => {
-    waStatus = 'desconectado';
-    waQrCode = null;
-    console.log('❌ WhatsApp desconectado:', reason);
-    isInitializing = false;
-});
+        waClient.on('ready', () => {
+            waStatus = 'conectado';
+            waQrCode = null;
+            console.log('✅ WhatsApp conectado e pronto!');
+            isInitializing = false;
+            ultimoErro = null;
+        });
 
-// Inicializa o cliente
-console.log('🔄 Iniciando cliente WhatsApp...');
-waClient.initialize().catch(err => {
-    console.error('❌ Erro ao inicializar WhatsApp:', err);
-    ultimoErro = err.message;
-});
-
-// ============================================================
-// 3. ROTA DE STATUS DO WHATSAPP (PRIMEIRO!)
-// ============================================================
-app.get('/api/whatsapp/status', (req, res) => {
-    console.log('📡 Requisição de status - waStatus:', waStatus);
-    console.log('📡 QR Code existe?', !!waQrCode);
-    
-    res.json({
-        status: waStatus,
-        qrCode: waQrCode,
-        erro: ultimoErro
-    });
-});
-
-// ============================================================
-// 4. ROTA PARA DESCONECTAR
-// ============================================================
-app.post('/api/whatsapp/disconnect', async (req, res) => {
-    try {
-        if (waStatus === 'conectado') {
-            await waClient.logout();
+        waClient.on('disconnected', (reason) => {
             waStatus = 'desconectado';
             waQrCode = null;
-            res.json({ success: true, message: 'Desconectado com sucesso.' });
-        } else {
-            res.json({ success: false, message: 'Nenhum aparelho conectado.' });
-        }
-    } catch (error) {
-        console.error("Erro ao desconectar:", error);
-        res.status(500).json({ error: 'Falha ao desconectar.' });
-    }
-});
+            console.log('❌ WhatsApp desconectado:', reason);
+            isInitializing = false;
+        });
 
-// ============================================================
-// 5. ROTA PARA CONFIGURAÇÕES DO WHATSAPP
-// ============================================================
-app.get('/api/whatsapp/config', async (req, res) => {
-    try {
-        const resultado = await pool.query('SELECT * FROM configuracoes_whatsapp WHERE id = 1');
-        if (resultado.rows.length === 0) {
-            return res.status(404).json({ erro: "Configuração não encontrada." });
-        }
-        res.json(resultado.rows[0]);
-    } catch (erro) {
-        console.error("❌ Erro ao buscar configurações:", erro);
-        res.status(500).json({ erro: "Erro interno no servidor." });
+        console.log('🔄 Iniciando cliente WhatsApp...');
+        await waClient.initialize();
+        console.log('✅ WhatsApp inicializado com sucesso!');
+        
+        // Exporta o cliente para uso nas rotas
+        module.exports.waClient = waClient;
+        
+    } catch (err) {
+        console.error('❌ Erro ao inicializar WhatsApp:', err);
+        ultimoErro = err.message;
     }
-});
-
-app.put('/api/whatsapp/config', async (req, res) => {
-    const { msg_novo, msg_preparo, msg_entrega } = req.body;
-    try {
-        await pool.query(
-            `UPDATE configuracoes_whatsapp 
-             SET msg_novo = $1, msg_preparo = $2, msg_entrega = $3 
-             WHERE id = 1`,
-            [msg_novo, msg_preparo, msg_entrega]
-        );
-        res.json({ mensagem: "Configurações salvas com sucesso!" });
-    } catch (erro) {
-        console.error("❌ Erro ao salvar configurações:", erro);
-        res.status(500).json({ erro: "Erro interno no servidor." });
-    }
-});
+})();
 
 // ============================================================
 // 6. ROTA DE TESTE
