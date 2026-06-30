@@ -9,6 +9,7 @@ const helmet = require('helmet');
 const pool = require('./config/db');
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode');
+const chromium = require('chrome-aws-lambda');
 
 const app = express();
 
@@ -20,62 +21,69 @@ app.use(cors());
 app.use(express.json());
 
 // ============================================================
-// WHATSAPP - CONFIGURAÇÃO ÚNICA (OTIMIZADA PARA MEMÓRIA)
+// WHATSAPP - USANDO CHROME-AWS-LAMBDA (NÃO PRECISA INSTALAR CHROME)
 // ============================================================
 let waStatus = 'desconectado';
 let waQrCode = null;
 let isInitializing = false;
 let ultimoErro = null;
+let waClient = null;
 
-const waClient = new Client({
-    authStrategy: new LocalAuth(),
-    puppeteer: {
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--disable-accelerated-2d-canvas',
-            '--disable-gpu',
-            '--disable-software-rasterizer'
-        ],
-        headless: true,
-        dumpio: false,
-        handleSIGINT: false
-    }
-});
-
-waClient.on('qr', async (qr) => {
-    waStatus = 'aguardando_qr';
+async function iniciarWhatsApp() {
     try {
-        waQrCode = await qrcode.toDataURL(qr);
-        console.log('✅ QR Code gerado com sucesso!');
-        ultimoErro = null;
+        console.log('🔄 Iniciando cliente WhatsApp...');
+        
+        // Pega o caminho do Chrome sem precisar baixar
+        const executablePath = await chromium.executablePath;
+        console.log('✅ Chrome encontrado em:', executablePath);
+
+        waClient = new Client({
+            authStrategy: new LocalAuth(),
+            puppeteer: {
+                executablePath: executablePath,
+                args: chromium.args,
+                headless: chromium.headless,
+            }
+        });
+
+        waClient.on('qr', async (qr) => {
+            waStatus = 'aguardando_qr';
+            try {
+                waQrCode = await qrcode.toDataURL(qr);
+                console.log('✅ QR Code gerado com sucesso!');
+                ultimoErro = null;
+            } catch (err) {
+                console.error('❌ Erro ao gerar QR Code:', err);
+                ultimoErro = err.message;
+            }
+        });
+
+        waClient.on('ready', () => {
+            waStatus = 'conectado';
+            waQrCode = null;
+            console.log('✅ WhatsApp conectado e pronto!');
+            isInitializing = false;
+            ultimoErro = null;
+        });
+
+        waClient.on('disconnected', (reason) => {
+            waStatus = 'desconectado';
+            waQrCode = null;
+            console.log('❌ WhatsApp desconectado:', reason);
+            isInitializing = false;
+        });
+
+        await waClient.initialize();
+        console.log('✅ WhatsApp inicializado com sucesso!');
+        
     } catch (err) {
-        console.error('❌ Erro ao gerar QR Code:', err);
+        console.error('❌ Erro ao inicializar WhatsApp:', err);
         ultimoErro = err.message;
     }
-});
+}
 
-waClient.on('ready', () => {
-    waStatus = 'conectado';
-    waQrCode = null;
-    console.log('✅ WhatsApp conectado e pronto!');
-    isInitializing = false;
-    ultimoErro = null;
-});
-
-waClient.on('disconnected', (reason) => {
-    waStatus = 'desconectado';
-    waQrCode = null;
-    console.log('❌ WhatsApp desconectado:', reason);
-    isInitializing = false;
-});
-
-console.log('🔄 Iniciando cliente WhatsApp...');
-waClient.initialize().catch(err => {
-    console.error('❌ Erro ao inicializar WhatsApp:', err);
-    ultimoErro = err.message;
-});
+// Inicia o WhatsApp
+iniciarWhatsApp();
 
 // ============================================================
 // ROTAS DO WHATSAPP
@@ -90,7 +98,7 @@ app.get('/api/whatsapp/status', (req, res) => {
 
 app.post('/api/whatsapp/disconnect', async (req, res) => {
     try {
-        if (waStatus === 'conectado') {
+        if (waStatus === 'conectado' && waClient) {
             await waClient.logout();
             waStatus = 'desconectado';
             waQrCode = null;
