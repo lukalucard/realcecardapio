@@ -7,7 +7,6 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const helmet = require('helmet');
 const pool = require('./config/db');
-
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode');
 const chromium = require('chrome-aws-lambda');
@@ -31,9 +30,6 @@ app.get('/api/test', (req, res) => {
 // ============================================================
 // INICIALIZAÇÃO DO WHATSAPP (COM CHROME-AWS-LAMBDA)
 // ============================================================
-const chromium = require('chrome-aws-lambda');
-const { Client, LocalAuth } = require('whatsapp-web.js');
-
 let waStatus = 'desconectado';
 let waQrCode = null;
 let waClient = null;
@@ -446,13 +442,8 @@ app.delete('/api/produtos/:id', async (req, res) => {
 });
 
 // ============================================================
-// ROTAS DO WHATSAPP (ADICIONAR ANTES DO STATIC)
+// ROTAS DO WHATSAPP
 // ============================================================
-
-// Variáveis de estado do WhatsApp
-let waStatus = 'desconectado';
-let waQrCode = null;
-let waClient = null;
 
 // Rota de status do WhatsApp
 app.get('/api/whatsapp/status', (req, res) => {
