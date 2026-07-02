@@ -38,33 +38,54 @@ async function iniciarWhatsApp() {
     try {
         console.log('🔄 Iniciando cliente WhatsApp...');
         
-        // Usa chrome-aws-lambda para encontrar o Chrome
+        // Tenta encontrar o Chrome
         let executablePath = null;
-        try {
-            executablePath = await chromium.executablePath;
-            console.log('✅ Chrome encontrado em:', executablePath);
-        } catch (err) {
-            console.log('⚠️ Chrome não encontrado via chrome-aws-lambda');
+        const fs = require('fs');
+        
+        // Lista de possíveis caminhos
+        const possiblePaths = [
+            '/usr/bin/google-chrome',
+            '/usr/bin/google-chrome-stable',
+            '/usr/bin/chromium-browser',
+            '/usr/bin/chromium',
+            '/opt/render/.cache/puppeteer/chrome/linux-*/chrome-linux/chrome',
+            '/opt/render/.cache/chrome/chrome'
+        ];
+        
+        for (const path of possiblePaths) {
+            try {
+                // Tenta encontrar o padrão com glob
+                const glob = require('glob');
+                const matches = glob.sync(path);
+                if (matches.length > 0) {
+                    executablePath = matches[0];
+                    console.log('✅ Chrome encontrado em:', executablePath);
+                    break;
+                }
+            } catch (e) {}
+            
+            // Tenta o caminho direto
+            try {
+                if (fs.existsSync(path)) {
+                    executablePath = path;
+                    console.log('✅ Chrome encontrado em:', executablePath);
+                    break;
+                }
+            } catch (e) {}
         }
 
-        // Se não encontrou, tenta caminhos comuns
+        // Se não encontrou, usa o chrome-aws-lambda
         if (!executablePath) {
-            const possiblePaths = [
-                '/usr/bin/google-chrome',
-                '/usr/bin/chromium-browser',
-                '/usr/bin/chromium',
-                '/opt/render/.cache/chrome/chrome'
-            ];
-            for (const path of possiblePaths) {
-                try {
-                    const fs = require('fs');
-                    if (fs.existsSync(path)) {
-                        executablePath = path;
-                        console.log('✅ Chrome encontrado em:', executablePath);
-                        break;
-                    }
-                } catch (e) {}
+            try {
+                executablePath = await chromium.executablePath;
+                console.log('✅ Chrome via chrome-aws-lambda:', executablePath);
+            } catch (err) {
+                console.log('⚠️ chrome-aws-lambda não encontrou Chrome');
             }
+        }
+
+        if (!executablePath) {
+            console.log('⚠️ NENHUM CHROME ENCONTRADO! Tentando sem executablePath...');
         }
 
         waClient = new Client({
@@ -76,17 +97,22 @@ async function iniciarWhatsApp() {
                     '--disable-setuid-sandbox',
                     '--disable-dev-shm-usage',
                     '--disable-accelerated-2d-canvas',
-                    '--disable-gpu'
+                    '--disable-gpu',
+                    '--disable-software-rasterizer'
                 ],
-                headless: true
+                headless: true,
+                dumpio: false
             }
         });
+
+        console.log('📱 Aguardando QR Code...');
 
         waClient.on('qr', async (qr) => {
             waStatus = 'aguardando_qr';
             try {
                 waQrCode = await qrcode.toDataURL(qr);
                 console.log('✅ QR Code gerado com sucesso!');
+                console.log('📱 QR Code (primeiros 50 caracteres):', qr.substring(0, 50));
             } catch (err) {
                 console.error('❌ Erro ao gerar QR Code:', err);
             }
@@ -95,7 +121,7 @@ async function iniciarWhatsApp() {
         waClient.on('ready', () => {
             waStatus = 'conectado';
             waQrCode = null;
-            console.log('✅ WhatsApp conectado!');
+            console.log('✅ WhatsApp conectado e pronto!');
         });
 
         waClient.on('disconnected', (reason) => {
@@ -105,7 +131,7 @@ async function iniciarWhatsApp() {
         });
 
         await waClient.initialize();
-        console.log('✅ WhatsApp inicializado!');
+        console.log('✅ WhatsApp inicializado com sucesso!');
         
     } catch (err) {
         console.error('❌ Erro ao inicializar WhatsApp:', err);
