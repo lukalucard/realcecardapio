@@ -37,10 +37,40 @@ let waClient = null;
 async function iniciarWhatsApp() {
     try {
         console.log('🔄 Iniciando cliente WhatsApp...');
+        
+        // Usa chrome-aws-lambda para encontrar o Chrome
+        let executablePath = null;
+        try {
+            executablePath = await chromium.executablePath;
+            console.log('✅ Chrome encontrado em:', executablePath);
+        } catch (err) {
+            console.log('⚠️ Chrome não encontrado via chrome-aws-lambda');
+        }
+
+        // Se não encontrou, tenta caminhos comuns
+        if (!executablePath) {
+            const possiblePaths = [
+                '/usr/bin/google-chrome',
+                '/usr/bin/chromium-browser',
+                '/usr/bin/chromium',
+                '/opt/render/.cache/chrome/chrome'
+            ];
+            for (const path of possiblePaths) {
+                try {
+                    const fs = require('fs');
+                    if (fs.existsSync(path)) {
+                        executablePath = path;
+                        console.log('✅ Chrome encontrado em:', executablePath);
+                        break;
+                    }
+                } catch (e) {}
+            }
+        }
 
         waClient = new Client({
             authStrategy: new LocalAuth(),
             puppeteer: {
+                ...(executablePath && { executablePath }),
                 args: [
                     '--no-sandbox',
                     '--disable-setuid-sandbox',
@@ -65,7 +95,7 @@ async function iniciarWhatsApp() {
         waClient.on('ready', () => {
             waStatus = 'conectado';
             waQrCode = null;
-            console.log('✅ WhatsApp conectado e pronto!');
+            console.log('✅ WhatsApp conectado!');
         });
 
         waClient.on('disconnected', (reason) => {
@@ -75,7 +105,7 @@ async function iniciarWhatsApp() {
         });
 
         await waClient.initialize();
-        console.log('✅ WhatsApp inicializado com sucesso!');
+        console.log('✅ WhatsApp inicializado!');
         
     } catch (err) {
         console.error('❌ Erro ao inicializar WhatsApp:', err);
