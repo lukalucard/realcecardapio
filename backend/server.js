@@ -37,28 +37,68 @@ let waClient = null;
 async function iniciarWhatsApp() {
     try {
         console.log('🔄 Iniciando cliente WhatsApp...');
-        const executablePath = await chromium.executablePath;
-        console.log('✅ Chrome encontrado em:', executablePath);
+        
+        // Tenta diferentes caminhos para o Chrome no Render
+        let executablePath = null;
+        try {
+            // Tenta o chrome-aws-lambda primeiro
+            executablePath = await chromium.executablePath;
+            console.log('✅ Chrome encontrado em:', executablePath);
+        } catch (err) {
+            console.log('⚠️ chrome-aws-lambda não encontrou Chrome, tentando caminho alternativo...');
+            // Fallback para o caminho padrão do Render
+            const possiblePaths = [
+                '/usr/bin/google-chrome',
+                '/usr/bin/chromium-browser',
+                '/usr/bin/chromium',
+                '/opt/render/.cache/chrome/chrome'
+            ];
+            for (const path of possiblePaths) {
+                try {
+                    const fs = require('fs');
+                    if (fs.existsSync(path)) {
+                        executablePath = path;
+                        console.log('✅ Chrome encontrado em:', executablePath);
+                        break;
+                    }
+                } catch (e) {}
+            }
+        }
+
+        if (!executablePath) {
+            console.log('⚠️ Chrome não encontrado! Usando Puppeteer sem caminho específico.');
+        }
 
         waClient = new Client({
             authStrategy: new LocalAuth(),
             puppeteer: {
-                executablePath: executablePath,
-                args: chromium.args,
-                headless: chromium.headless,
+                ...(executablePath && { executablePath }),
+                args: [
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--disable-dev-shm-usage',
+                    '--disable-accelerated-2d-canvas',
+                    '--disable-gpu'
+                ],
+                headless: true
             }
         });
 
         waClient.on('qr', async (qr) => {
             waStatus = 'aguardando_qr';
-            waQrCode = await qrcode.toDataURL(qr);
-            console.log('✅ QR Code gerado!');
+            try {
+                waQrCode = await qrcode.toDataURL(qr);
+                console.log('✅ QR Code gerado com sucesso!');
+                console.log('📱 QR Code (primeiros 50 caracteres):', qr.substring(0, 50));
+            } catch (err) {
+                console.error('❌ Erro ao gerar QR Code:', err);
+            }
         });
 
         waClient.on('ready', () => {
             waStatus = 'conectado';
             waQrCode = null;
-            console.log('✅ WhatsApp conectado!');
+            console.log('✅ WhatsApp conectado e pronto!');
         });
 
         waClient.on('disconnected', (reason) => {
@@ -68,7 +108,8 @@ async function iniciarWhatsApp() {
         });
 
         await waClient.initialize();
-        console.log('✅ WhatsApp inicializado!');
+        console.log('✅ WhatsApp inicializado com sucesso!');
+        
     } catch (err) {
         console.error('❌ Erro ao inicializar WhatsApp:', err);
     }
