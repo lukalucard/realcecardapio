@@ -37,42 +37,10 @@ let waClient = null;
 async function iniciarWhatsApp() {
     try {
         console.log('🔄 Iniciando cliente WhatsApp...');
-        
-        // Tenta diferentes caminhos para o Chrome no Render
-        let executablePath = null;
-        try {
-            // Tenta o chrome-aws-lambda primeiro
-            executablePath = await chromium.executablePath;
-            console.log('✅ Chrome encontrado em:', executablePath);
-        } catch (err) {
-            console.log('⚠️ chrome-aws-lambda não encontrou Chrome, tentando caminho alternativo...');
-            // Fallback para o caminho padrão do Render
-            const possiblePaths = [
-                '/usr/bin/google-chrome',
-                '/usr/bin/chromium-browser',
-                '/usr/bin/chromium',
-                '/opt/render/.cache/chrome/chrome'
-            ];
-            for (const path of possiblePaths) {
-                try {
-                    const fs = require('fs');
-                    if (fs.existsSync(path)) {
-                        executablePath = path;
-                        console.log('✅ Chrome encontrado em:', executablePath);
-                        break;
-                    }
-                } catch (e) {}
-            }
-        }
-
-        if (!executablePath) {
-            console.log('⚠️ Chrome não encontrado! Usando Puppeteer sem caminho específico.');
-        }
 
         waClient = new Client({
             authStrategy: new LocalAuth(),
             puppeteer: {
-                ...(executablePath && { executablePath }),
                 args: [
                     '--no-sandbox',
                     '--disable-setuid-sandbox',
@@ -89,7 +57,6 @@ async function iniciarWhatsApp() {
             try {
                 waQrCode = await qrcode.toDataURL(qr);
                 console.log('✅ QR Code gerado com sucesso!');
-                console.log('📱 QR Code (primeiros 50 caracteres):', qr.substring(0, 50));
             } catch (err) {
                 console.error('❌ Erro ao gerar QR Code:', err);
             }
